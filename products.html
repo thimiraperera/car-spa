@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Products — Car Spa LK</title>
-<meta name="description" content="Shop the full Car Spa LK range — engine care, exterior shine, interior & AC, brake & underbody, bike & chain care. LKR pricing, island-wide delivery.">
+<title>All Products | Car Spa LK</title>
+<meta name="description" content="Shop the full Car Spa LK range: engine care, exterior shine, interior & AC, brake & underbody, bike & chain care. LKR pricing, island-wide delivery.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -31,7 +31,7 @@
 <div class="page-hero">
   <div class="page-hero-panel">
     <h1>ALL <span style="color:var(--accent)">PRODUCTS</span></h1>
-    <p>Professional-grade auto care — delivered island-wide.</p>
+    <p>Professional-grade auto care, delivered island-wide.</p>
   </div>
 </div>
 
@@ -46,7 +46,7 @@
       <button class="filter-pill" data-filter="chain" id="chain">Bike &amp; Chain</button>
     </div>
     <div class="prod-grid three" id="catalog" style="margin-top:34px;">
-      <a class="prod-card" data-cat="engine" href="products/engine-oil-flush.html">
+      <a class="prod-card reveal" data-cat="engine" href="products/engine-oil-flush.html">
         <div class="prod-media"><img src="assets/engine-oil-flush.svg" alt="Engine Oil Flush"></div>
         <div class="prod-body">
           <span class="badge-cat">Engine Care</span>
@@ -56,7 +56,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="engine" href="products/throttle-body-cleaner.html">
+      <a class="prod-card reveal" data-cat="engine" href="products/throttle-body-cleaner.html">
         <div class="prod-media"><img src="assets/throttle-body-cleaner.svg" alt="Throttle Body Cleaner"></div>
         <div class="prod-body">
           <span class="badge-cat">Engine Care</span>
@@ -66,7 +66,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="brake" href="products/brake-cleaner.html">
+      <a class="prod-card reveal" data-cat="brake" href="products/brake-cleaner.html">
         <div class="prod-media"><img src="assets/brake-cleaner.svg" alt="Brake Cleaner"></div>
         <div class="prod-body">
           <span class="badge-cat">Brake & Underbody</span>
@@ -76,7 +76,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="interior" href="products/ac-disinfectant-spray.html">
+      <a class="prod-card reveal" data-cat="interior" href="products/ac-disinfectant-spray.html">
         <div class="prod-media"><img src="assets/ac-disinfectant-spray.svg" alt="AC Disinfectant Spray"></div>
         <div class="prod-body">
           <span class="badge-cat">Interior & AC</span>
@@ -86,7 +86,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="exterior" href="products/headlight-polish.html">
+      <a class="prod-card reveal" data-cat="exterior" href="products/headlight-polish.html">
         <div class="prod-media"><img src="assets/headlight-polish.svg" alt="Headlight Polish"></div>
         <div class="prod-body">
           <span class="badge-cat">Exterior & Shine</span>
@@ -96,7 +96,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="exterior" href="products/insta-polish.html">
+      <a class="prod-card reveal" data-cat="exterior" href="products/insta-polish.html">
         <div class="prod-media"><img src="assets/insta-polish.svg" alt="Insta Polish"></div>
         <div class="prod-body">
           <span class="badge-cat">Exterior & Shine</span>
@@ -106,7 +106,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="brake" href="products/rust-off.html">
+      <a class="prod-card reveal" data-cat="brake" href="products/rust-off.html">
         <div class="prod-media"><img src="assets/rust-off.svg" alt="Rust Off"></div>
         <div class="prod-body">
           <span class="badge-cat">Brake & Underbody</span>
@@ -116,7 +116,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="chain" href="products/chain-lube.html">
+      <a class="prod-card reveal" data-cat="chain" href="products/chain-lube.html">
         <div class="prod-media"><img src="assets/chain-lube.svg" alt="Chain Lube"></div>
         <div class="prod-body">
           <span class="badge-cat">Bike & Chain Care</span>
@@ -126,7 +126,7 @@
           <span class="btn btn-outline">View product</span>
         </div>
       </a>
-      <a class="prod-card" data-cat="chain" href="products/chain-cleaner-spray.html">
+      <a class="prod-card reveal" data-cat="chain" href="products/chain-cleaner-spray.html">
         <div class="prod-media"><img src="assets/chain-cleaner-spray.svg" alt="Chain Cleaner Spray"></div>
         <div class="prod-body">
           <span class="badge-cat">Bike & Chain Care</span>
@@ -163,6 +163,7 @@ if (location.hash) {
   if ([...pills].some(p => p.dataset.filter === f)) applyFilter(f);
 }
 </script>
+<script src="main.js"></script>
 
 <footer id="contact">
   <div class="container">
@@ -197,7 +198,7 @@ if (location.hash) {
     </div>
     <div class="footer-bottom">
       <span>Copyright © 2026 Car Spa LK. All rights reserved.</span>
-      <span><a href="#" style="display:inline;">Privacy policy</a> — <a href="#" style="display:inline;">Cookie policy</a></span>
+      <span><a href="#" style="display:inline;">Privacy policy</a> · <a href="#" style="display:inline;">Cookie policy</a></span>
     </div>
   </div>
 </footer>
