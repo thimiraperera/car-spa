@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 640">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26292e"/><stop offset="1" stop-color="#111214"/></linearGradient></defs>
+<rect x="70" y="150" width="360" height="360" rx="18" fill="url(#g)"/>
+<rect x="70" y="150" width="360" height="26" fill="#3a3e44"/>
+<rect x="70" y="484" width="360" height="26" fill="#3a3e44"/>
+<path d="M100 300 h300" stroke="#e0332b" stroke-width="5" opacity=".9"/>
+<text x="250" y="270" font-family="Arial Black, Arial" font-size="34" font-weight="900" fill="#ffffff" text-anchor="middle">INSTA</text>
+<text x="250" y="350" font-family="Arial Black, Arial" font-size="34" font-weight="900" fill="#ffffff" text-anchor="middle">POLISH</text>
+<text x="250" y="400" font-family="Arial" font-size="16" letter-spacing="4" fill="#e0332b" text-anchor="middle">CAR SPA LK</text>
+</svg>

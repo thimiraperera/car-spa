@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 640">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#101113"/><stop offset=".5" stop-color="#2c2f34"/><stop offset="1" stop-color="#101113"/></linearGradient></defs>
+<rect x="195" y="55" width="110" height="80" rx="14" fill="#e0332b"/><rect x="175" y="130" width="150" height="40" rx="12" fill="#f2f0ec"/>
+<rect x="150" y="165" width="200" height="395" rx="16" fill="url(#g)"/>
+<rect x="150" y="544" width="200" height="16" rx="8" fill="#c8c8c8"/>
+<path d="M165 235 h140 l22 16 -22 16 h-140 z" fill="#e0332b"/>
+<text x="235" y="258" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">CAR SPA</text>
+<text x="250" y="315" font-family="Arial Black, Arial" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle">HEADLIGHT</text>
+<text x="250" y="350" font-family="Arial Black, Arial" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle">POLISH</text>
+<circle cx="250" cy="430" r="55" fill="none" stroke="#e0332b" stroke-width="4"/>
+<circle cx="250" cy="430" r="40" fill="none" stroke="#5f6469" stroke-width="3"/>
+<text x="250" y="533" font-family="Arial" font-size="14" letter-spacing="3" fill="#9aa0a6" text-anchor="middle">AUTO CARE EXPERT</text>
+</svg>

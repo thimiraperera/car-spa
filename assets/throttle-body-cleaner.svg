@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 640">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#101113"/><stop offset=".5" stop-color="#2c2f34"/><stop offset="1" stop-color="#101113"/></linearGradient></defs>
+<rect x="185" y="60" width="130" height="70" rx="10" fill="#e0332b"/><rect x="185" y="118" width="130" height="12" fill="#b3241d"/><rect x="160" y="126" width="180" height="10" rx="5" fill="#c8c8c8"/>
+<rect x="150" y="136" width="200" height="424" rx="16" fill="url(#g)"/>
+<rect x="150" y="544" width="200" height="16" rx="8" fill="#c8c8c8"/>
+<path d="M165 206 h140 l22 16 -22 16 h-140 z" fill="#e0332b"/>
+<text x="235" y="229" font-family="Arial Black, Arial" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">CAR SPA</text>
+<text x="250" y="286" font-family="Arial Black, Arial" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle">THROTTLE BODY</text>
+<text x="250" y="321" font-family="Arial Black, Arial" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle">CLEANER</text>
+<circle cx="250" cy="401" r="55" fill="none" stroke="#e0332b" stroke-width="4"/>
+<circle cx="250" cy="401" r="40" fill="none" stroke="#5f6469" stroke-width="3"/>
+<text x="250" y="504" font-family="Arial" font-size="14" letter-spacing="3" fill="#9aa0a6" text-anchor="middle">AUTO CARE EXPERT</text>
+</svg>
