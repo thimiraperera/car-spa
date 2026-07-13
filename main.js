@@ -1,6 +1,43 @@
 (function () {
   'use strict';
 
+  /* Buttery smooth anchor scrolling with eased motion + header offset */
+  var reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var HEADER_OFFSET = 112;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function smoothScrollTo(targetY) {
+    var startY = window.scrollY;
+    var distance = targetY - startY;
+    var duration = Math.min(1000, Math.max(400, Math.abs(distance) * 0.6));
+    var startTime = null;
+    function step(timestamp) {
+      if (startTime === null) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var hash = link.getAttribute('href');
+      if (hash.length < 2) return;
+      var target;
+      try { target = document.querySelector(hash); } catch (err) { return; }
+      if (!target) return;
+      e.preventDefault();
+      var targetY = target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+      if (reducedMotionQuery.matches) window.scrollTo(0, targetY);
+      else smoothScrollTo(targetY);
+      history.pushState(null, '', hash);
+    });
+  });
+
   /* Header: solidify + shadow once the page scrolls */
   var header = document.querySelector('.site-header');
   if (header) {
