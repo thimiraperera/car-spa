@@ -38,6 +38,56 @@
     });
   });
 
+  /* Slow, smooth mouse-wheel scrolling: the wheel nudges a virtual target
+     and the page eases toward it each frame, instead of jumping instantly. */
+  if (!reducedMotionQuery.matches) {
+    var wheelCurrent = window.scrollY;
+    var wheelTarget = window.scrollY;
+    var wheelTicking = false;
+    var WHEEL_EASE = 0.09;   /* lower = slower, silkier catch-up */
+    var WHEEL_SPEED = 0.55;  /* lower = less distance per wheel notch */
+
+    function maxScrollY() {
+      return document.documentElement.scrollHeight - window.innerHeight;
+    }
+
+    function wheelRender() {
+      var diff = wheelTarget - wheelCurrent;
+      if (Math.abs(diff) < 0.5) {
+        wheelCurrent = wheelTarget;
+        wheelTicking = false;
+      } else {
+        wheelCurrent += diff * WHEEL_EASE;
+        wheelTicking = true;
+      }
+      window.scrollTo(0, wheelCurrent);
+      if (wheelTicking) requestAnimationFrame(wheelRender);
+    }
+
+    window.addEventListener('wheel', function (e) {
+      if (e.ctrlKey) return; /* let pinch-zoom behave natively */
+      var lineHeight = 18;
+      var pageHeight = window.innerHeight * 0.9;
+      var delta = e.deltaMode === 1 ? e.deltaY * lineHeight
+        : e.deltaMode === 2 ? e.deltaY * pageHeight
+        : e.deltaY;
+      e.preventDefault();
+      wheelTarget = Math.max(0, Math.min(wheelTarget + delta * WHEEL_SPEED, maxScrollY()));
+      if (!wheelTicking) {
+        wheelTicking = true;
+        requestAnimationFrame(wheelRender);
+      }
+    }, { passive: false });
+
+    /* Stay in sync with keyboard/scrollbar/touch scrolling */
+    window.addEventListener('scroll', function () {
+      if (!wheelTicking) {
+        wheelCurrent = window.scrollY;
+        wheelTarget = window.scrollY;
+      }
+    }, { passive: true });
+  }
+
   /* Header: solidify + shadow once the page scrolls */
   var header = document.querySelector('.site-header');
   if (header) {
@@ -72,54 +122,6 @@
     }
   }
 
-  /* Testimonial carousel: autoplay, arrows, dots, pause on hover/focus */
-  var carousel = document.querySelector('.testi-carousel');
-  if (carousel) {
-    var track = carousel.querySelector('.testi-track');
-    var slides = Array.prototype.slice.call(carousel.querySelectorAll('.testi-slide'));
-    var dotsWrap = carousel.querySelector('.testi-dots');
-    var prevBtn = carousel.querySelector('.testi-arrow.prev');
-    var nextBtn = carousel.querySelector('.testi-arrow.next');
-    var index = 0;
-    var timer = null;
-    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var autoplayMs = parseInt(carousel.getAttribute('data-autoplay'), 10) || 5000;
-    var dots = [];
-
-    if (dotsWrap) {
-      slides.forEach(function (_, i) {
-        var dot = document.createElement('button');
-        dot.className = 'testi-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Go to testimonial ' + (i + 1));
-        dot.addEventListener('click', function () { goTo(i); restart(); });
-        dotsWrap.appendChild(dot);
-        dots.push(dot);
-      });
-    }
-
-    function render() {
-      track.style.transform = 'translateX(-' + (index * 100) + '%)';
-      dots.forEach(function (d, i) { d.classList.toggle('active', i === index); });
-    }
-    function goTo(i) { index = (i + slides.length) % slides.length; render(); }
-    function next() { goTo(index + 1); }
-    function prev() { goTo(index - 1); }
-    function start() {
-      if (reducedMotion || slides.length < 2) return;
-      stop();
-      timer = setInterval(next, autoplayMs);
-    }
-    function stop() { if (timer) { clearInterval(timer); timer = null; } }
-    function restart() { stop(); start(); }
-
-    if (nextBtn) nextBtn.addEventListener('click', function () { next(); restart(); });
-    if (prevBtn) prevBtn.addEventListener('click', function () { prev(); restart(); });
-    carousel.addEventListener('mouseenter', stop);
-    carousel.addEventListener('mouseleave', start);
-    carousel.addEventListener('focusin', stop);
-    carousel.addEventListener('focusout', start);
-
-    render();
-    start();
-  }
+  /* Testimonial ticker is pure CSS (continuous marquee-style animation,
+     paused on hover/focus via :hover/:focus-within) — no JS needed. */
 })();
