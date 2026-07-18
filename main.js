@@ -280,6 +280,67 @@
     if (next) next.addEventListener('click', function () { viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
   });
 
+  /* Finder media: auto-rotating image stack; hovering an option pins its image */
+  var finderMedia = document.getElementById('finder-media');
+  var finderOptions = document.getElementById('finder-options');
+  if (finderMedia) {
+    var finderImgs = Array.prototype.slice.call(finderMedia.querySelectorAll('img'));
+    var finderIdx = 0;
+    var finderPinned = false;
+    function finderShow(i) {
+      finderIdx = ((i % finderImgs.length) + finderImgs.length) % finderImgs.length;
+      finderImgs.forEach(function (img, k) { img.classList.toggle('active', k === finderIdx); });
+    }
+    if (finderImgs.length > 1 && !reducedMotionQuery.matches) {
+      setInterval(function () {
+        if (!finderPinned) finderShow(finderIdx + 1);
+      }, 4500);
+    }
+    if (finderOptions) {
+      finderOptions.querySelectorAll('a[data-media]').forEach(function (opt) {
+        var pin = function () {
+          /* match by product slug so a missing image can't shift the mapping */
+          var m = (opt.getAttribute('href') || '').match(/products\/([a-z0-9-]+)\.html/);
+          if (!m) return;
+          for (var i = 0; i < finderImgs.length; i++) {
+            if (finderImgs[i].getAttribute('src').indexOf(m[1] + '-featured') !== -1) {
+              finderPinned = true;
+              finderShow(i);
+              return;
+            }
+          }
+        };
+        opt.addEventListener('mouseenter', pin);
+        opt.addEventListener('focus', pin);
+      });
+      finderOptions.addEventListener('mouseleave', function () { finderPinned = false; });
+      finderOptions.addEventListener('focusout', function () { finderPinned = false; });
+    }
+  }
+
+  /* Go-to-top button: appears once the footer scrolls into view */
+  var footerEl = document.querySelector('footer');
+  if (footerEl) {
+    var toTop = document.createElement('button');
+    toTop.className = 'to-top';
+    toTop.setAttribute('aria-label', 'Back to top');
+    toTop.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 12l6-6 6 6"/></svg>';
+    document.body.appendChild(toTop);
+    toTop.addEventListener('click', function () {
+      if (reducedMotionQuery.matches) window.scrollTo(0, 0);
+      else smoothScrollTo(0);
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          toTop.classList.toggle('show', entry.isIntersecting);
+        });
+      }, { threshold: 0.04 }).observe(footerEl);
+    } else {
+      toTop.classList.add('show');
+    }
+  }
+
   /* Testimonial ticker is pure CSS (continuous marquee-style animation,
      paused on hover/focus via :hover/:focus-within), no JS needed. */
 

@@ -28,9 +28,6 @@
       <a class="icon-link" href="products.html" aria-label="Search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
-      <a class="icon-link" href="contact.html" aria-label="Contact">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
-      </a>
       <a class="icon-link cart-link" href="cart.html" aria-label="Cart">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg><span class="cart-count">0</span>
       </a>
@@ -52,6 +49,9 @@
     <div class="hero-top">
       <h1 class="hero-wordmark">CARSPA<span class="lk">.LK</span></h1>
       <p class="hero-sub">Auto care, done right</p>
+    </div>
+    <div class="hero-centerpiece" aria-hidden="true" data-parallax="0.06">
+      <img src="assets/img/site/hero-centerpiece.webp" alt="" onerror="this.closest('.hero-centerpiece').remove()">
     </div>
     <div class="hero-dust" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -166,17 +166,23 @@
       <div>
         <h2>Find the <strong class="hl">right product</strong> for your vehicle!</h2>
         <p>Tell us what you're dealing with and we'll point you to the right bottle. No guesswork, no wasted money, just results you can see.</p>
-        <div class="finder-media">
-          <img src="assets/img/site/finder-mechanic.webp" alt="Inspecting a motorcycle chain with a flashlight" loading="lazy" decoding="async" onerror="this.remove()">
+        <div class="finder-media" id="finder-media">
+          <img src="assets/img/site/finder-mechanic.webp" class="active" alt="Inspecting a motorcycle chain with a flashlight" decoding="async" onerror="this.remove()">
+          <img src="assets/img/products/engine-flush-4-wheeler-featured.webp" alt="" loading="lazy" decoding="async">
+          <img src="assets/img/products/headlight-polish-featured.webp" alt="" loading="lazy" decoding="async">
+          <img src="assets/img/products/ac-disinfectant-spray-featured.webp" alt="" loading="lazy" decoding="async">
+          <img src="assets/img/products/chain-lube-featured.webp" alt="" loading="lazy" decoding="async">
+          <img src="assets/img/products/rust-off-featured.webp" alt="" loading="lazy" decoding="async">
+          <img src="assets/img/products/radiator-flush-featured.webp" alt="" loading="lazy" decoding="async">
         </div>
       </div>
-      <div class="finder-options">
-        <a href="products/engine-flush-4-wheeler.html">My engine feels sluggish <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
-        <a href="products/headlight-polish.html">My headlights are cloudy <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
-        <a href="products/ac-disinfectant-spray.html">My AC smells musty <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
-        <a href="products/chain-lube.html">My bike chain is noisy <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
-        <a href="products/rust-off.html">I can see rust forming <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
-        <a href="products/radiator-flush.html">My engine runs hot <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+      <div class="finder-options" id="finder-options">
+        <a href="products/engine-flush-4-wheeler.html" data-media="1">My engine feels sluggish <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+        <a href="products/headlight-polish.html" data-media="2">My headlights are cloudy <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+        <a href="products/ac-disinfectant-spray.html" data-media="3">My AC smells musty <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+        <a href="products/chain-lube.html" data-media="4">My bike chain is noisy <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+        <a href="products/rust-off.html" data-media="5">I can see rust forming <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+        <a href="products/radiator-flush.html" data-media="6">My engine runs hot <span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
       </div>
     </div>
   </div>
@@ -495,6 +501,14 @@
     </div>
   </div>
 </section>
+
+<!-- ===== Mini marquee ===== -->
+<div class="marquee-mini" aria-hidden="true">
+  <div class="marquee-mini-track">
+    <span>Genuine Arkos Vetek products</span><span>Island-wide delivery in 2–4 days</span><span>Cash on delivery available</span><span>Rated 4.9 by 180+ owners</span><span>Colombo next-day delivery</span>
+    <span>Genuine Arkos Vetek products</span><span>Island-wide delivery in 2–4 days</span><span>Cash on delivery available</span><span>Rated 4.9 by 180+ owners</span><span>Colombo next-day delivery</span>
+  </div>
+</div>
 
 <!-- ===== Footer ===== -->
 <footer id="contact">
