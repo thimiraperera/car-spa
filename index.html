@@ -49,19 +49,16 @@
       <img class="hero-bg-img" src="assets/img/site/hero-home-3.webp" alt="" onerror="this.remove()">
     </div>
     <div class="hero-overlay" aria-hidden="true"></div>
-    <div class="hero-fg" aria-hidden="true" data-parallax="0.08">
-      <img src="assets/img/site/hero-foreground.webp" alt="" onerror="this.closest('.hero-fg').remove()">
-    </div>
     <div class="hero-top">
       <h1 class="hero-wordmark">CARSPA<span class="lk">.LK</span></h1>
       <p class="hero-sub">Auto care, done right</p>
     </div>
-    <div class="hero-scroll-cue" aria-hidden="true">
-      <svg viewBox="0 0 24 34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="8" y="1" width="8" height="14" rx="4"/>
-        <circle cx="12" cy="7" r="1.3" fill="currentColor" stroke="none"/>
-        <path d="M8 22l4 4 4-4" opacity=".85"/>
-        <path d="M8 27l4 4 4-4" opacity=".55"/>
+    <div class="hero-road" aria-hidden="true"></div>
+    <div class="hero-car" id="hero-car" aria-hidden="true">
+      <svg viewBox="0 0 64 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 30 Q10 20 18 18 L24 10 Q26 7 30 7 h8 Q42 7 44 10 L50 18 Q58 20 60 30 v6 q0 3-3 3 h-3 a6 6 0 0 1-12 0 h-18 a6 6 0 0 1-12 0 h-1 q-3 0-3-3 z M20 18 h26 l-5-7 q-1-2-3-2 h-10 q-2 0-3 2 z"/>
+        <g class="wheel"><circle cx="15" cy="39" r="5.6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15 34.4v9.2M10.4 39h9.2" stroke="currentColor" stroke-width="1.8"/></g>
+        <g class="wheel"><circle cx="51" cy="39" r="5.6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M51 34.4v9.2M46.4 39h9.2" stroke="currentColor" stroke-width="1.8"/></g>
       </svg>
     </div>
     <div class="hero-bottom">
@@ -97,12 +94,15 @@
           </a>
         </div>
       </div>
-      <div class="hero-toggle" title="Shop by vehicle">
-        <button class="tog active" data-vehicle="car" aria-label="Car products">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13 5.5 8.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13v5h-2.2a1.8 1.8 0 0 1-3.6 0H9.8a1.8 1.8 0 0 1-3.6 0H4z"/><path d="M6 13h12"/></svg>
+      <div class="hero-toggle" id="vehicle-toggle" title="Shop by vehicle">
+        <span class="tog-thumb" aria-hidden="true"></span>
+        <button class="tog active" data-vehicle="car" aria-label="Show car products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 15.5h1a2.4 2.4 0 0 0 4.6 0h5.8a2.4 2.4 0 0 0 4.6 0h1a1 1 0 0 0 1-1v-1.6c0-.9-.6-1.6-1.5-1.8l-3.1-.7-2.2-2.8a2 2 0 0 0-1.6-.8H8.6a2 2 0 0 0-1.8 1.1l-1.3 2.6-2 .5a1.6 1.6 0 0 0-1.2 1.6v1.9a1 1 0 0 0 1.2 1z"/><circle cx="6.8" cy="15.7" r="1.7"/><circle cx="16.2" cy="15.7" r="1.7"/><path d="M9.2 7.9 8.3 10h7.2l-1.6-2.1z" fill="currentColor" stroke="none" opacity=".35"/></svg>
+          <span>Car</span>
         </button>
-        <button class="tog" data-vehicle="bike" aria-label="Bike products">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="17" r="3.4"/><circle cx="18" cy="17" r="3.4"/><path d="M6 17 10 9h4l4 8M10 9 8.5 6H6"/></svg>
+        <button class="tog" data-vehicle="bike" aria-label="Show bike products">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.6" cy="16.4" r="3.1"/><circle cx="18.4" cy="16.4" r="3.1"/><path d="M5.6 16.4h4.2l2.6-4.6h3.2"/><path d="M18.4 16.4 15.4 8.6h-2.2"/><path d="M14.6 6.8h2.6l.7 1.8"/><path d="M8.2 11.8h4"/></svg>
+          <span>Bike</span>
         </button>
       </div>
     </div>
@@ -194,7 +194,10 @@
       </div>
       <a class="btn btn-dark" href="products.html">All products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
     </div>
-    <div class="prod-grid" id="featured-grid">
+    <div class="prod-carousel">
+      <button class="carousel-btn prev" type="button" aria-label="Previous products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+      <div class="prod-carousel-viewport" id="featured-viewport">
+      <div class="prod-grid" id="featured-grid">
       <a class="prod-card reveal" data-vehicle="car" href="products/engine-flush-4-wheeler.html" style="--rd:0.00s">
         <div class="prod-media">
           <span class="badge-cat">Engine Care</span>
@@ -315,6 +318,9 @@
           </div>
         </div>
       </a>
+      </div>
+      </div>
+      <button class="carousel-btn next" type="button" aria-label="Next products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
     </div>
   </div>
 </section>
@@ -487,7 +493,7 @@
   <div class="container">
     <div class="cta-band">
       <h2>Not sure what your ride needs?<br>Message us and we'll sort you out!</h2>
-      <a class="btn btn-accent" href="#contact">Talk to Car Spa LK <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+      <a class="btn btn-accent" href="contact.html">Talk to Car Spa LK <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
     </div>
   </div>
 </section>
@@ -539,15 +545,18 @@
 </footer>
 
 <script>
-// Vehicle toggle: filter featured products + swap hero quick picks
+// Vehicle toggle: slide the thumb, filter featured products, swap hero quick picks
 document.querySelectorAll('.hero-toggle .tog').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.hero-toggle .tog').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const v = btn.dataset.vehicle;
+    document.getElementById('vehicle-toggle').classList.toggle('bike', v === 'bike');
     document.querySelectorAll('#featured-grid .prod-card').forEach(card => {
       card.hidden = card.dataset.vehicle !== v;
     });
+    const viewport = document.getElementById('featured-viewport');
+    if (viewport) viewport.scrollTo({ left: 0 });
     document.querySelectorAll('#hero-picks .hero-picks-row').forEach(row => {
       if (row.dataset.vehicle === v) {
         row.hidden = false;

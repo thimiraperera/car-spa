@@ -191,20 +191,24 @@ body.menu-open { overflow: hidden; }
   from { transform: scale(1); }
   to   { transform: scale(1.09); }
 }
-/* Floating product cutout: parallax on the wrapper, ambient float on the img */
-.hero-fg {
+/* Scroll-driven car: the brand mark drives across the hero as you scroll,
+   wheels spinning, along a dashed road line above the bottom bar */
+.hero-road {
   position: absolute; z-index: 2; pointer-events: none;
-  width: clamp(250px, 30vw, 500px);
-  right: clamp(16px, 8vw, 140px); top: 27%;
+  left: 5%; right: 5%; bottom: 118px; height: 3px; border-radius: 3px;
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,.22) 0 26px, transparent 26px 48px);
 }
-.hero-fg img {
-  width: 100%; display: block; opacity: .85;
-  filter: drop-shadow(0 30px 44px rgba(0,0,0,.42));
-  animation: heroFloat 7s ease-in-out infinite alternate;
+.hero-car {
+  position: absolute; z-index: 3; pointer-events: none;
+  bottom: 121px; left: 0; width: clamp(92px, 9vw, 132px);
+  color: rgba(255,255,255,.92);
+  will-change: transform;
 }
-@keyframes heroFloat {
-  from { transform: translateY(-10px) rotate(-1.2deg); }
-  to   { transform: translateY(12px) rotate(1.2deg); }
+.hero-car svg { width: 100%; height: auto; display: block; }
+.hero-car .wheel {
+  transform-box: fill-box; transform-origin: center;
+  will-change: transform;
 }
 /* Base + scroll-driven darkening (opacity raised by JS as the hero scrolls by) */
 .hero-overlay {
@@ -242,8 +246,15 @@ body.menu-open { overflow: hidden; }
   color: #fff; line-height: .95;
   user-select: none;
   animation: heroFadeUp .9s cubic-bezier(.22,1,.36,1) both;
+  transition: letter-spacing .6s cubic-bezier(.22,1,.36,1), text-shadow .6s ease;
+  cursor: default;
 }
-.hero-wordmark .lk { color: var(--accent); }
+.hero-wordmark:hover {
+  letter-spacing: .045em;
+  text-shadow: 0 0 34px rgba(224,51,43,.65), 0 0 90px rgba(224,51,43,.35);
+}
+.hero-wordmark .lk { color: var(--accent); transition: text-shadow .6s ease; }
+.hero-wordmark:hover .lk { text-shadow: 0 0 30px rgba(255,255,255,.5); }
 .hero-sub {
   text-align: center; color: rgba(255,255,255,.75);
   letter-spacing: .3em; text-transform: uppercase; font-size: clamp(11px, 1.3vw, 14px);
@@ -256,10 +267,12 @@ body.menu-open { overflow: hidden; }
 }
 .hero-bottom {
   position: relative; z-index: 4;
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 20px;
   padding: 34px;
   animation: heroFadeUp .9s cubic-bezier(.22,1,.36,1) .3s both;
 }
+.hero-bottom > .btn { justify-self: start; }
+.hero-bottom > .hero-toggle { justify-self: end; }
 /* Quick picks: bottom-center strip, swaps content with the car/bike toggle */
 .hero-picks { text-align: center; }
 .hero-picks-label {
@@ -292,29 +305,29 @@ body.menu-open { overflow: hidden; }
   text-align: left; white-space: nowrap;
 }
 .hero-pick span small { display: block; color: rgba(255,255,255,.62); font-size: 11px; font-weight: 600; }
-/* Scroll-cue: fades out fast once the visitor actually starts scrolling */
-.hero-scroll-cue {
-  position: absolute; left: 50%; bottom: 132px; z-index: 4;
-  transform: translateX(-50%);
-  animation: heroScrollBounce 2.4s ease-in-out infinite;
-  opacity: .8; pointer-events: none;
-}
-.hero-scroll-cue svg { width: 22px; height: 34px; display: block; color: #fff; }
-@keyframes heroScrollBounce {
-  0%, 100% { transform: translate(-50%, 0); }
-  50%      { transform: translate(-50%, 9px); }
-}
+/* Segmented vehicle toggle: labelled buttons + a sliding thumb */
 .hero-toggle {
-  background: var(--cream); border-radius: 999px; padding: 10px;
-  display: inline-flex; gap: 8px; align-items: center;
+  position: relative;
+  background: var(--cream); border-radius: 999px; padding: 8px;
+  display: inline-flex; align-items: center;
 }
+.tog-thumb {
+  position: absolute; top: 8px; bottom: 8px; left: 8px;
+  width: calc(50% - 8px); border-radius: 999px; background: var(--accent);
+  transition: transform .45s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.hero-toggle.bike .tog-thumb { transform: translateX(100%); }
 .hero-toggle .tog {
-  width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: transparent; color: var(--ink); transition: background .2s;
+  position: relative; z-index: 1;
+  width: 110px; padding: 12px 0; border-radius: 999px; border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--ink);
+  font-weight: 800; font-size: 14px; letter-spacing: .02em;
+  transition: color .35s ease;
 }
-.hero-toggle .tog.active { background: var(--accent); color: #fff; }
-.hero-toggle .tog svg { width: 28px; height: 28px; }
+.hero-toggle .tog.active { color: #fff; }
+.hero-toggle .tog svg { width: 22px; height: 22px; flex: 0 0 auto; }
 
 /* ---------- Scroll reveal ---------- */
 .reveal {
@@ -439,6 +452,34 @@ section { padding: 90px 0; }
 .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .prod-grid.three { grid-template-columns: repeat(3, 1fr); }
 
+/* ---------- Featured carousel (homepage) ---------- */
+.prod-carousel { position: relative; }
+.prod-carousel-viewport {
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+  scrollbar-width: none; -ms-overflow-style: none;
+  margin: 0 -2px; padding: 2px;
+}
+.prod-carousel-viewport::-webkit-scrollbar { display: none; }
+.prod-carousel .prod-grid {
+  display: flex; gap: 20px;
+}
+.prod-carousel .prod-card {
+  flex: 0 0 calc(30% - 14px); min-width: 272px; scroll-snap-align: start;
+}
+.carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 48px; height: 48px; border-radius: 50%; border: none;
+  background: var(--ink); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(28,31,35,.25);
+  transition: background .25s ease, transform .25s ease, opacity .25s ease;
+}
+.carousel-btn:hover { background: var(--accent); transform: translateY(-50%) scale(1.08); }
+.carousel-btn svg { width: 18px; height: 18px; }
+.carousel-btn.prev { left: -12px; }
+.carousel-btn.prev svg { transform: rotate(180deg); }
+.carousel-btn.next { right: -12px; }
+
 .prod-card {
   background: var(--white); border-radius: var(--radius-md);
   border: 1px solid #eceae5; overflow: hidden; position: relative;
@@ -488,7 +529,7 @@ section { padding: 90px 0; }
 }
 
 /* ---------- Benefits ---------- */
-/* Optional photographic band behind "Why Car Spa" — the solid-color layers
+/* Optional photographic band behind "Why Car Spa": the solid-color layers
    are always there, so this looks identical until why-us-band.webp exists */
 #why-us {
   position: relative;
@@ -680,23 +721,22 @@ footer {
 }
 .filter-pill.active, .filter-pill:hover { background: var(--ink); color: #fff; }
 
-/* ---------- Cursor follower ---------- */
-.cursor-dot, .cursor-ring {
+/* ---------- Cursor follower: inverting blob ---------- */
+.cursor-blob {
   position: fixed; top: 0; left: 0; z-index: 300; pointer-events: none;
-  border-radius: 50%; opacity: 0; transition: opacity .3s ease;
+  opacity: 0; transition: opacity .3s ease;
 }
-.cursor-dot { width: 8px; height: 8px; background: var(--accent); }
-.cursor-ring {
-  width: 38px; height: 38px; border: 1.5px solid rgba(224,51,43,.55);
-  transition: opacity .3s ease, width .25s ease, height .25s ease,
-              margin .25s ease, border-color .25s ease, background-color .25s ease;
+.cursor-blob.visible { opacity: 1; }
+.cursor-blob-inner {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; mix-blend-mode: difference;
+  transform: scale(1);
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
 }
-.cursor-dot.visible, .cursor-ring.visible { opacity: 1; }
-.cursor-ring.hover {
-  width: 56px; height: 56px; margin: -9px 0 0 -9px;
-  border-color: rgba(224,51,43,.9); background: rgba(224,51,43,.08);
-}
-@media (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
+.cursor-blob.hover .cursor-blob-inner { transform: scale(2.4); }
+.cursor-blob.press .cursor-blob-inner { transform: scale(.65); }
+.cursor-blob.hover.press .cursor-blob-inner { transform: scale(1.8); }
+@media (pointer: coarse) { .cursor-blob { display: none; } }
 
 /* ---------- Header cart icon ---------- */
 .cart-link { position: relative; }
@@ -713,7 +753,10 @@ footer {
 .add-to-cart .arrow { transition: transform .25s ease; }
 
 /* ---------- Page shell for utility pages (cart, checkout, contact, legal, 404) ---------- */
-.page-shell { padding: 40px 0 70px; min-height: 44vh; }
+.page-shell { padding: 60px 0 70px; min-height: 44vh; }
+/* When the shell sits directly under the fixed header (no page-hero band),
+   clear the header height plus a gap that matches the bottom padding */
+.site-header.solid + .page-shell { padding-top: 172px; }
 .page-shell h1 { font-size: clamp(30px, 4vw, 46px); margin-bottom: 10px; }
 .page-lead { max-width: 620px; }
 
@@ -853,7 +896,6 @@ footer {
   .story-media { aspect-ratio: 16 / 11; }
   @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-1032px); } }
   .hero-picks { display: none; }
-  .hero-fg { width: clamp(200px, 24vw, 320px); }
 }
 @media (max-width: 760px) {
   .burger { display: inline-flex; }
@@ -874,12 +916,6 @@ footer {
   .prod-grid, .prod-grid.three { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .review-card { padding: 26px 22px; }
   .testi-slide { flex: 0 0 270px; }
-  .hero-foreground {
-    width: min(48vw, 320px);
-    right: -8vw;
-    top: 38%;
-    opacity: .46;
-  }
   @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-882px); } }
   .testi-viewport {
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
@@ -895,10 +931,13 @@ footer {
   .cart-line { grid-area: line; }
   .cart-remove { grid-area: remove; justify-self: end; }
   .form-row { grid-template-columns: 1fr; }
-  .hero-bottom { flex-direction: column; gap: 18px; align-items: stretch; }
-  .hero-toggle { align-self: flex-end; }
-  .hero-scroll-cue { display: none; }
-  .hero-fg { display: none; }
+  .hero-bottom { grid-template-columns: 1fr; align-items: stretch; }
+  .hero-bottom > .btn { justify-self: stretch; }
+  .hero-bottom > .hero-toggle { justify-self: end; }
+  .hero-car, .hero-road { display: none; }
+  .carousel-btn { display: none; }
+  .prod-carousel .prod-card { min-width: 74vw; }
+  .site-header.solid + .page-shell { padding-top: 140px; }
   section { padding: 60px 0; }
 }
 @media (max-width: 480px) {

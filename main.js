@@ -17,7 +17,7 @@
     function step(timestamp) {
       if (startTime === null) startTime = timestamp;
       var progress = Math.min((timestamp - startTime) / duration, 1);
-      /* behavior:'instant' bypasses html{scroll-behavior:smooth} — without
+      /* behavior:'instant' bypasses html{scroll-behavior:smooth}; without
          it, every rAF-frame scrollTo() would itself try to smooth-animate,
          double-easing on top of our own easing and causing lag/stutter. */
       window.scrollTo({ top: startY + distance * easeInOutCubic(progress), left: 0, behavior: 'instant' });
@@ -63,14 +63,16 @@
         wheelCurrent += diff * WHEEL_EASE;
         wheelTicking = true;
       }
-      /* behavior:'instant' bypasses html{scroll-behavior:smooth} — see note
-         in smoothScrollTo() above; same double-easing risk applies here. */
+      /* behavior:'instant' bypasses html{scroll-behavior:smooth}; see note
+         in smoothScrollTo() above, same double-easing risk applies here. */
       window.scrollTo({ top: wheelCurrent, left: 0, behavior: 'instant' });
       if (wheelTicking) requestAnimationFrame(wheelRender);
     }
 
     window.addEventListener('wheel', function (e) {
       if (e.ctrlKey) return; /* let pinch-zoom behave natively */
+      /* let sideways trackpad scrolling work inside horizontal carousels */
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && e.target.closest && e.target.closest('.prod-carousel-viewport')) return;
       var lineHeight = 18;
       var pageHeight = window.innerHeight * 0.9;
       var delta = e.deltaMode === 1 ? e.deltaY * lineHeight
@@ -178,7 +180,8 @@
      One rAF-throttled scroll handler drives all three. */
   var heroTop = document.querySelector('.hero-panel .hero-top');
   var heroOverlay = document.querySelector('.hero-overlay');
-  var heroScrollCue = document.querySelector('.hero-scroll-cue');
+  var heroPanel = document.querySelector('.hero-panel');
+  var heroCar = document.getElementById('hero-car');
   var parallaxEls = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
   var fxTicking = false;
 
@@ -195,8 +198,20 @@
         heroTop.style.opacity = String(1 - t * 0.85);
         /* The photo darkens smoothly into the next section as you scroll past it */
         if (heroOverlay) heroOverlay.style.opacity = String(0.78 + t * 0.22);
-        /* The "scroll down" cue only makes sense before scrolling starts */
-        if (heroScrollCue) heroScrollCue.style.opacity = String(Math.max(0, 0.8 - t * 4));
+        /* The brand-mark car drives across the hero as the visitor scrolls,
+           wheels spinning with the distance travelled */
+        if (heroCar && heroPanel) {
+          var panelW = heroPanel.clientWidth;
+          var carW = heroCar.offsetWidth || 120;
+          /* starts mostly rolled-in at the left, exits fully right */
+          var x = -carW * 0.3 + t * (panelW + carW * 1.3);
+          heroCar.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
+          var deg = (x / (carW * 0.19)) * 57.3;
+          var wheels = heroCar.querySelectorAll('.wheel');
+          for (var w = 0; w < wheels.length; w++) {
+            wheels[w].style.transform = 'rotate(' + deg.toFixed(1) + 'deg)';
+          }
+        }
       }
       parallaxEls.forEach(function (el) {
         var host = el.parentElement || el;
@@ -270,6 +285,17 @@
     });
   }
 
+  /* Featured products carousel: arrow buttons page through the strip */
+  document.querySelectorAll('.prod-carousel').forEach(function (car) {
+    var viewport = car.querySelector('.prod-carousel-viewport');
+    if (!viewport) return;
+    var step = function () { return Math.max(viewport.clientWidth * 0.8, 280); };
+    var prev = car.querySelector('.carousel-btn.prev');
+    var next = car.querySelector('.carousel-btn.next');
+    if (prev) prev.addEventListener('click', function () { viewport.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    if (next) next.addEventListener('click', function () { viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
+  });
+
   /* Testimonial ticker is pure CSS (continuous marquee-style animation,
      paused on hover/focus via :hover/:focus-within), no JS needed. */
 
@@ -305,76 +331,82 @@
         return;
       }
       animating = true;
+      /* border-box means height can never animate below the body's own
+         padding, so the padding has to collapse along with the height or
+         the motion visibly snags at the end. Animate both together. */
+      var pad = getComputedStyle(body).paddingBottom;
       if (item.open) {
         var h = body.offsetHeight;
         body.style.height = h + 'px';
+        body.style.paddingBottom = pad;
         body.style.overflow = 'hidden';
-        body.style.transition = 'height .45s cubic-bezier(.22,1,.36,1), opacity .3s ease';
+        body.style.transition = 'height .45s cubic-bezier(.22,1,.36,1), padding-bottom .45s cubic-bezier(.22,1,.36,1), opacity .3s ease';
         requestAnimationFrame(function () {
           body.style.height = '0px';
+          body.style.paddingBottom = '0px';
           body.style.opacity = '0';
         });
         setTimeout(function () {
           item.open = false;
           body.style.cssText = '';
           animating = false;
-        }, 460);
+        }, 470);
       } else {
         item.open = true;
         var target = body.offsetHeight;
         body.style.height = '0px';
+        body.style.paddingBottom = '0px';
         body.style.opacity = '0';
         body.style.overflow = 'hidden';
-        body.style.transition = 'height .5s cubic-bezier(.22,1,.36,1), opacity .4s ease .1s';
+        body.style.transition = 'height .5s cubic-bezier(.22,1,.36,1), padding-bottom .5s cubic-bezier(.22,1,.36,1), opacity .4s ease .1s';
         requestAnimationFrame(function () {
           body.style.height = target + 'px';
+          body.style.paddingBottom = pad;
           body.style.opacity = '1';
         });
         setTimeout(function () {
           body.style.cssText = '';
           animating = false;
-        }, 620);
+        }, 630);
       }
     });
   });
 
-  /* Cursor follower: a trailing ring that eases after the pointer and grows
-     over interactive elements. Fine-pointer devices only; the native cursor
-     stays visible, this is a decorative companion. */
+  /* Cursor follower: a single soft blob that inverts whatever it passes over
+     (mix-blend-mode difference), swells over interactive elements and squeezes
+     on click. Fine-pointer devices only; the native cursor stays visible. */
   if (window.matchMedia('(pointer: fine)').matches && !reducedMotionQuery.matches) {
-    var ring = document.createElement('div');
-    ring.className = 'cursor-ring';
-    ring.setAttribute('aria-hidden', 'true');
-    var dot = document.createElement('div');
-    dot.className = 'cursor-dot';
-    dot.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(ring);
-    document.body.appendChild(dot);
-    var mouseX = -100, mouseY = -100, ringX = -100, ringY = -100;
+    var blob = document.createElement('div');
+    blob.className = 'cursor-blob';
+    blob.setAttribute('aria-hidden', 'true');
+    var blobInner = document.createElement('div');
+    blobInner.className = 'cursor-blob-inner';
+    blob.appendChild(blobInner);
+    document.body.appendChild(blob);
+    var mouseX = -100, mouseY = -100, blobX = -100, blobY = -100;
     var cursorSeen = false;
     document.addEventListener('mousemove', function (e) {
       mouseX = e.clientX; mouseY = e.clientY;
       if (!cursorSeen) {
         cursorSeen = true;
-        ringX = mouseX; ringY = mouseY;
-        ring.classList.add('visible');
-        dot.classList.add('visible');
+        blobX = mouseX; blobY = mouseY;
+        blob.classList.add('visible');
       }
-      dot.style.transform = 'translate(' + (mouseX - 4) + 'px,' + (mouseY - 4) + 'px)';
     }, { passive: true });
     document.addEventListener('mouseleave', function () {
-      ring.classList.remove('visible');
-      dot.classList.remove('visible');
+      blob.classList.remove('visible');
       cursorSeen = false;
     });
     document.addEventListener('mouseover', function (e) {
       var interactive = e.target.closest('a, button, summary, input, textarea, select, [role="button"]');
-      ring.classList.toggle('hover', !!interactive);
+      blob.classList.toggle('hover', !!interactive);
     }, { passive: true });
+    document.addEventListener('mousedown', function () { blob.classList.add('press'); });
+    document.addEventListener('mouseup', function () { blob.classList.remove('press'); });
     (function cursorLoop() {
-      ringX += (mouseX - ringX) * 0.16;
-      ringY += (mouseY - ringY) * 0.16;
-      ring.style.transform = 'translate(' + (ringX - 19) + 'px,' + (ringY - 19) + 'px)';
+      blobX += (mouseX - blobX) * 0.13;
+      blobY += (mouseY - blobY) * 0.13;
+      blob.style.transform = 'translate(' + (blobX - 12) + 'px,' + (blobY - 12) + 'px)';
       requestAnimationFrame(cursorLoop);
     })();
   }
