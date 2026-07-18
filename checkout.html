@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | Car Spa LK</title>
+<meta name="description" content="Check out your Car Spa LK order: delivery details, cash on delivery or bank transfer, confirmed on WhatsApp.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="styles.css">
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+<header class="site-header solid">
+  <div class="container">
+    <nav class="nav-left">
+      <a href="products.html">Products</a>
+      <a href="index.html#why-us">Why Car Spa</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <a class="logo-mark" href="index.html" aria-label="Car Spa LK home">
+      <svg viewBox="0 0 64 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 30 Q10 20 18 18 L24 10 Q26 7 30 7 h8 Q42 7 44 10 L50 18 Q58 20 60 30 v6 q0 3-3 3 h-3 a6 6 0 0 1-12 0 h-18 a6 6 0 0 1-12 0 h-1 q-3 0-3-3 z M20 18 h26 l-5-7 q-1-2-3-2 h-10 q-2 0-3 2 z"/>
+        <path d="M14 2 q4 4 0 8 M22 0 q4 4 0 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </a>
+    <div class="nav-right">
+      <a class="icon-link cart-link" href="cart.html" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg><span class="cart-count">0</span></a>
+      <a class="btn-shop" href="products.html">Shop Online</a>
+      <button class="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<section class="page-shell" id="checkout-page">
+  <div class="container">
+    <h1><strong class="hl">Checkout</strong></h1>
+    <p class="page-lead">Fill in your delivery details. Your order goes to us on WhatsApp, and we confirm the total plus delivery before anything is paid.</p>
+    <noscript><p style="margin-top:20px;">Checkout needs JavaScript. You can also order directly on WhatsApp: 074 2 388 588.</p></noscript>
+    <div class="co-empty" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg>
+      <h2>Nothing to check out yet</h2>
+      <p>Your cart is empty. Add a few products first.</p>
+      <a class="btn btn-accent" href="products.html">Browse products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="co-done" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5.5-6.5"/></svg>
+      <h2>Order sent!</h2>
+      <p>Your order details opened in WhatsApp. Hit send there and we'll confirm your total and delivery right away.</p>
+      <a class="btn btn-dark" href="index.html">Back to home <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="co-grid">
+      <div class="co-panel">
+        <h3>Delivery details</h3>
+        <form id="checkout-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="co-name">Full name</label>
+              <input id="co-name" name="name" type="text" required autocomplete="name">
+            </div>
+            <div class="form-field">
+              <label for="co-phone">Phone</label>
+              <input id="co-phone" name="phone" type="tel" required autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="co-address">Delivery address</label>
+            <input id="co-address" name="address" type="text" required autocomplete="street-address">
+          </div>
+          <div class="form-field">
+            <label for="co-city">City / District</label>
+            <input id="co-city" name="city" type="text" autocomplete="address-level2">
+          </div>
+          <div class="form-field">
+            <label for="co-notes">Order notes (optional)</label>
+            <textarea id="co-notes" name="notes" rows="3"></textarea>
+          </div>
+          <h3>Payment method</h3>
+          <div class="pay-options">
+            <label class="pay-option"><input type="radio" name="payment" value="Cash on Delivery" checked> Cash on delivery</label>
+            <label class="pay-option"><input type="radio" name="payment" value="Bank Transfer"> Bank transfer</label>
+          </div>
+          <button class="btn btn-accent" type="submit">Place order on WhatsApp <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></button>
+          <p class="co-note">Placing the order opens WhatsApp with everything pre-filled. We never ask for card details.</p>
+        </form>
+      </div>
+      <div class="co-panel">
+        <h3>Your order</h3>
+        <div class="co-items"></div>
+        <div class="co-total"><span>Total</span><span class="co-total-value">Rs. 0</span></div>
+        <p class="co-note">Delivery fee is confirmed on WhatsApp based on your location. Island-wide delivery, 2–4 working days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">CARSPA<span class="lk">.LK</span></div>
+        <p>123 Galle Road, Colombo 04<br>Sri Lanka</p>
+        <p style="margin-top:14px;">Hotline: <a href="tel:+94742388588" style="display:inline; color:#fff;">074 2 388 588</a><br>
+        Landline: <a href="tel:+94114242400" style="display:inline; color:#fff;">011 42 42 400</a><br>
+        Email: <a href="mailto:info@carspa.lk" style="display:inline; color:#fff;">info@carspa.lk</a></p>
+      </div>
+      <div>
+        <h5>Our Products</h5>
+        <a href="products.html#engine">Engine care</a>
+        <a href="products.html#exterior">Exterior &amp; shine</a>
+        <a href="products.html#interior">Interior &amp; AC</a>
+        <a href="products.html#brake">Brake &amp; underbody</a>
+        <a href="products.html#chain">Bike &amp; chain care</a>
+      </div>
+      <div>
+        <h5>Customer Service</h5>
+        <a href="contact.html">Contact us</a>
+        <a href="index.html#why-us">Why Car Spa LK?</a>
+        <a href="delivery-returns.html">Delivery information</a>
+        <a href="delivery-returns.html#returns">Returns &amp; refunds</a>
+        <a href="terms-of-service.html#payments">Payments &amp; security</a>
+      </div>
+      <div>
+        <h5>Opening Hours</h5>
+        <p>Monday – Friday:<br>9:00 – 18:00</p>
+        <p style="margin-top:12px;">Saturday:<br>9:00 – 15:00</p>
+        <p style="margin-top:12px;">Sunday &amp; Poya: Closed</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Copyright © 2026 Car Spa LK. All rights reserved.</span>
+      <span><a href="privacy-policy.html" style="display:inline;">Privacy policy</a> · <a href="cookie-policy.html" style="display:inline;">Cookie policy</a> · <a href="terms-of-service.html" style="display:inline;">Terms of service</a></span>
+    </div>
+  </div>
+</footer>
+<script src="main.js"></script>
+</body>
+</html>

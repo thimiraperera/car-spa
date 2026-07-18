@@ -16,7 +16,7 @@
     <nav class="nav-left">
       <a href="products.html">Products</a>
       <a href="#why-us">Why Car Spa</a>
-      <a href="#contact">Contact</a>
+      <a href="contact.html">Contact</a>
     </nav>
     <a class="logo-mark" href="index.html" aria-label="Car Spa LK home">
       <svg viewBox="0 0 64 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -28,11 +28,11 @@
       <a class="icon-link" href="products.html" aria-label="Search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       </a>
-      <a class="icon-link" href="#contact" aria-label="Account">
+      <a class="icon-link" href="contact.html" aria-label="Contact">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
       </a>
-      <a class="icon-link" href="products.html" aria-label="Cart">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg>
+      <a class="icon-link cart-link" href="cart.html" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg><span class="cart-count">0</span>
       </a>
       <a class="btn-shop" href="products.html">Shop Online</a>
       <button class="burger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -43,14 +43,18 @@
 <!-- ===== Hero ===== -->
 <div class="hero">
   <div class="hero-panel">
-    <img class="hero-bg-img" src="assets/img/site/hero-home.webp" alt="" aria-hidden="true" data-parallax="-0.1" onerror="this.remove()">
+    <div class="hero-bg" aria-hidden="true" data-parallax="-0.1">
+      <img class="hero-bg-img" src="assets/img/site/hero-home.webp" alt="" onerror="this.remove()">
+      <img class="hero-bg-img" src="assets/img/site/hero-home-2.webp" alt="" onerror="this.remove()">
+      <img class="hero-bg-img" src="assets/img/site/hero-home-3.webp" alt="" onerror="this.remove()">
+    </div>
     <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-fg" aria-hidden="true" data-parallax="0.08">
+      <img src="assets/img/site/hero-foreground.webp" alt="" onerror="this.closest('.hero-fg').remove()">
+    </div>
     <div class="hero-top">
       <h1 class="hero-wordmark">CARSPA<span class="lk">.LK</span></h1>
       <p class="hero-sub">Auto care, done right</p>
-      <svg class="hero-doodle" viewBox="0 0 80 70" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round">
-        <path d="M10 60 Q14 45 22 38"/><path d="M30 62 Q32 50 38 42"/><path d="M48 66 Q48 56 52 48"/>
-      </svg>
     </div>
     <div class="hero-scroll-cue" aria-hidden="true">
       <svg viewBox="0 0 24 34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -62,6 +66,37 @@
     </div>
     <div class="hero-bottom">
       <a class="btn btn-cream" href="products.html">Discover our products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+      <div class="hero-picks" id="hero-picks" aria-label="Popular picks">
+        <span class="hero-picks-label">Popular now</span>
+        <div class="hero-picks-row" data-vehicle="car">
+          <a class="hero-pick" href="products/engine-flush-4-wheeler.html">
+            <img src="assets/img/products/engine-flush-4-wheeler-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Engine Flush<small>Rs. 2,950</small></span>
+          </a>
+          <a class="hero-pick" href="products/insta-glaze.html">
+            <img src="assets/img/products/insta-glaze-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Insta Glaze<small>Rs. 9,990</small></span>
+          </a>
+          <a class="hero-pick" href="products/brake-cleaner.html">
+            <img src="assets/img/products/brake-cleaner-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Brake Cleaner<small>Rs. 2,200</small></span>
+          </a>
+        </div>
+        <div class="hero-picks-row" data-vehicle="bike" hidden>
+          <a class="hero-pick" href="products/chain-lube.html">
+            <img src="assets/img/products/chain-lube-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Chain Lube<small>Rs. 3,000</small></span>
+          </a>
+          <a class="hero-pick" href="products/chain-cleaner.html">
+            <img src="assets/img/products/chain-cleaner-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Chain Cleaner<small>Rs. 3,000</small></span>
+          </a>
+          <a class="hero-pick" href="products/engine-flush-2-wheeler.html">
+            <img src="assets/img/products/engine-flush-2-wheeler-featured.webp" alt="" loading="lazy" decoding="async">
+            <span>Engine Flush 2W<small>Rs. 950</small></span>
+          </a>
+        </div>
+      </div>
       <div class="hero-toggle" title="Shop by vehicle">
         <button class="tog active" data-vehicle="car" aria-label="Car products">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13 5.5 8.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13v5h-2.2a1.8 1.8 0 0 1-3.6 0H9.8a1.8 1.8 0 0 1-3.6 0H4z"/><path d="M6 13h12"/></svg>
@@ -466,7 +501,7 @@
         <p>123 Galle Road, Colombo 04<br>Sri Lanka</p>
         <p style="margin-top:14px;">Hotline: <a href="tel:+94742388588" style="display:inline; color:#fff;">074 2 388 588</a><br>
         Landline: <a href="tel:+94114242400" style="display:inline; color:#fff;">011 42 42 400</a><br>
-        Email: <a href="mailto:hello@carspa.lk" style="display:inline; color:#fff;">hello@carspa.lk</a></p>
+        Email: <a href="mailto:info@carspa.lk" style="display:inline; color:#fff;">info@carspa.lk</a></p>
         <div class="footer-social">
           <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.2 0-1-.1-1.9-.1-1.9 0-3.2 1.2-3.2 3.3V11H9v3h2.3v7z"/></svg></a>
           <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -483,11 +518,11 @@
       </div>
       <div>
         <h5>Customer Service</h5>
-        <a href="#contact">Contact us</a>
+        <a href="contact.html">Contact us</a>
         <a href="index.html#why-us">Why Car Spa LK?</a>
-        <a href="#">Delivery information</a>
-        <a href="#">Returns &amp; refunds</a>
-        <a href="#">Payments &amp; security</a>
+        <a href="delivery-returns.html">Delivery information</a>
+        <a href="delivery-returns.html#returns">Returns &amp; refunds</a>
+        <a href="terms-of-service.html#payments">Payments &amp; security</a>
       </div>
       <div>
         <h5>Opening Hours</h5>
@@ -498,13 +533,13 @@
     </div>
     <div class="footer-bottom">
       <span>Copyright © 2026 Car Spa LK. All rights reserved.</span>
-      <span><a href="#" style="display:inline;">Privacy policy</a> · <a href="#" style="display:inline;">Cookie policy</a></span>
+      <span><a href="privacy-policy.html" style="display:inline;">Privacy policy</a> · <a href="cookie-policy.html" style="display:inline;">Cookie policy</a> · <a href="terms-of-service.html" style="display:inline;">Terms of service</a></span>
     </div>
   </div>
 </footer>
 
 <script>
-// Vehicle toggle: filter featured products
+// Vehicle toggle: filter featured products + swap hero quick picks
 document.querySelectorAll('.hero-toggle .tog').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.hero-toggle .tog').forEach(b => b.classList.remove('active'));
@@ -513,7 +548,16 @@ document.querySelectorAll('.hero-toggle .tog').forEach(btn => {
     document.querySelectorAll('#featured-grid .prod-card').forEach(card => {
       card.hidden = card.dataset.vehicle !== v;
     });
-    document.getElementById('featured-grid').scrollIntoView({behavior:'smooth', block:'nearest'});
+    document.querySelectorAll('#hero-picks .hero-picks-row').forEach(row => {
+      if (row.dataset.vehicle === v) {
+        row.hidden = false;
+        row.classList.remove('swap-in');
+        void row.offsetWidth; /* restart the swap animation */
+        row.classList.add('swap-in');
+      } else {
+        row.hidden = true;
+      }
+    });
   });
 });
 </script>
