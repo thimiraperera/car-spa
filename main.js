@@ -280,6 +280,49 @@
     if (next) next.addEventListener('click', function () { viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
   });
 
+  /* Hero light rig: a soft light pool sweeps the hero photo following the
+     mouse, and the relight image stack (same car, three key-light angles)
+     crossfades so the light direction on the car tracks the cursor too. */
+  var heroPanelEl = document.querySelector('.hero-panel');
+  var spotlight = document.getElementById('hero-spotlight');
+  var relightEl = document.getElementById('hero-relight');
+  /* If only one relight render exists, show it as a static centerpiece */
+  setTimeout(function () {
+    var rl = document.querySelectorAll('#hero-relight img');
+    if (rl.length === 1) rl[0].style.opacity = '1';
+  }, 1600);
+  if (heroPanelEl && (spotlight || relightEl) &&
+      window.matchMedia('(pointer: fine)').matches && !reducedMotionQuery.matches) {
+    var lightX = 0.5, lightY = 0.42, lightTX = 0.5, lightTY = 0.42;
+    heroPanelEl.addEventListener('mousemove', function (e) {
+      var r = heroPanelEl.getBoundingClientRect();
+      lightTX = (e.clientX - r.left) / r.width;
+      lightTY = (e.clientY - r.top) / r.height;
+    }, { passive: true });
+    heroPanelEl.addEventListener('mouseleave', function () {
+      lightTX = 0.5; lightTY = 0.42;
+    });
+    (function lightLoop() {
+      lightX += (lightTX - lightX) * 0.08;
+      lightY += (lightTY - lightY) * 0.08;
+      if (spotlight) {
+        spotlight.style.setProperty('--sx', (lightX * 100).toFixed(2) + '%');
+        spotlight.style.setProperty('--sy', (lightY * 100).toFixed(2) + '%');
+      }
+      var imgs = relightEl ? relightEl.querySelectorAll('img') : [];
+      if (imgs.length > 1) {
+        var wl = Math.max(0, 1 - lightX * 2);
+        var wr = Math.max(0, lightX * 2 - 1);
+        var wc = 1 - wl - wr;
+        for (var i = 0; i < imgs.length; i++) {
+          var side = imgs[i].getAttribute('data-light');
+          imgs[i].style.opacity = (side === 'left' ? wl : side === 'right' ? wr : wc).toFixed(3);
+        }
+      }
+      requestAnimationFrame(lightLoop);
+    })();
+  }
+
   /* Finder media: auto-rotating image stack; hovering an option pins its image */
   var finderMedia = document.getElementById('finder-media');
   var finderOptions = document.getElementById('finder-options');
