@@ -191,24 +191,47 @@ body.menu-open { overflow: hidden; }
   from { transform: scale(1); }
   to   { transform: scale(1.09); }
 }
-/* Scroll-driven car: the brand mark drives across the hero as you scroll,
-   wheels spinning, along a dashed road line above the bottom bar */
-.hero-road {
-  position: absolute; z-index: 2; pointer-events: none;
-  left: 5%; right: 5%; bottom: 118px; height: 3px; border-radius: 3px;
-  background: repeating-linear-gradient(90deg,
-    rgba(255,255,255,.22) 0 26px, transparent 26px 48px);
+/* Ambient dust: soft glowing motes drifting slowly up through the hero */
+.hero-dust {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  overflow: hidden;
 }
-.hero-car {
-  position: absolute; z-index: 3; pointer-events: none;
-  bottom: 121px; left: 0; width: clamp(92px, 9vw, 132px);
-  color: rgba(255,255,255,.92);
-  will-change: transform;
+.hero-dust span {
+  position: absolute; bottom: -3%;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  box-shadow: 0 0 8px rgba(255,255,255,.35);
+  opacity: 0;
+  animation: dustRise 14s linear infinite;
 }
-.hero-car svg { width: 100%; height: auto; display: block; }
-.hero-car .wheel {
-  transform-box: fill-box; transform-origin: center;
-  will-change: transform;
+.hero-dust span:nth-child(3n) {
+  background: rgba(224,51,43,.55);
+  box-shadow: 0 0 10px rgba(224,51,43,.5);
+}
+.hero-dust span:nth-child(1)  { left: 6%;  width: 4px; height: 4px; animation-duration: 15s; animation-delay: 0s; }
+.hero-dust span:nth-child(2)  { left: 14%; width: 6px; height: 6px; animation-duration: 12s; animation-delay: 4s; }
+.hero-dust span:nth-child(3)  { left: 23%; width: 3px; height: 3px; animation-duration: 17s; animation-delay: 8s; }
+.hero-dust span:nth-child(4)  { left: 31%; width: 5px; height: 5px; animation-duration: 13s; animation-delay: 2s; }
+.hero-dust span:nth-child(5)  { left: 42%; width: 4px; height: 4px; animation-duration: 16s; animation-delay: 10s; }
+.hero-dust span:nth-child(6)  { left: 51%; width: 6px; height: 6px; animation-duration: 11s; animation-delay: 6s; }
+.hero-dust span:nth-child(7)  { left: 59%; width: 3px; height: 3px; animation-duration: 18s; animation-delay: 1s; }
+.hero-dust span:nth-child(8)  { left: 67%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 9s; }
+.hero-dust span:nth-child(9)  { left: 74%; width: 4px; height: 4px; animation-duration: 15s; animation-delay: 5s; }
+.hero-dust span:nth-child(10) { left: 82%; width: 6px; height: 6px; animation-duration: 13s; animation-delay: 12s; }
+.hero-dust span:nth-child(11) { left: 89%; width: 3px; height: 3px; animation-duration: 16s; animation-delay: 3s; }
+.hero-dust span:nth-child(12) { left: 95%; width: 5px; height: 5px; animation-duration: 14s; animation-delay: 7s; }
+.hero-dust span:nth-child(even) { animation-name: dustRiseSway; }
+@keyframes dustRise {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  8%   { opacity: .75; }
+  85%  { opacity: .2; }
+  100% { transform: translate(34px, -92vh); opacity: 0; }
+}
+@keyframes dustRiseSway {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  8%   { opacity: .65; }
+  85%  { opacity: .18; }
+  100% { transform: translate(-40px, -88vh); opacity: 0; }
 }
 /* Base + scroll-driven darkening (opacity raised by JS as the hero scrolls by) */
 .hero-overlay {
@@ -721,22 +744,23 @@ footer {
 }
 .filter-pill.active, .filter-pill:hover { background: var(--ink); color: #fff; }
 
-/* ---------- Cursor follower: inverting blob ---------- */
-.cursor-blob {
+/* ---------- Cursor follower: red dot + trailing ring ---------- */
+.cursor-dot, .cursor-ring {
   position: fixed; top: 0; left: 0; z-index: 300; pointer-events: none;
-  opacity: 0; transition: opacity .3s ease;
+  border-radius: 50%; opacity: 0; transition: opacity .3s ease;
 }
-.cursor-blob.visible { opacity: 1; }
-.cursor-blob-inner {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: #fff; mix-blend-mode: difference;
-  transform: scale(1);
-  transition: transform .35s cubic-bezier(.22,1,.36,1);
+.cursor-dot { width: 8px; height: 8px; background: var(--accent); }
+.cursor-ring {
+  width: 38px; height: 38px; border: 1.5px solid rgba(224,51,43,.55);
+  transition: opacity .3s ease, width .25s ease, height .25s ease,
+              margin .25s ease, border-color .25s ease, background-color .25s ease;
 }
-.cursor-blob.hover .cursor-blob-inner { transform: scale(2.4); }
-.cursor-blob.press .cursor-blob-inner { transform: scale(.65); }
-.cursor-blob.hover.press .cursor-blob-inner { transform: scale(1.8); }
-@media (pointer: coarse) { .cursor-blob { display: none; } }
+.cursor-dot.visible, .cursor-ring.visible { opacity: 1; }
+.cursor-ring.hover {
+  width: 56px; height: 56px; margin: -9px 0 0 -9px;
+  border-color: rgba(224,51,43,.9); background: rgba(224,51,43,.08);
+}
+@media (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
 
 /* ---------- Header cart icon ---------- */
 .cart-link { position: relative; }
@@ -934,7 +958,6 @@ footer {
   .hero-bottom { grid-template-columns: 1fr; align-items: stretch; }
   .hero-bottom > .btn { justify-self: stretch; }
   .hero-bottom > .hero-toggle { justify-self: end; }
-  .hero-car, .hero-road { display: none; }
   .carousel-btn { display: none; }
   .prod-carousel .prod-card { min-width: 74vw; }
   .site-header.solid + .page-shell { padding-top: 140px; }

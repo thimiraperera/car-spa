@@ -180,8 +180,6 @@
      One rAF-throttled scroll handler drives all three. */
   var heroTop = document.querySelector('.hero-panel .hero-top');
   var heroOverlay = document.querySelector('.hero-overlay');
-  var heroPanel = document.querySelector('.hero-panel');
-  var heroCar = document.getElementById('hero-car');
   var parallaxEls = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
   var fxTicking = false;
 
@@ -198,20 +196,6 @@
         heroTop.style.opacity = String(1 - t * 0.85);
         /* The photo darkens smoothly into the next section as you scroll past it */
         if (heroOverlay) heroOverlay.style.opacity = String(0.78 + t * 0.22);
-        /* The brand-mark car drives across the hero as the visitor scrolls,
-           wheels spinning with the distance travelled */
-        if (heroCar && heroPanel) {
-          var panelW = heroPanel.clientWidth;
-          var carW = heroCar.offsetWidth || 120;
-          /* starts mostly rolled-in at the left, exits fully right */
-          var x = -carW * 0.3 + t * (panelW + carW * 1.3);
-          heroCar.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
-          var deg = (x / (carW * 0.19)) * 57.3;
-          var wheels = heroCar.querySelectorAll('.wheel');
-          for (var w = 0; w < wheels.length; w++) {
-            wheels[w].style.transform = 'rotate(' + deg.toFixed(1) + 'deg)';
-          }
-        }
       }
       parallaxEls.forEach(function (el) {
         var host = el.parentElement || el;
@@ -372,41 +356,44 @@
     });
   });
 
-  /* Cursor follower: a single soft blob that inverts whatever it passes over
-     (mix-blend-mode difference), swells over interactive elements and squeezes
-     on click. Fine-pointer devices only; the native cursor stays visible. */
+  /* Cursor follower: a trailing red ring that eases after the pointer and
+     grows over interactive elements. The accent color stays visible on both
+     light and dark sections. Fine-pointer devices only; the native cursor
+     stays visible, this is a decorative companion. */
   if (window.matchMedia('(pointer: fine)').matches && !reducedMotionQuery.matches) {
-    var blob = document.createElement('div');
-    blob.className = 'cursor-blob';
-    blob.setAttribute('aria-hidden', 'true');
-    var blobInner = document.createElement('div');
-    blobInner.className = 'cursor-blob-inner';
-    blob.appendChild(blobInner);
-    document.body.appendChild(blob);
-    var mouseX = -100, mouseY = -100, blobX = -100, blobY = -100;
+    var ring = document.createElement('div');
+    ring.className = 'cursor-ring';
+    ring.setAttribute('aria-hidden', 'true');
+    var dot = document.createElement('div');
+    dot.className = 'cursor-dot';
+    dot.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(ring);
+    document.body.appendChild(dot);
+    var mouseX = -100, mouseY = -100, ringX = -100, ringY = -100;
     var cursorSeen = false;
     document.addEventListener('mousemove', function (e) {
       mouseX = e.clientX; mouseY = e.clientY;
       if (!cursorSeen) {
         cursorSeen = true;
-        blobX = mouseX; blobY = mouseY;
-        blob.classList.add('visible');
+        ringX = mouseX; ringY = mouseY;
+        ring.classList.add('visible');
+        dot.classList.add('visible');
       }
+      dot.style.transform = 'translate(' + (mouseX - 4) + 'px,' + (mouseY - 4) + 'px)';
     }, { passive: true });
     document.addEventListener('mouseleave', function () {
-      blob.classList.remove('visible');
+      ring.classList.remove('visible');
+      dot.classList.remove('visible');
       cursorSeen = false;
     });
     document.addEventListener('mouseover', function (e) {
       var interactive = e.target.closest('a, button, summary, input, textarea, select, [role="button"]');
-      blob.classList.toggle('hover', !!interactive);
+      ring.classList.toggle('hover', !!interactive);
     }, { passive: true });
-    document.addEventListener('mousedown', function () { blob.classList.add('press'); });
-    document.addEventListener('mouseup', function () { blob.classList.remove('press'); });
     (function cursorLoop() {
-      blobX += (mouseX - blobX) * 0.13;
-      blobY += (mouseY - blobY) * 0.13;
-      blob.style.transform = 'translate(' + (blobX - 12) + 'px,' + (blobY - 12) + 'px)';
+      ringX += (mouseX - ringX) * 0.16;
+      ringY += (mouseY - ringY) * 0.16;
+      ring.style.transform = 'translate(' + (ringX - 19) + 'px,' + (ringY - 19) + 'px)';
       requestAnimationFrame(cursorLoop);
     })();
   }
