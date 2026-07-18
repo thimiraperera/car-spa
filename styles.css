@@ -193,6 +193,9 @@ body.menu-open { overflow: hidden; }
   opacity: 0;
 }
 .hero-relight img[data-light="center"] { opacity: 1; }
+/* the dusk "lamps off" base eases in and out around a blink so the body
+   color never jumps; the lamp flashes themselves stay crisp */
+.hero-relight img[data-light="off"] { transition: opacity .28s ease; }
 /* Mouse-tracked light pool sweeping the whole hero photo */
 .hero-spotlight {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;

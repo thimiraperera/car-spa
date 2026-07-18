@@ -229,19 +229,27 @@
     var lightsOn = document.querySelector('#hero-relight img[data-light="on"]');
     if (!lightsOn || lightsBlinking || reducedMotionQuery.matches) return;
     lightsBlinking = true;
+    /* The dusk "lamps off" base eases in underneath first, so the flashes
+       only ever change the lamps, never the body color. Without that render
+       the blink falls back to toggling the lights-on layer alone. */
+    var lightsOff = document.querySelector('#hero-relight img[data-light="off"]');
+    if (lightsOff) lightsOff.style.opacity = '1';
     var seq = [];
     for (var b = 0; b < times; b++) seq.push('1', '0');
     var step = 0;
-    var iv = setInterval(function () {
-      if (step >= seq.length) {
-        clearInterval(iv);
-        lightsBlinking = false;
-        scrollFx(); /* hand the layer back to the scroll-driven fade */
-        return;
-      }
-      lightsOn.style.opacity = seq[step];
-      step += 1;
-    }, 150);
+    setTimeout(function () {
+      var iv = setInterval(function () {
+        if (step >= seq.length) {
+          clearInterval(iv);
+          if (lightsOff) lightsOff.style.opacity = '0';
+          lightsBlinking = false;
+          scrollFx(); /* hand the layer back to the scroll-driven fade */
+          return;
+        }
+        lightsOn.style.opacity = seq[step];
+        step += 1;
+      }, 150);
+    }, lightsOff ? 300 : 0);
   }
   var relightHover = document.getElementById('hero-relight');
   if (relightHover) {
@@ -358,9 +366,9 @@
         spotlight.style.setProperty('--sx', (lightX * 100).toFixed(2) + '%');
         spotlight.style.setProperty('--sy', (lightY * 100).toFixed(2) + '%');
       }
-      /* the "on" (headlights) layer is scroll-driven, never mouse-driven */
+      /* the "on"/"off" (headlight) layers are scroll/blink-driven, never mouse-driven */
       var imgs = relightEl
-        ? relightEl.querySelectorAll('img:not([data-light="on"])')
+        ? relightEl.querySelectorAll('img:not([data-light="on"]):not([data-light="off"])')
         : [];
       if (imgs.length > 1) {
         var wl = Math.max(0, 1 - lightX * 2);
