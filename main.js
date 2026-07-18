@@ -331,23 +331,29 @@
     var finderIdx = 0;
     var finderPinned = false;
     function finderShow(i) {
+      /* re-query so images that removed themselves after a 404 never count */
+      finderImgs = Array.prototype.slice.call(finderMedia.querySelectorAll('img'));
+      if (!finderImgs.length) return;
       finderIdx = ((i % finderImgs.length) + finderImgs.length) % finderImgs.length;
       finderImgs.forEach(function (img, k) { img.classList.toggle('active', k === finderIdx); });
     }
-    if (finderImgs.length > 1 && !reducedMotionQuery.matches) {
+    if (!reducedMotionQuery.matches) {
       setInterval(function () {
-        if (!finderPinned) finderShow(finderIdx + 1);
+        if (!finderPinned && finderMedia.querySelectorAll('img').length > 1) finderShow(finderIdx + 1);
       }, 4500);
     }
     if (finderOptions) {
       finderOptions.querySelectorAll('a[data-media]').forEach(function (opt) {
         var pin = function () {
-          /* match by product slug so a missing image can't shift the mapping */
-          var m = (opt.getAttribute('href') || '').match(/products\/([a-z0-9-]+)\.html/);
-          if (!m) return;
-          for (var i = 0; i < finderImgs.length; i++) {
-            if (finderImgs[i].getAttribute('src').indexOf(m[1] + '-featured') !== -1) {
+          /* match by key; images that failed to load removed themselves, and
+             re-querying means a missing image can never shift the mapping */
+          var key = opt.getAttribute('data-media');
+          var live = finderMedia.querySelectorAll('img');
+          for (var i = 0; i < live.length; i++) {
+            if (live[i].complete && live[i].naturalWidth === 0) continue; /* failed, not yet removed */
+            if (live[i].getAttribute('data-key') === key) {
               finderPinned = true;
+              finderImgs = Array.prototype.slice.call(live);
               finderShow(i);
               return;
             }
