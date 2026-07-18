@@ -4,7 +4,9 @@
    pill buttons, marquee ribbon, curved dividers, rounded cards
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Archivo+Black&display=swap');
+/* Archivo + Archivo Black, self-hosted so the fonts always load
+   even if Google Fonts is slow, blocked or offline */
+@import url('assets/fonts/fonts.css');
 
 :root {
   --ink: #1c1f23;          /* deep charcoal (headings, footer) */
@@ -220,6 +222,16 @@ body.menu-open { overflow: hidden; }
 .hero-dust span:nth-child(10) { left: 82%; width: 6px; height: 6px; animation-duration: 13s; animation-delay: 12s; }
 .hero-dust span:nth-child(11) { left: 89%; width: 3px; height: 3px; animation-duration: 16s; animation-delay: 3s; }
 .hero-dust span:nth-child(12) { left: 95%; width: 5px; height: 5px; animation-duration: 14s; animation-delay: 7s; }
+.hero-dust span:nth-child(13) { left: 3%;  width: 6px; height: 6px; animation-duration: 13s; animation-delay: 6s; }
+.hero-dust span:nth-child(14) { left: 10%; width: 3px; height: 3px; animation-duration: 17s; animation-delay: 11s; }
+.hero-dust span:nth-child(15) { left: 19%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 1s; }
+.hero-dust span:nth-child(16) { left: 27%; width: 4px; height: 4px; animation-duration: 15s; animation-delay: 9s; }
+.hero-dust span:nth-child(17) { left: 37%; width: 6px; height: 6px; animation-duration: 11s; animation-delay: 5s; }
+.hero-dust span:nth-child(18) { left: 46%; width: 3px; height: 3px; animation-duration: 18s; animation-delay: 13s; }
+.hero-dust span:nth-child(19) { left: 55%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 3s; }
+.hero-dust span:nth-child(20) { left: 63%; width: 4px; height: 4px; animation-duration: 16s; animation-delay: 8s; }
+.hero-dust span:nth-child(21) { left: 71%; width: 6px; height: 6px; animation-duration: 13s; animation-delay: 12s; }
+.hero-dust span:nth-child(22) { left: 78%; width: 4px; height: 4px; animation-duration: 15s; animation-delay: 2s; }
 .hero-dust span:nth-child(even) { animation-name: dustRiseSway; }
 @keyframes dustRise {
   0%   { transform: translate(0, 0); opacity: 0; }
