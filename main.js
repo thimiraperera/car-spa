@@ -177,6 +177,8 @@
   /* Scroll-linked effects: progress bar, hero fade-out, parallax images.
      One rAF-throttled scroll handler drives all three. */
   var heroTop = document.querySelector('.hero-panel .hero-top');
+  var heroOverlay = document.querySelector('.hero-overlay');
+  var heroScrollCue = document.querySelector('.hero-scroll-cue');
   var parallaxEls = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
   var fxTicking = false;
 
@@ -191,6 +193,10 @@
         var t = Math.min(window.scrollY / (vh * 0.85), 1);
         heroTop.style.transform = 'translateY(' + (t * 70) + 'px) scale(' + (1 - t * 0.06) + ')';
         heroTop.style.opacity = String(1 - t * 0.85);
+        /* The photo darkens smoothly into the next section as you scroll past it */
+        if (heroOverlay) heroOverlay.style.opacity = String(0.78 + t * 0.22);
+        /* The "scroll down" cue only makes sense before scrolling starts */
+        if (heroScrollCue) heroScrollCue.style.opacity = String(Math.max(0, 0.8 - t * 4));
       }
       parallaxEls.forEach(function (el) {
         var host = el.parentElement || el;
@@ -220,12 +226,13 @@
       el.textContent = target.toFixed(decimals) + suffix;
       return;
     }
-    var duration = 1400;
+    /* Slow, deliberate count-up rather than a quick tick-up */
+    var duration = 2800;
     var startTime = null;
     function tick(ts) {
       if (startTime === null) startTime = ts;
       var p = Math.min((ts - startTime) / duration, 1);
-      var eased = 1 - Math.pow(1 - p, 3);
+      var eased = 1 - Math.pow(1 - p, 4);
       el.textContent = (target * eased).toFixed(decimals) + suffix;
       if (p < 1) requestAnimationFrame(tick);
     }

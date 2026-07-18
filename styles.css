@@ -81,8 +81,9 @@ strong.hl, .hl { color: var(--accent); }
   width: 44px; height: 44px; border-radius: 50%;
   background: var(--accent); color: #fff;
   display: inline-flex; align-items: center; justify-content: center;
-  flex: 0 0 auto; font-size: 18px; transition: transform .25s ease;
+  flex: 0 0 auto; transition: transform .3s cubic-bezier(.22,1,.36,1);
 }
+.btn .arrow svg { width: 18px; height: 18px; }
 .btn:hover .arrow { transform: translateX(4px); }
 .btn-accent .arrow { background: var(--white); color: var(--accent); }
 
@@ -169,17 +170,32 @@ body.menu-open { overflow: hidden; }
 .hero-panel {
   position: relative; overflow: hidden;
   min-height: 94vh; border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--hero-bg-1), var(--hero-bg-2));
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+/* Real image layer (not a CSS background) so it can take a scroll-parallax
+   transform and a slow ambient zoom; oversized so both never expose an edge */
+.hero-bg-img {
+  position: absolute; z-index: 0; inset: -6%; width: 112%; height: 112%;
+  object-fit: cover; pointer-events: none;
+  animation: heroKenBurns 24s ease-in-out infinite alternate;
+}
+@keyframes heroKenBurns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.09); }
+}
+/* Base + scroll-driven darkening (opacity raised by JS as the hero scrolls by) */
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
     radial-gradient(1200px 600px at 80% 110%, rgba(224,51,43,.28), transparent 60%),
     radial-gradient(900px 500px at 10% -10%, rgba(255,255,255,.07), transparent 55%),
-    linear-gradient(rgba(28,31,35,.6), rgba(28,31,35,.78)),
-    url("assets/img/site/hero-home.webp") center/cover no-repeat,
-    linear-gradient(135deg, var(--hero-bg-1), var(--hero-bg-2));
-  display: flex; flex-direction: column; justify-content: space-between;
+    linear-gradient(rgba(28,31,35,.58), rgba(28,31,35,.8));
+  opacity: .78;
 }
-/* Continuous glow, sitting behind the wordmark, above the base gradient */
+/* Continuous glow, sitting above the darkened photo, behind the wordmark */
 .hero-panel::before {
-  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  content: ""; position: absolute; z-index: 2; pointer-events: none;
   width: 70vw; height: 70vw; max-width: 900px; max-height: 900px;
   left: 50%; top: 42%; transform: translate(-50%, -50%);
   background: radial-gradient(circle, rgba(224,51,43,.4), rgba(224,51,43,0) 68%);
@@ -190,11 +206,11 @@ body.menu-open { overflow: hidden; }
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 }
 .hero-panel::after {
-  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none;
   background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.5px);
   background-size: 26px 26px;
 }
-.hero-top { position: relative; z-index: 1; }
+.hero-top { position: relative; z-index: 3; }
 .hero-wordmark {
   margin-top: 15vh;
   text-align: center;
@@ -221,10 +237,22 @@ body.menu-open { overflow: hidden; }
   transform: rotate(-15deg);
 }
 .hero-bottom {
-  position: relative; z-index: 2;
+  position: relative; z-index: 4;
   display: flex; justify-content: space-between; align-items: flex-end;
   padding: 34px;
   animation: heroFadeUp .9s cubic-bezier(.22,1,.36,1) .3s both;
+}
+/* Scroll-cue: fades out fast once the visitor actually starts scrolling */
+.hero-scroll-cue {
+  position: absolute; left: 50%; bottom: 132px; z-index: 4;
+  transform: translateX(-50%);
+  animation: heroScrollBounce 2.4s ease-in-out infinite;
+  opacity: .8; pointer-events: none;
+}
+.hero-scroll-cue svg { width: 22px; height: 34px; display: block; color: #fff; }
+@keyframes heroScrollBounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, 9px); }
 }
 .hero-toggle {
   background: var(--cream); border-radius: 999px; padding: 10px;
@@ -344,8 +372,12 @@ section { padding: 90px 0; }
   transition: background .2s, border-color .2s;
 }
 .finder-options a:hover { background: var(--accent); border-color: var(--accent); }
-.finder-options a span.arr { color: var(--accent); }
-.finder-options a:hover span.arr { color: #fff; }
+.finder-options a span.arr {
+  color: var(--accent); flex: 0 0 auto; display: inline-flex;
+  transition: transform .3s cubic-bezier(.22,1,.36,1), color .2s ease;
+}
+.finder-options a span.arr svg { width: 17px; height: 17px; }
+.finder-options a:hover span.arr { color: #fff; transform: translateX(4px); }
 .finder-media {
   margin-top: 30px; border-radius: var(--radius-md); overflow: hidden;
   aspect-ratio: 16 / 10; background: rgba(255,255,255,.05);
@@ -359,12 +391,19 @@ section { padding: 90px 0; }
 
 .prod-card {
   background: var(--white); border-radius: var(--radius-md);
-  border: 1px solid #eceae5; overflow: hidden;
+  border: 1px solid #eceae5; overflow: hidden; position: relative;
   display: flex; flex-direction: column;
-  transition: transform .25s ease, box-shadow .25s ease;
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .35s ease;
 }
-.prod-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(28,31,35,.12); }
+.prod-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform .4s cubic-bezier(.22,1,.36,1); z-index: 2;
+}
+.prod-card:hover::before { transform: scaleX(1); }
+.prod-card:hover { transform: translateY(-8px); box-shadow: 0 22px 44px rgba(28,31,35,.14); border-color: #e2ded7; }
 .prod-media {
+  position: relative;
   background: linear-gradient(160deg, #f7f5f1, #edeae4);
   aspect-ratio: 1 / 1; overflow: hidden;
 }
@@ -373,19 +412,41 @@ section { padding: 90px 0; }
   transition: transform .7s cubic-bezier(.22,1,.36,1);
 }
 .prod-card:hover .prod-media img { transform: scale(1.06); }
-.prod-body { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.prod-body h4 { font-size: 17px; }
-.prod-size { font-size: 13px; color: var(--ink-soft); }
-.prod-price { font-weight: 800; color: var(--ink); font-size: 17px; margin-top: auto; }
-.prod-body .btn-outline { margin-top: 14px; justify-content: center; font-size: 14px; border-radius: 999px; }
+.prod-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.prod-body h4 { font-size: 16.5px; letter-spacing: -.01em; }
+.prod-rating { color: #f5a623; font-size: 11px; letter-spacing: 2px; }
+.prod-size { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 2px; }
+.prod-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 14px; }
+.prod-price { font-weight: 800; color: var(--ink); font-size: 17px; }
+.prod-view {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--cream); color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  transition: background .3s ease, color .3s ease, transform .3s cubic-bezier(.22,1,.36,1);
+}
+.prod-view svg { width: 15px; height: 15px; }
+.prod-card:hover .prod-view { background: var(--accent); color: #fff; transform: translateX(3px); }
 
 .badge-cat {
   align-self: flex-start; font-size: 11px; font-weight: 800; letter-spacing: .1em;
   text-transform: uppercase; color: var(--accent);
   background: rgba(224,51,43,.08); padding: 5px 12px; border-radius: 999px;
 }
+.prod-media .badge-cat {
+  position: absolute; top: 14px; left: 14px; z-index: 1;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(28,31,35,.1);
+}
 
 /* ---------- Benefits ---------- */
+/* Optional photographic band behind "Why Car Spa" — the solid-color layers
+   are always there, so this looks identical until why-us-band.webp exists */
+#why-us {
+  position: relative;
+  background:
+    linear-gradient(rgba(255,255,255,.9), rgba(255,255,255,.96)),
+    url("assets/img/site/why-us-band.webp") center/cover no-repeat,
+    linear-gradient(var(--white), var(--white));
+}
 .benefits-grid {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px 28px; margin-top: 56px;
 }
@@ -415,7 +476,7 @@ section { padding: 90px 0; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ---------- Testimonials ticker ---------- */
-.testi-carousel { position: relative; max-width: 1100px; margin: 50px auto 0; }
+.testi-carousel { position: relative; width: 100%; margin: 50px auto 0; }
 .testi-viewport {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
@@ -423,14 +484,14 @@ section { padding: 90px 0; }
 }
 .testi-track {
   display: flex; gap: 24px; width: max-content;
-  animation: testiTicker 36s linear infinite;
+  animation: testiTicker 44s linear infinite;
 }
 .testi-carousel:hover .testi-track,
 .testi-carousel:focus-within .testi-track { animation-play-state: paused; }
-/* -1092px = exactly 3 cards (340px) + 3 gaps (24px), the true repeat
+/* -1212px = exactly 3 cards (380px) + 3 gaps (24px), the true repeat
    pitch, NOT -50%, since flex `gap` doesn't scale evenly with % transforms */
-@keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-1092px); } }
-.testi-slide { flex: 0 0 340px; padding: 2px; }
+@keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-1212px); } }
+.testi-slide { flex: 0 0 380px; padding: 2px; }
 .review-card {
   background: var(--white); border-radius: var(--radius-md); border: 1px solid #eceae5;
   padding: 32px 30px; text-align: left; height: 100%;
@@ -576,10 +637,10 @@ footer {
   .benefits-grid { grid-template-columns: repeat(2, 1fr); }
   .finder { grid-template-columns: 1fr; padding: 40px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
-  .testi-slide { flex: 0 0 300px; }
+  .testi-slide { flex: 0 0 320px; }
   .story-grid { grid-template-columns: 1fr; gap: 40px; }
   .story-media { aspect-ratio: 16 / 11; }
-  @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-972px); } }
+  @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-1032px); } }
 }
 @media (max-width: 760px) {
   .burger { display: inline-flex; }
@@ -599,8 +660,8 @@ footer {
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
   .prod-grid, .prod-grid.three { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .review-card { padding: 26px 22px; }
-  .testi-slide { flex: 0 0 260px; }
-  @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-852px); } }
+  .testi-slide { flex: 0 0 270px; }
+  @keyframes testiTicker { from { transform: translateX(0); } to { transform: translateX(-882px); } }
   .testi-viewport {
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
     mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
@@ -609,6 +670,7 @@ footer {
   .pd-media-col { position: static; }
   .hero-bottom { flex-direction: column; gap: 18px; align-items: stretch; }
   .hero-toggle { align-self: flex-end; }
+  .hero-scroll-cue { display: none; }
   section { padding: 60px 0; }
 }
 @media (max-width: 480px) {
