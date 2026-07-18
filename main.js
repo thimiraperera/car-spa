@@ -182,6 +182,7 @@
   var heroOverlay = document.querySelector('.hero-overlay');
   var parallaxEls = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
   var fxTicking = false;
+  var lightsBlinking = false;
 
   function scrollFx() {
     fxTicking = false;
@@ -199,8 +200,8 @@
         /* Headlights fade in slowly with scroll: as the hero darkens, the
            lights-on render blends over the mouse-relight stack like dusk */
         var lightsOn = document.querySelector('#hero-relight img[data-light="on"]');
-        if (lightsOn) {
-          var lt = Math.max(0, Math.min((t - 0.06) / 0.55, 1));
+        if (lightsOn && !lightsBlinking) {
+          var lt = Math.max(0, Math.min((t - 0.04) / 0.34, 1));
           lightsOn.style.opacity = (lt * lt * (3 - 2 * lt)).toFixed(3); /* smoothstep */
         }
       }
@@ -221,6 +222,47 @@
     if (!fxTicking) { fxTicking = true; requestAnimationFrame(scrollFx); }
   }, { passive: true });
   scrollFx();
+
+  /* Headlight blink: three quick flashes when the mouse hovers the car;
+     touch devices get automatic double-flash sets instead (no hover there) */
+  function blinkLights(times) {
+    var lightsOn = document.querySelector('#hero-relight img[data-light="on"]');
+    if (!lightsOn || lightsBlinking || reducedMotionQuery.matches) return;
+    lightsBlinking = true;
+    var seq = [];
+    for (var b = 0; b < times; b++) seq.push('1', '0');
+    var step = 0;
+    var iv = setInterval(function () {
+      if (step >= seq.length) {
+        clearInterval(iv);
+        lightsBlinking = false;
+        scrollFx(); /* hand the layer back to the scroll-driven fade */
+        return;
+      }
+      lightsOn.style.opacity = seq[step];
+      step += 1;
+    }, 150);
+  }
+  var relightHover = document.getElementById('hero-relight');
+  if (relightHover) {
+    if (window.matchMedia('(pointer: fine)').matches) {
+      relightHover.querySelectorAll('img').forEach(function (img) {
+        img.style.pointerEvents = 'auto';
+      });
+      var blinkArmed = true;
+      relightHover.addEventListener('mouseover', function () {
+        if (blinkArmed) { blinkArmed = false; blinkLights(3); }
+      });
+      relightHover.addEventListener('mouseout', function (e) {
+        if (!relightHover.contains(e.relatedTarget)) blinkArmed = true;
+      });
+    } else {
+      setInterval(function () {
+        var r = relightHover.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < window.innerHeight && !document.hidden) blinkLights(2);
+      }, 8000);
+    }
+  }
 
   /* Count-up stats when they scroll into view */
   var counters = Array.prototype.slice.call(document.querySelectorAll('[data-count]'));
