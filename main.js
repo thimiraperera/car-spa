@@ -196,6 +196,13 @@
         heroTop.style.opacity = String(1 - t * 0.85);
         /* The photo darkens smoothly into the next section as you scroll past it */
         if (heroOverlay) heroOverlay.style.opacity = String(0.78 + t * 0.22);
+        /* Headlights fade in slowly with scroll: as the hero darkens, the
+           lights-on render blends over the mouse-relight stack like dusk */
+        var lightsOn = document.querySelector('#hero-relight img[data-light="on"]');
+        if (lightsOn) {
+          var lt = Math.max(0, Math.min((t - 0.06) / 0.55, 1));
+          lightsOn.style.opacity = (lt * lt * (3 - 2 * lt)).toFixed(3); /* smoothstep */
+        }
       }
       parallaxEls.forEach(function (el) {
         var host = el.parentElement || el;
@@ -309,7 +316,10 @@
         spotlight.style.setProperty('--sx', (lightX * 100).toFixed(2) + '%');
         spotlight.style.setProperty('--sy', (lightY * 100).toFixed(2) + '%');
       }
-      var imgs = relightEl ? relightEl.querySelectorAll('img') : [];
+      /* the "on" (headlights) layer is scroll-driven, never mouse-driven */
+      var imgs = relightEl
+        ? relightEl.querySelectorAll('img:not([data-light="on"])')
+        : [];
       if (imgs.length > 1) {
         var wl = Math.max(0, 1 - lightX * 2);
         var wr = Math.max(0, lightX * 2 - 1);
