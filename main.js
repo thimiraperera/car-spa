@@ -655,15 +655,16 @@
     list.innerHTML = items.map(function (it) {
       var line = it.price * it.qty;
       total += line;
-      return '<div class="cart-row" data-slug="' + it.slug + '">' +
-        '<a class="cart-thumb" href="/products/' + it.slug + '"><img src="' + it.img + '" alt="' + it.name + '"></a>' +
-        '<div class="cart-info"><a href="/products/' + it.slug + '"><h4>' + it.name + '</h4></a>' +
-        '<small>' + it.size + '</small><span class="cart-unit">' + fmtRs(it.price) + ' each</span></div>' +
+      var slug = escapeHtml(it.slug);
+      return '<div class="cart-row" data-slug="' + slug + '">' +
+        '<a class="cart-thumb" href="/products/' + slug + '"><img src="' + escapeHtml(it.img) + '" alt="' + escapeHtml(it.name) + '"></a>' +
+        '<div class="cart-info"><a href="/products/' + slug + '"><h4>' + escapeHtml(it.name) + '</h4></a>' +
+        '<small>' + escapeHtml(it.size) + '</small><span class="cart-unit">' + fmtRs(it.price) + ' each</span></div>' +
         '<div class="cart-qty"><button class="qty-btn" data-d="-1" aria-label="Decrease quantity">&#8722;</button>' +
         '<span>' + it.qty + '</span>' +
         '<button class="qty-btn" data-d="1" aria-label="Increase quantity">+</button></div>' +
         '<div class="cart-line">' + fmtRs(line) + '</div>' +
-        '<button class="cart-remove" aria-label="Remove ' + it.name + '">' +
+        '<button class="cart-remove" aria-label="Remove ' + escapeHtml(it.name) + '">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
         '</button></div>';
     }).join('');
@@ -700,8 +701,8 @@
       listEl.innerHTML = items.map(function (it) {
         var line = it.price * it.qty;
         total += line;
-        return '<div class="co-item"><img src="' + it.img + '" alt="' + it.name + '">' +
-          '<div><h4>' + it.name + '</h4><small>' + it.size + ' &times; ' + it.qty + '</small></div>' +
+        return '<div class="co-item"><img src="' + escapeHtml(it.img) + '" alt="' + escapeHtml(it.name) + '">' +
+          '<div><h4>' + escapeHtml(it.name) + '</h4><small>' + escapeHtml(it.size) + ' &times; ' + it.qty + '</small></div>' +
           '<b>' + fmtRs(line) + '</b></div>';
       }).join('');
       checkoutRoot.querySelector('.co-total-value').textContent = fmtRs(total);

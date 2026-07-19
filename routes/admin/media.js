@@ -8,6 +8,9 @@ const router = express.Router();
 
 const MEDIA_ROOT = path.join(__dirname, '..', '..', 'media');
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+// The extension decides what content type the file is served back with, so it
+// is checked as well; the client-declared mimetype alone cannot be trusted.
+const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif'];
 
 function slugifyBase(name) {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -30,7 +33,8 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: function (req, file, cb) {
-    cb(null, ALLOWED_TYPES.indexOf(file.mimetype) !== -1);
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, ALLOWED_TYPES.indexOf(file.mimetype) !== -1 && ALLOWED_EXTS.indexOf(ext) !== -1);
   }
 });
 

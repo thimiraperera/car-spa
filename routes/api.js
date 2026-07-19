@@ -38,9 +38,23 @@ router.get('/search', async function (req, res, next) {
   }
 });
 
-// Click tracking; the products page orders by this.
+// Click tracking; the products page orders by this. One counted click per
+// client per product per window, so a curl loop cannot pin a product on top.
+const recentClicks = new Map();
+const CLICK_WINDOW_MS = 10 * 60 * 1000;
+
 router.post('/products/:slug/click', async function (req, res, next) {
   try {
+    const key = req.ip + '|' + req.params.slug;
+    const now = Date.now();
+    const last = recentClicks.get(key);
+    if (last && now - last < CLICK_WINDOW_MS) return res.json({ ok: true });
+    recentClicks.set(key, now);
+    if (recentClicks.size > 5000) {
+      recentClicks.forEach(function (t, k) {
+        if (now - t >= CLICK_WINDOW_MS) recentClicks.delete(k);
+      });
+    }
     await query('UPDATE products SET click_count = click_count + 1 WHERE slug = ? AND is_active = 1', [req.params.slug]);
     res.json({ ok: true });
   } catch (err) {

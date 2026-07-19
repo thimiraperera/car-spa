@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 
@@ -32,14 +33,30 @@ let ASSET_V = assetVersion();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.set('trust proxy', 1);
+app.use(function (req, res, next) {
+  res.set('X-Frame-Options', 'DENY');
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Without a configured secret, sessions cannot survive a restart; a random
+// one is safer than a guessable literal in a public repo.
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.SESSION_SECRET) {
+  console.warn('SESSION_SECRET is not set; using a random secret, sign-ins reset on restart.');
+}
+
 app.use(session({
   name: 'carspa.sid',
-  secret: process.env.SESSION_SECRET || 'carspa-dev-secret',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
+    secure: 'auto',
     maxAge: 1000 * 60 * 60 * 8
   }
 }));

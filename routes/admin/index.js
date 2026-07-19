@@ -7,6 +7,33 @@ const router = express.Router();
 
 // ---- Login / logout -------------------------------------------------------
 
+// Failed sign-ins are counted per client address so the single admin account
+// cannot be brute forced; the counter clears on a successful sign-in.
+const loginFails = new Map();
+const LOGIN_MAX_FAILS = 5;
+const LOGIN_LOCK_MS = 10 * 60 * 1000;
+
+function loginLocked(ip) {
+  const rec = loginFails.get(ip);
+  return !!rec && rec.count >= LOGIN_MAX_FAILS && Date.now() - rec.last < LOGIN_LOCK_MS;
+}
+
+function noteLoginFail(ip) {
+  const now = Date.now();
+  const rec = loginFails.get(ip);
+  if (rec && now - rec.last < LOGIN_LOCK_MS) {
+    rec.count += 1;
+    rec.last = now;
+  } else {
+    loginFails.set(ip, { count: 1, last: now });
+  }
+  if (loginFails.size > 1000) {
+    loginFails.forEach(function (r, key) {
+      if (now - r.last >= LOGIN_LOCK_MS) loginFails.delete(key);
+    });
+  }
+}
+
 router.get('/login', function (req, res) {
   if (req.session.adminId) return res.redirect('/admin');
   res.render('admin/login', { csrf: csrfToken(req), error: null });
@@ -14,15 +41,22 @@ router.get('/login', function (req, res) {
 
 router.post('/login', verifyCsrf, async function (req, res, next) {
   try {
+    if (loginLocked(req.ip)) {
+      return res.status(429).render('admin/login', {
+        csrf: csrfToken(req), error: 'Too many attempts. Try again in a few minutes.'
+      });
+    }
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const user = await queryOne('SELECT * FROM admin_users WHERE username = ?', [username]);
     const ok = user && await bcrypt.compare(password, user.password_hash);
     if (!ok) {
+      noteLoginFail(req.ip);
       // Same delay either way so usernames cannot be probed by timing.
       await new Promise(function (r) { setTimeout(r, 400); });
       return res.status(401).render('admin/login', { csrf: csrfToken(req), error: 'Wrong username or password' });
     }
+    loginFails.delete(req.ip);
     req.session.regenerate(function (err) {
       if (err) return next(err);
       req.session.adminId = user.id;
