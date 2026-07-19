@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><%- include('partials/head') %></head><body>
+<%- include('partials/header') %>
+
+<section class="page-shell" id="checkout-page">
+  <div class="container">
+    <h1><strong class="hl">Checkout</strong></h1>
+    <p class="page-lead">Fill in your delivery details. Your order comes straight to us, and we confirm the total plus delivery before anything is paid.</p>
+    <noscript><p style="margin-top:20px;">Checkout needs JavaScript. You can also order directly on 074 2 388 588.</p></noscript>
+    <div class="co-empty" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg>
+      <h2>Nothing to check out yet</h2>
+      <p>Your cart is empty. Add a few products first.</p>
+      <a class="btn btn-accent" href="/products">Browse products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="co-done" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5.5-6.5"/></svg>
+      <h2>Order sent!</h2>
+      <p>Your order is ready in the chat that just opened. Hit send and we'll confirm your total and delivery right away.</p>
+      <a class="btn btn-dark" href="/">Back to home <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="co-grid">
+      <div class="co-panel">
+        <h3>Delivery details</h3>
+        <form id="checkout-form" data-whatsapp="<%= (site.phones.find(function (p) { return p.type === 'whatsapp'; }) || site.phones[0] || {}).number || '' %>">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="co-name">Full name</label>
+              <input id="co-name" name="name" type="text" required autocomplete="name">
+            </div>
+            <div class="form-field">
+              <label for="co-phone">Phone</label>
+              <input id="co-phone" name="phone" type="tel" required autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="co-address">Delivery address</label>
+            <input id="co-address" name="address" type="text" required autocomplete="street-address">
+          </div>
+          <div class="form-field">
+            <label for="co-city">City / District</label>
+            <input id="co-city" name="city" type="text" autocomplete="address-level2">
+          </div>
+          <div class="form-field">
+            <label for="co-notes">Order notes (optional)</label>
+            <textarea id="co-notes" name="notes" rows="3"></textarea>
+          </div>
+          <h3>Payment method</h3>
+          <div class="pay-options">
+            <label class="pay-option"><input type="radio" name="payment" value="Cash on Delivery" checked> Cash on delivery</label>
+            <label class="pay-option"><input type="radio" name="payment" value="Bank Transfer"> Bank transfer</label>
+          </div>
+          <button class="btn btn-accent" type="submit">Place order <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></button>
+          <p class="co-note">Placing the order opens a chat with us with everything pre-filled. We never ask for card details.</p>
+        </form>
+      </div>
+      <div class="co-panel">
+        <h3>Your order</h3>
+        <div class="co-items"></div>
+        <div class="co-total"><span>Total</span><span class="co-total-value">Rs. 0</span></div>
+        <p class="co-note">Delivery fee is confirmed based on your location. Island-wide delivery, 2–4 working days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+</body>
+</html>

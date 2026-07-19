@@ -1,0 +1,92 @@
+<!-- ===== Mini marquee ===== -->
+<div class="marquee-mini" aria-hidden="true">
+  <div class="marquee-mini-track">
+    <span>Genuine Arkos Vetek products</span><span>Island-wide delivery in 2–4 days</span><span>Cash on delivery available</span><span>Rated 4.9 by 180+ owners</span><span>Colombo next-day delivery</span>
+    <span>Genuine Arkos Vetek products</span><span>Island-wide delivery in 2–4 days</span><span>Cash on delivery available</span><span>Rated 4.9 by 180+ owners</span><span>Colombo next-day delivery</span>
+  </div>
+</div>
+
+<!-- ===== Footer ===== -->
+<footer id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">CARSPA<span class="lk">.LK</span></div>
+        <p><% String(site.settings.address || '').split(/\r?\n/).forEach(function (line, i) { %><% if (i) { %><br><% } %><%= line %><% }); %></p>
+        <p style="margin-top:14px;"><% site.phones.forEach(function (ph) { %><% var digits = String(ph.number || '').replace(/[^0-9+]/g, ''); %><% var href = ph.type === 'whatsapp' ? 'https://wa.me/' + digits.replace(/^\+/, '').replace(/^0/, '94') : 'tel:' + digits; %><%= ph.label %>: <a href="<%= href %>" style="display:inline; color:#fff;"><%= ph.number %></a><br>
+        <% }); %>Email: <a href="mailto:<%= site.settings.email %>" style="display:inline; color:#fff;"><%= site.settings.email %></a></p>
+        <div class="footer-social">
+          <% site.socials.forEach(function (s) { %>
+          <% var platform = String(s.platform || '').toLowerCase(); %>
+          <% if (platform === 'facebook') { %>
+          <a href="<%= s.url %>" aria-label="<%= s.platform %>"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.2 0-1-.1-1.9-.1-1.9 0-3.2 1.2-3.2 3.3V11H9v3h2.3v7z"/></svg></a>
+          <% } else if (platform === 'instagram') { %>
+          <a href="<%= s.url %>" aria-label="<%= s.platform %>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>
+          <% } else if (platform === 'whatsapp') { %>
+          <a href="<%= s.url %>" aria-label="<%= s.platform %>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 0 0-7.8 13.4L3 21l4.8-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c.5 2.5 3 5 5.5 5.5l1-1.5 2 1c-.5 1.5-1.5 2-3 2-3.5-.5-6.5-3.5-7-7 0-1.5.5-2.5 2-3l1 2z" fill="currentColor" stroke="none"/></svg></a>
+          <% } else { %>
+          <a href="<%= s.url %>" aria-label="<%= s.platform %>"><%= s.platform %></a>
+          <% } %>
+          <% }); %>
+        </div>
+      </div>
+      <div>
+        <h5>Our Products</h5>
+        <a href="/products#engine">Engine care</a>
+        <a href="/products#exterior">Exterior &amp; shine</a>
+        <a href="/products#interior">Interior &amp; AC</a>
+        <a href="/products#brake">Brake &amp; underbody</a>
+        <a href="/products#chain">Bike &amp; chain care</a>
+      </div>
+      <div>
+        <h5>Customer Service</h5>
+        <a href="/contact">Contact us</a>
+        <a href="/#why-us">Why Car Spa LK?</a>
+        <a href="/delivery-returns">Delivery information</a>
+        <a href="/delivery-returns#returns">Returns &amp; refunds</a>
+        <a href="/terms-of-service#payments">Payments &amp; security</a>
+      </div>
+      <div>
+        <h5>Opening Hours</h5>
+        <% site.hoursDisplay.forEach(function (g, i) { %>
+        <p<% if (i) { %> style="margin-top:12px;"<% } %>><%= g.label %>:<% if (g.value === 'Closed') { %> Closed<% } else { %><br><%= g.value %><% } %></p>
+        <% }); %>
+        <% site.hourNotes.forEach(function (n) { %>
+        <p style="margin-top:12px;"><%= n.note %></p>
+        <% }); %>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Copyright © 2026 Car Spa LK. All rights reserved.</span>
+      <span><a href="/privacy-policy" style="display:inline;">Privacy policy</a> · <a href="/cookie-policy" style="display:inline;">Cookie policy</a> · <a href="/terms-of-service" style="display:inline;">Terms of service</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== Live search overlay (hidden until .search-open is clicked) ===== -->
+<div class="search-overlay" id="search-overlay" aria-hidden="true">
+  <div class="search-backdrop"></div>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search products">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input class="search-input" type="text" placeholder="Search products" autocomplete="off" spellcheck="false" aria-label="Search products">
+      <button class="search-close" type="button" aria-label="Close search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="search-results" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- ===== Mini-cart drawer (hidden until .cart-link is clicked) ===== -->
+<div class="mini-cart" id="mini-cart" aria-hidden="true">
+  <div class="mini-cart-backdrop"></div>
+  <aside class="mini-cart-panel" role="dialog" aria-modal="true" aria-label="Your cart">
+    <div class="mini-cart-head">
+      <h3>Your cart</h3>
+      <button class="mini-cart-close" type="button" aria-label="Close cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="mini-cart-body"></div>
+    <div class="mini-cart-foot"></div>
+  </aside>
+</div>
+
+<script src="/main.js?v=<%= v %>"></script>

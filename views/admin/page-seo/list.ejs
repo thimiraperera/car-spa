@@ -1,0 +1,38 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Page SEO</h1>
+</header>
+
+<section class="adm-panel">
+  <p class="adm-panel-note">One row per public page. Rows are seeded with the site, so there is nothing to add or delete here.</p>
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th>Page</th>
+        <th>Path</th>
+        <th>SEO title</th>
+        <th>Cornerstone</th>
+        <th>Updated</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.forEach(function (r) { %>
+      <tr>
+        <td><b><%= r.page_key %></b></td>
+        <td class="muted"><%= r.path %></td>
+        <td><%= r.seo_title || '' %></td>
+        <td><span class="adm-pill <%= r.cornerstone ? 'on' : '' %>"><%= r.cornerstone ? 'Yes' : 'No' %></span></td>
+        <td class="muted"><%= String(r.updated_at).slice(0, 10) %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/page-seo/<%= r.id %>/edit">Edit</a>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!rows.length) { %>
+      <tr><td colspan="6" class="muted">No pages seeded yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>

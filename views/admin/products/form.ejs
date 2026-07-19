@@ -1,0 +1,224 @@
+<%- include('../partials/top') %>
+<% const p = product || {}; const s = seo || {}; const isNew = !p.id; %>
+<header class="adm-head">
+  <h1><%= isNew ? 'Add product' : 'Edit product' %></h1>
+  <div class="adm-head-actions">
+    <% if (!isNew) { %>
+    <a class="adm-btn-ghost" href="/products/<%= p.slug %>" target="_blank" rel="noopener">View page</a>
+    <% } %>
+    <a class="adm-btn-ghost" href="/admin/products">Back to list</a>
+  </div>
+</header>
+
+<style>
+  .adm-imgpick .pick .tag { display: flex; justify-content: center; gap: 10px; padding: 3px 0; }
+  .adm-imgpick .pick .tag label { display: flex; align-items: center; gap: 3px; margin: 0; font-weight: 400; font-size: 10px; cursor: pointer; }
+  .adm-imgpick .pick .tag input { margin: 0; }
+</style>
+
+<form class="adm-form" method="post" action="<%= isNew ? '/admin/products' : '/admin/products/' + p.id %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+
+  <section class="adm-panel">
+    <h2>Basics</h2>
+    <div class="adm-grid2">
+      <label>Name
+        <input type="text" name="name" id="prod-name" required maxlength="150" value="<%= p.name || '' %>">
+      </label>
+      <label>Slug <small>lowercase letters, numbers and hyphens</small>
+        <input type="text" name="slug" id="prod-slug" required maxlength="120" pattern="[a-z0-9-]+" value="<%= p.slug || '' %>">
+      </label>
+    </div>
+    <div class="adm-grid3">
+      <label>Vehicle
+        <select name="vehicle">
+          <option value="car" <%= p.vehicle === 'car' ? 'selected' : '' %>>Car</option>
+          <option value="bike" <%= p.vehicle === 'bike' ? 'selected' : '' %>>Bike</option>
+          <option value="both" <%= !p.vehicle || p.vehicle === 'both' ? 'selected' : '' %>>Both</option>
+        </select>
+      </label>
+      <label>Category <small>shown in listing filters</small>
+        <input type="text" name="category" maxlength="100" value="<%= p.category || '' %>">
+      </label>
+      <label>Price (LKR)
+        <input type="number" name="price_lkr" required step="0.01" min="0" value="<%= p.price_lkr != null ? p.price_lkr : '' %>">
+      </label>
+    </div>
+    <div class="adm-grid3">
+      <label>Size <small>e.g. 500ml</small>
+        <input type="text" name="size" maxlength="50" value="<%= p.size || '' %>">
+      </label>
+      <label>SKU
+        <input type="text" name="sku" maxlength="50" value="<%= p.sku || '' %>">
+      </label>
+      <label class="check">
+        <input type="checkbox" name="is_active" value="1" <%= isNew || p.is_active ? 'checked' : '' %>>
+        Show on the site
+      </label>
+    </div>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Copy</h2>
+    <label>Listing blurb <small>short text on listing cards</small>
+      <input type="text" name="listing_blurb" maxlength="255" value="<%= p.listing_blurb || '' %>">
+    </label>
+    <label>Short description
+      <textarea name="short_description"><%= p.short_description || '' %></textarea>
+    </label>
+    <div class="adm-field">Description
+      <div class="adm-editor">
+        <div class="adm-editor-bar">
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="H2">H2</button>
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="H3">H3</button>
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="P">P</button>
+          <button type="button" data-cmd="bold" title="Bold">B</button>
+          <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button type="button" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
+          <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+          <button type="button" class="wide" data-cmd="createLink" title="Insert link">Link</button>
+          <button type="button" class="wide" data-cmd="removeFormat" title="Clear formatting">Clear</button>
+          <span class="sep"></span>
+          <button type="button" class="wide" data-src-toggle title="Edit HTML source">HTML</button>
+        </div>
+        <div class="adm-editor-area" contenteditable="true"></div>
+        <textarea class="adm-editor-src" name="description_html"><%= p.description_html || '' %></textarea>
+      </div>
+    </div>
+    <label>Features <small>one bullet per line</small>
+      <textarea name="features"><%= featuresText %></textarea>
+    </label>
+    <label>Specs <small>one per line in the form Label | Value</small>
+      <textarea name="specs"><%= specsText %></textarea>
+    </label>
+    <label>How to use <small>one step per line</small>
+      <textarea name="how_to_use"><%= howToText %></textarea>
+    </label>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Images</h2>
+    <p class="adm-panel-note">Pick one featured image and any number of gallery images. Upload new files in <a href="/admin/media">Media</a>.</p>
+    <% if (media.length) { %>
+    <div class="adm-imgpick" id="imgpick">
+      <% media.forEach(function (m) { %>
+      <% const isFeat = featuredId === m.id; const isGal = galleryIds.indexOf(m.id) !== -1; %>
+      <div class="pick<%= isFeat || isGal ? ' sel' : '' %>">
+        <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
+        <span class="tag">
+          <label title="Featured image"><input type="radio" name="featured_media" value="<%= m.id %>" <%= isFeat ? 'checked' : '' %>> Feat</label>
+          <label title="In gallery"><input type="checkbox" name="gallery_media[]" value="<%= m.id %>" <%= isGal ? 'checked' : '' %>> Gal</label>
+        </span>
+      </div>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <p class="adm-panel-note">The media library is empty.</p>
+    <% } %>
+  </section>
+
+  <section class="adm-panel">
+    <h2>SEO</h2>
+    <div class="adm-grid2">
+      <label>SEO title
+        <input type="text" name="seo_title" maxlength="70" value="<%= s.seo_title || '' %>">
+      </label>
+      <label>Focus keyphrase
+        <input type="text" name="focus_keyphrase" maxlength="120" value="<%= s.focus_keyphrase || '' %>">
+      </label>
+      <label>Meta description <small id="meta-desc-count"></small>
+        <textarea name="meta_description" id="meta-desc" maxlength="200"><%= s.meta_description || '' %></textarea>
+      </label>
+      <label class="check">
+        <input type="checkbox" name="cornerstone" value="1" <%= s.cornerstone ? 'checked' : '' %>>
+        Cornerstone content
+      </label>
+      <label>Breadcrumbs title
+        <input type="text" name="breadcrumbs_title" maxlength="120" value="<%= s.breadcrumbs_title || '' %>">
+      </label>
+      <label>Canonical URL <small>Leave blank to auto-generate</small>
+        <input type="text" name="canonical_url" id="canonical-url" maxlength="255" placeholder="<%= baseUrl %>/products/<%= p.slug || '' %>" value="<%= s.canonical_url || '' %>">
+      </label>
+      <label>Page type
+        <select name="page_type">
+          <% pageTypes.forEach(function (t) { %>
+          <option value="<%= t %>" <%= (s.page_type || 'Item Page') === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Article type
+        <select name="article_type">
+          <% articleTypes.forEach(function (t) { %>
+          <option value="<%= t %>" <%= (s.article_type || 'None') === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Social title
+        <input type="text" name="social_title" maxlength="120" value="<%= s.social_title || '' %>">
+      </label>
+      <label>Social description
+        <textarea name="social_description" maxlength="300"><%= s.social_description || '' %></textarea>
+      </label>
+      <label>X title
+        <input type="text" name="x_title" maxlength="120" value="<%= s.x_title || '' %>">
+      </label>
+      <label>X description
+        <textarea name="x_description" maxlength="300"><%= s.x_description || '' %></textarea>
+      </label>
+      <label>Excerpt
+        <textarea name="excerpt"><%= s.excerpt || '' %></textarea>
+      </label>
+    </div>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save product</button>
+    <a class="adm-btn-ghost" href="/admin/products">Cancel</a>
+  </div>
+</form>
+
+<script>
+(function () {
+  var nameInput = document.getElementById('prod-name');
+  var slugInput = document.getElementById('prod-slug');
+  var canonical = document.getElementById('canonical-url');
+  var isNew = <%= isNew ? 'true' : 'false' %>;
+  var slugTouched = !isNew || !!slugInput.value;
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  function updateCanonical() {
+    canonical.placeholder = '<%= baseUrl %>/products/' + slugInput.value;
+  }
+  nameInput.addEventListener('input', function () {
+    if (!slugTouched) {
+      slugInput.value = slugify(nameInput.value);
+      updateCanonical();
+    }
+  });
+  slugInput.addEventListener('input', function () {
+    slugTouched = true;
+    updateCanonical();
+  });
+
+  var ta = document.getElementById('meta-desc');
+  var out = document.getElementById('meta-desc-count');
+  function count() { out.textContent = ta.value.length + ' / 200'; }
+  ta.addEventListener('input', count);
+  count();
+
+  var grid = document.getElementById('imgpick');
+  if (grid) {
+    var refresh = function () {
+      grid.querySelectorAll('.pick').forEach(function (pick) {
+        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
+      });
+    };
+    grid.addEventListener('change', refresh);
+    refresh();
+  }
+})();
+</script>
+<%- include('../partials/bottom') %>

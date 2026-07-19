@@ -1,0 +1,44 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Testimonials</h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn" href="/admin/testimonials/new">Add testimonial</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th>Quote</th>
+        <th>Customer</th>
+        <th>Detail</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% testimonials.forEach(function (t) { %>
+      <tr>
+        <td><%= t.quote.length > 80 ? t.quote.slice(0, 80) + '...' : t.quote %></td>
+        <td><%= t.customer_name %></td>
+        <td class="muted"><%= t.detail || '' %></td>
+        <td><span class="adm-pill <%= t.is_active ? 'on' : 'off' %>"><%= t.is_active ? 'Active' : 'Hidden' %></span></td>
+        <td class="muted"><%= String(t.created_at).slice(0, 10) %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/testimonials/<%= t.id %>/edit">Edit</a>
+          <form class="adm-inline-form" method="post" action="/admin/testimonials/<%= t.id %>/delete" data-confirm="Delete this testimonial?">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit" class="adm-btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!testimonials.length) { %>
+      <tr><td colspan="6" class="muted">No testimonials yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>

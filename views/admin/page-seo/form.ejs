@@ -1,0 +1,80 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Edit SEO: <%= row.page_key %></h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn-ghost" href="/admin/page-seo">Back to list</a>
+  </div>
+</header>
+
+<form class="adm-form" method="post" action="/admin/page-seo/<%= row.id %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <section class="adm-panel">
+    <h2>SEO</h2>
+    <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+    <div class="adm-grid2">
+      <label>SEO title
+        <input type="text" name="seo_title" maxlength="70" value="<%= row.seo_title || '' %>">
+      </label>
+      <label>Focus keyphrase
+        <input type="text" name="focus_keyphrase" maxlength="120" value="<%= row.focus_keyphrase || '' %>">
+      </label>
+      <label>Meta description <small id="meta-desc-count"></small>
+        <textarea name="meta_description" id="meta-desc" maxlength="200"><%= row.meta_description || '' %></textarea>
+      </label>
+      <label class="check">
+        <input type="checkbox" name="cornerstone" value="1" <%= row.cornerstone ? 'checked' : '' %>>
+        Cornerstone content
+      </label>
+      <label>Breadcrumbs title
+        <input type="text" name="breadcrumbs_title" maxlength="120" value="<%= row.breadcrumbs_title || '' %>">
+      </label>
+      <label>Canonical URL <small>Leave blank to auto-generate</small>
+        <input type="text" name="canonical_url" maxlength="255" placeholder="<%= canonicalDefault %>" value="<%= row.canonical_url || '' %>">
+      </label>
+      <label>Page type
+        <select name="page_type">
+          <% pageTypes.forEach(function (t) { %>
+          <option value="<%= t %>" <%= row.page_type === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Article type
+        <select name="article_type">
+          <% articleTypes.forEach(function (t) { %>
+          <option value="<%= t %>" <%= row.article_type === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Social title
+        <input type="text" name="social_title" maxlength="120" value="<%= row.social_title || '' %>">
+      </label>
+      <label>Social description
+        <textarea name="social_description" maxlength="300"><%= row.social_description || '' %></textarea>
+      </label>
+      <label>X title
+        <input type="text" name="x_title" maxlength="120" value="<%= row.x_title || '' %>">
+      </label>
+      <label>X description
+        <textarea name="x_description" maxlength="300"><%= row.x_description || '' %></textarea>
+      </label>
+      <label>Excerpt
+        <textarea name="excerpt"><%= row.excerpt || '' %></textarea>
+      </label>
+    </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save SEO</button>
+      <a class="adm-btn-ghost" href="/admin/page-seo">Cancel</a>
+    </div>
+  </section>
+</form>
+
+<script>
+(function () {
+  var ta = document.getElementById('meta-desc');
+  var out = document.getElementById('meta-desc-count');
+  function update() { out.textContent = ta.value.length + ' / 200'; }
+  ta.addEventListener('input', update);
+  update();
+})();
+</script>
+<%- include('../partials/bottom') %>

@@ -1,0 +1,46 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1><%= item && item.id ? 'Edit testimonial' : 'Add testimonial' %></h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn-ghost" href="/admin/testimonials">Back to list</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+  <form class="adm-form" method="post" action="<%= item && item.id ? '/admin/testimonials/' + item.id : '/admin/testimonials' %>">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label>Quote
+      <textarea name="quote" required><%= item ? item.quote : '' %></textarea>
+    </label>
+    <div class="adm-grid2">
+      <label>Customer name
+        <input type="text" name="customer_name" required maxlength="100" value="<%= item ? item.customer_name : '' %>">
+      </label>
+      <label>Detail <small>vehicle or city, optional</small>
+        <input type="text" name="detail" maxlength="150" value="<%= item && item.detail ? item.detail : '' %>">
+      </label>
+    </div>
+    <div class="adm-grid3">
+      <label>Rating
+        <select name="rating">
+          <% [5, 4, 3, 2, 1].forEach(function (r) { %>
+          <option value="<%= r %>" <%= (item ? Number(item.rating) : 5) === r ? 'selected' : '' %>><%= '★'.repeat(r) %> (<%= r %>)</option>
+          <% }); %>
+        </select>
+      </label>
+      <label>Sort order
+        <input type="number" name="sort_order" step="1" value="<%= item ? item.sort_order : 0 %>">
+      </label>
+      <label class="check">
+        <input type="checkbox" name="is_active" value="1" <%= !item || item.is_active ? 'checked' : '' %>>
+        Show on the site
+      </label>
+    </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save testimonial</button>
+      <a class="adm-btn-ghost" href="/admin/testimonials">Cancel</a>
+    </div>
+  </form>
+</section>
+<%- include('../partials/bottom') %>

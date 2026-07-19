@@ -1,0 +1,26 @@
+<!-- ===== Header ===== -->
+<header class="site-header<%= currentPath === '/' ? '' : ' solid' %>">
+  <div class="container">
+    <nav class="nav-left">
+      <a href="/products">Products</a>
+      <a href="/#why-us">Why Car Spa</a>
+      <a href="/contact">Contact</a>
+    </nav>
+    <a class="logo-mark" href="/" aria-label="Car Spa LK home">
+      <svg viewBox="0 0 64 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 30 Q10 20 18 18 L24 10 Q26 7 30 7 h8 Q42 7 44 10 L50 18 Q58 20 60 30 v6 q0 3-3 3 h-3 a6 6 0 0 1-12 0 h-18 a6 6 0 0 1-12 0 h-1 q-3 0-3-3 z M20 18 h26 l-5-7 q-1-2-3-2 h-10 q-2 0-3 2 z"/>
+        <path d="M14 2 q4 4 0 8 M22 0 q4 4 0 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </a>
+    <div class="nav-right">
+      <button class="icon-link search-open" type="button" aria-label="Search" aria-haspopup="dialog" aria-controls="search-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <a class="icon-link cart-link" href="/cart" aria-label="Cart" aria-haspopup="dialog" aria-controls="mini-cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2.5 12.5A2 2 0 0 0 10.5 18h8a2 2 0 0 0 2-1.6L22 8H7"/><circle cx="10" cy="21" r="1.6"/><circle cx="18" cy="21" r="1.6"/></svg><span class="cart-count">0</span>
+      </a>
+      <a class="btn-shop" href="/products">Shop Online</a>
+      <button class="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>

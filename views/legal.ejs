@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><%- include('partials/head') %></head><body>
+<%- include('partials/header') %>
+
+<section class="page-shell">
+  <div class="container">
+    <p class="eyebrow" style="margin-top:20px;">Car Spa LK</p>
+    <h1><%= page.title %></h1>
+    <% if (meta.description) { %><p class="page-lead"><%= meta.description %></p><% } %>
+    <div class="legal-body">
+<%- page.content_html %>
+
+<% if (page.updated_at) { %><p>Last updated: <%= new Date(page.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p><% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+</body>
+</html>

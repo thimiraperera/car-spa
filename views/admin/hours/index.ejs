@@ -1,0 +1,106 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Opening hours</h1>
+</header>
+
+<style>
+  .hrs-day { width: 140px; }
+  .hrs-closed { width: 120px; }
+  .hrs-closed .check { margin-bottom: 0; }
+  .hrs-sort { width: 90px; }
+  .hrs-rep .actions { width: 90px; }
+</style>
+
+<form class="adm-form" method="post" action="/admin/hours">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <section class="adm-panel">
+    <h2>Weekly hours</h2>
+    <p class="adm-panel-note">Tick Closed to skip a day. Days without both times are saved as closed.</p>
+    <table class="adm-table">
+      <thead><tr><th class="hrs-day">Day</th><th class="hrs-closed">Closed</th><th>Opens</th><th>Closes</th></tr></thead>
+      <tbody>
+        <% days.forEach(function (d) { %>
+        <tr>
+          <td class="hrs-day"><b><%= d.name %></b></td>
+          <td class="hrs-closed">
+            <label class="check">
+              <input type="checkbox" name="days[<%= d.dow %>][closed]" value="1" data-closed-toggle <%= d.closed ? 'checked' : '' %>>
+              Closed
+            </label>
+          </td>
+          <td><input type="time" name="days[<%= d.dow %>][open_time]" value="<%= d.open %>" <%= d.closed ? 'disabled' : '' %>></td>
+          <td><input type="time" name="days[<%= d.dow %>][close_time]" value="<%= d.close %>" <%= d.closed ? 'disabled' : '' %>></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Extra rows</h2>
+    <p class="adm-panel-note">Free-form lines shown under the hours, e.g. holiday notices. Empty rows are dropped on save.</p>
+    <table class="adm-table hrs-rep">
+      <thead><tr><th>Note</th><th class="hrs-sort">Sort</th><th></th></tr></thead>
+      <tbody id="notes-rows">
+        <% notes.forEach(function (n, i) { %>
+        <tr>
+          <td><input type="text" name="notes[<%= i %>][note]" maxlength="255" value="<%= n.note %>"></td>
+          <td class="hrs-sort"><input type="number" name="notes[<%= i %>][sort_order]" step="1" value="<%= n.sort_order %>"></td>
+          <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div class="adm-form-actions">
+      <button type="button" class="adm-btn-ghost small" data-add-row>Add row</button>
+    </div>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save hours</button>
+  </div>
+</form>
+
+<template id="notes-row-template">
+  <tr>
+    <td><input type="text" name="notes[__IDX__][note]" maxlength="255" value=""></td>
+    <td class="hrs-sort"><input type="number" name="notes[__IDX__][sort_order]" step="1" value="0"></td>
+    <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+  </tr>
+</template>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Closed checkbox disables that row's time inputs; disabled inputs are not submitted */
+  document.querySelectorAll('[data-closed-toggle]').forEach(function (box) {
+    function apply() {
+      box.closest('tr').querySelectorAll('input[type="time"]').forEach(function (el) {
+        el.disabled = box.checked;
+      });
+    }
+    box.addEventListener('change', apply);
+    apply();
+  });
+
+  /* Indexes keep counting past the server-rendered rows so names never collide */
+  var next = <%= notes.length %>;
+  document.querySelector('[data-add-row]').addEventListener('click', function () {
+    var tpl = document.getElementById('notes-row-template');
+    var row = tpl.content.firstElementChild.cloneNode(true);
+    row.querySelectorAll('[name]').forEach(function (el) {
+      el.setAttribute('name', el.getAttribute('name').replace('__IDX__', next));
+    });
+    next += 1;
+    document.getElementById('notes-rows').appendChild(row);
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove-row]');
+    if (btn) btn.closest('tr').remove();
+  });
+})();
+</script>
+<%- include('../partials/bottom') %>

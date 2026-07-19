@@ -1,0 +1,42 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Edit <%= page.title %></h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn-ghost" href="/<%= encodeURIComponent(page.slug) %>" target="_blank" rel="noopener">View page</a>
+    <a class="adm-btn-ghost" href="/admin/legal">Back to list</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+  <form class="adm-form" method="post" action="/admin/legal/<%= encodeURIComponent(page.slug) %>">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label>Title
+      <input type="text" name="title" required maxlength="150" value="<%= page.title %>">
+    </label>
+    <div class="adm-field">Content
+      <div class="adm-editor">
+        <div class="adm-editor-bar">
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="H2">H2</button>
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="H3">H3</button>
+          <button type="button" class="wide" data-cmd="formatBlock" data-value="P">P</button>
+          <button type="button" data-cmd="bold" title="Bold">B</button>
+          <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button type="button" data-cmd="insertUnorderedList" title="Bullet list">&bull;</button>
+          <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+          <button type="button" class="wide" data-cmd="createLink" title="Insert link">Link</button>
+          <button type="button" class="wide" data-cmd="removeFormat" title="Clear formatting">Clear</button>
+          <span class="sep"></span>
+          <button type="button" class="wide" data-src-toggle title="Edit HTML source">HTML</button>
+        </div>
+        <div class="adm-editor-area" contenteditable="true"></div>
+        <textarea class="adm-editor-src" name="content_html"><%= page.content_html %></textarea>
+      </div>
+    </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save page</button>
+      <a class="adm-btn-ghost" href="/admin/legal">Cancel</a>
+    </div>
+  </form>
+</section>
+<%- include('../partials/bottom') %>

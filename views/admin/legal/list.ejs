@@ -1,0 +1,34 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Legal pages</h1>
+</header>
+
+<section class="adm-panel">
+  <p class="adm-panel-note">These four pages are fixed. Edit the title and content, the slug stays the same.</p>
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Slug</th>
+        <th>Updated</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% pages.forEach(function (p) { %>
+      <tr>
+        <td><%= p.title %></td>
+        <td class="muted">/<%= p.slug %></td>
+        <td class="muted"><%= String(p.updated_at).slice(0, 16) %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/legal/<%= encodeURIComponent(p.slug) %>/edit">Edit</a>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!pages.length) { %>
+      <tr><td colspan="4" class="muted">No legal pages found, import the content seed first</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>

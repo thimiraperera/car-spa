@@ -1,0 +1,152 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Site info</h1>
+</header>
+
+<style>
+  .adm-form .si-address { min-height: 0; }
+  .si-rep td { vertical-align: top; }
+  .si-rep .si-sort { width: 90px; }
+  .si-rep .actions { width: 90px; }
+</style>
+
+<form class="adm-form" method="post" action="/admin/site-info">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <section class="adm-panel">
+    <h2>Business details</h2>
+    <div class="adm-grid2">
+      <label>Brand name
+        <input type="text" name="brand_name" maxlength="100" value="<%= settings.brand_name || '' %>">
+      </label>
+      <label>Email
+        <input type="email" name="email" maxlength="150" value="<%= settings.email || '' %>">
+      </label>
+    </div>
+    <label>Tagline
+      <input type="text" name="tagline" maxlength="255" value="<%= settings.tagline || '' %>">
+    </label>
+    <label>Address
+      <textarea name="address" rows="2" class="si-address"><%= settings.address || '' %></textarea>
+    </label>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Phone numbers</h2>
+    <p class="adm-panel-note">Rows with an empty number are dropped on save.</p>
+    <table class="adm-table si-rep">
+      <thead><tr><th>Number</th><th>Label</th><th>Type</th><th class="si-sort">Sort</th><th></th></tr></thead>
+      <tbody id="phones-rows">
+        <% phones.forEach(function (p, i) { %>
+        <tr>
+          <td><input type="text" name="phones[<%= i %>][number]" maxlength="30" value="<%= p.number %>"></td>
+          <td><input type="text" name="phones[<%= i %>][label]" maxlength="100" value="<%= p.label || '' %>"></td>
+          <td>
+            <select name="phones[<%= i %>][type]">
+              <% phoneTypes.forEach(function (t) { %>
+              <option value="<%= t %>" <%= p.type === t ? 'selected' : '' %>><%= t.charAt(0).toUpperCase() + t.slice(1) %></option>
+              <% }); %>
+            </select>
+          </td>
+          <td class="si-sort"><input type="number" name="phones[<%= i %>][sort_order]" step="1" value="<%= p.sort_order %>"></td>
+          <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div class="adm-form-actions">
+      <button type="button" class="adm-btn-ghost small" data-add-row="phones">Add number</button>
+    </div>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Social links</h2>
+    <p class="adm-panel-note">Rows with an empty URL are dropped on save.</p>
+    <table class="adm-table si-rep">
+      <thead><tr><th>Platform</th><th>Label</th><th>URL</th><th class="si-sort">Sort</th><th></th></tr></thead>
+      <tbody id="socials-rows">
+        <% socials.forEach(function (s, i) { %>
+        <tr>
+          <td>
+            <select name="socials[<%= i %>][platform]">
+              <% platforms.forEach(function (t) { %>
+              <option value="<%= t %>" <%= s.platform === t ? 'selected' : '' %>><%= t === 'x' ? 'X' : t.charAt(0).toUpperCase() + t.slice(1) %></option>
+              <% }); %>
+            </select>
+          </td>
+          <td><input type="text" name="socials[<%= i %>][label]" maxlength="100" value="<%= s.label || '' %>"></td>
+          <td><input type="text" name="socials[<%= i %>][url]" maxlength="255" value="<%= s.url %>"></td>
+          <td class="si-sort"><input type="number" name="socials[<%= i %>][sort_order]" step="1" value="<%= s.sort_order %>"></td>
+          <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div class="adm-form-actions">
+      <button type="button" class="adm-btn-ghost small" data-add-row="socials">Add link</button>
+    </div>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save site info</button>
+  </div>
+</form>
+
+<template id="phones-row-template">
+  <tr>
+    <td><input type="text" name="phones[__IDX__][number]" maxlength="30" value=""></td>
+    <td><input type="text" name="phones[__IDX__][label]" maxlength="100" value=""></td>
+    <td>
+      <select name="phones[__IDX__][type]">
+        <% phoneTypes.forEach(function (t) { %>
+        <option value="<%= t %>"><%= t.charAt(0).toUpperCase() + t.slice(1) %></option>
+        <% }); %>
+      </select>
+    </td>
+    <td class="si-sort"><input type="number" name="phones[__IDX__][sort_order]" step="1" value="0"></td>
+    <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+  </tr>
+</template>
+
+<template id="socials-row-template">
+  <tr>
+    <td>
+      <select name="socials[__IDX__][platform]">
+        <% platforms.forEach(function (t) { %>
+        <option value="<%= t %>"><%= t === 'x' ? 'X' : t.charAt(0).toUpperCase() + t.slice(1) %></option>
+        <% }); %>
+      </select>
+    </td>
+    <td><input type="text" name="socials[__IDX__][label]" maxlength="100" value=""></td>
+    <td><input type="text" name="socials[__IDX__][url]" maxlength="255" value=""></td>
+    <td class="si-sort"><input type="number" name="socials[__IDX__][sort_order]" step="1" value="0"></td>
+    <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+  </tr>
+</template>
+
+<script>
+(function () {
+  'use strict';
+  /* Indexes keep counting past the server-rendered rows so names never collide */
+  var next = { phones: <%= phones.length %>, socials: <%= socials.length %> };
+
+  document.querySelectorAll('[data-add-row]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.getAttribute('data-add-row');
+      var tpl = document.getElementById(kind + '-row-template');
+      var row = tpl.content.firstElementChild.cloneNode(true);
+      row.querySelectorAll('[name]').forEach(function (el) {
+        el.setAttribute('name', el.getAttribute('name').replace('__IDX__', next[kind]));
+      });
+      next[kind] += 1;
+      document.getElementById(kind + '-rows').appendChild(row);
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove-row]');
+    if (btn) btn.closest('tr').remove();
+  });
+})();
+</script>
+<%- include('../partials/bottom') %>

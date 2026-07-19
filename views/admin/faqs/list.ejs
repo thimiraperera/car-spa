@@ -1,0 +1,42 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>FAQs</h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn" href="/admin/faqs/new">Add FAQ</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th>Question</th>
+        <th>Answer</th>
+        <th>Status</th>
+        <th class="num">Sort</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% faqs.forEach(function (f) { %>
+      <tr>
+        <td><%= f.question %></td>
+        <td class="muted"><%= f.answer.length > 80 ? f.answer.slice(0, 80) + '...' : f.answer %></td>
+        <td><span class="adm-pill <%= f.is_active ? 'on' : 'off' %>"><%= f.is_active ? 'Active' : 'Hidden' %></span></td>
+        <td class="num"><%= f.sort_order %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/faqs/<%= f.id %>/edit">Edit</a>
+          <form class="adm-inline-form" method="post" action="/admin/faqs/<%= f.id %>/delete" data-confirm="Delete this FAQ?">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit" class="adm-btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!faqs.length) { %>
+      <tr><td colspan="5" class="muted">No FAQs yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>

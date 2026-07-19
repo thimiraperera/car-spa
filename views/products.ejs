@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><%- include('partials/head') %></head><body>
+<% var BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; %>
+<% var catKey = function (category) {
+  var c = String(category || '').toLowerCase();
+  if (c.indexOf('engine') !== -1) return 'engine';
+  if (c.indexOf('exterior') !== -1 || c.indexOf('shine') !== -1) return 'exterior';
+  if (c.indexOf('brake') !== -1 || c.indexOf('underbody') !== -1) return 'brake';
+  if (c.indexOf('chain') !== -1 || c.indexOf('bike') !== -1) return 'chain';
+  if (c.indexOf('interior') !== -1 || /\bac\b/.test(c)) return 'interior';
+  return '';
+}; %>
+
+<%- include('partials/header') %>
+
+<div class="page-hero">
+  <div class="page-hero-panel">
+    <h1>ALL <span style="color:var(--accent)">PRODUCTS</span></h1>
+    <p>Professional-grade auto care, delivered island-wide.</p>
+  </div>
+</div>
+
+<section style="padding-top:30px;">
+  <div class="container">
+    <div class="filter-row" id="filters">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="engine" id="engine">Engine Care</button>
+      <button class="filter-pill" data-filter="exterior" id="exterior">Exterior &amp; Shine</button>
+      <button class="filter-pill" data-filter="interior" id="interior">Interior &amp; AC</button>
+      <button class="filter-pill" data-filter="brake" id="brake">Brake &amp; Underbody</button>
+      <button class="filter-pill" data-filter="chain" id="chain">Bike &amp; Chain</button>
+    </div>
+    <div class="prod-grid three" id="catalog" style="margin-top:34px;">
+      <% products.forEach(function (p, i) { %>
+      <a class="prod-card reveal" data-cat="<%= catKey(p.category) %>" href="<%= p.url %>" style="--rd:<%= ((i % 4) * 0.07).toFixed(2) %>s">
+        <div class="prod-media">
+          <% if (p.category) { %><span class="badge-cat"><%= p.category %></span><% } %>
+          <img src="<%= p.image || BLANK_IMG %>" alt="<%= p.name %>"<% if (i === 0) { %> fetchpriority="high"<% } else if (i >= 3) { %> loading="lazy"<% } %> decoding="async" onerror="this.remove()">
+        </div>
+        <div class="prod-body">
+          <h4><%= p.name %></h4>
+          <div class="prod-rating" aria-hidden="true">★★★★★</div>
+          <span class="prod-size"><%= p.size %></span>
+          <div class="prod-foot">
+            <span class="prod-price">Rs. <%= Number(p.price_lkr).toLocaleString('en-US') %></span>
+            <span class="prod-view" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </div>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="container">
+    <div class="cta-band">
+      <h2>Buying for a workshop or fleet?<br>Ask us about wholesale pricing!</h2>
+      <a class="btn btn-accent" href="/contact">Talk to Car Spa LK <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+  </div>
+</section>
+
+<script>
+const pills = document.querySelectorAll('.filter-pill');
+function applyFilter(f) {
+  pills.forEach(p => p.classList.toggle('active', p.dataset.filter === f));
+  document.querySelectorAll('#catalog .prod-card').forEach(c => {
+    c.style.display = (f === 'all' || c.dataset.cat === f) ? '' : 'none';
+  });
+}
+pills.forEach(p => p.addEventListener('click', () => applyFilter(p.dataset.filter)));
+if (location.hash) {
+  const f = location.hash.slice(1);
+  if ([...pills].some(p => p.dataset.filter === f)) applyFilter(f);
+}
+</script>
+<%- include('partials/footer') %>
+</body>
+</html>

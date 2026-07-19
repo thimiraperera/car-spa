@@ -1,0 +1,69 @@
+<%- include('../partials/top') %>
+<style>
+  .adm-form input[type="file"] { display: block; width: 100%; margin-top: 5px; font: inherit; font-weight: 400; }
+  .adm-media-item .alt-form { display: flex; gap: 4px; padding: 0 6px 6px; }
+  .adm-media-item .alt-form input {
+    flex: 1; min-width: 0; font: inherit; font-size: 11.5px; padding: 4px 7px;
+    border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+  }
+  .adm-media-item .alt-form input:focus { outline: none; border-color: var(--ink); }
+</style>
+<header class="adm-head">
+  <h1>Media</h1>
+</header>
+
+<% if (err === 'used') { %>
+<div class="adm-error">That file is attached to a product, detach it first</div>
+<% } else if (err === 'upload') { %>
+<div class="adm-error">Upload failed. Use a jpg, png, webp, avif or gif under 8 MB.</div>
+<% } %>
+
+<section class="adm-panel">
+  <h2>Upload image</h2>
+  <form class="adm-form" method="post" action="/admin/media" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="adm-grid2">
+      <label>File
+        <input type="file" name="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required>
+      </label>
+      <label>Alt text <small>(optional)</small>
+        <input type="text" name="alt_text" maxlength="255" placeholder="Describe the image">
+      </label>
+    </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Upload</button>
+    </div>
+  </form>
+</section>
+
+<section class="adm-panel">
+  <h2>Library</h2>
+  <% if (!items.length) { %>
+  <p class="adm-panel-note">No media yet. Upload the first image above.</p>
+  <% } else { %>
+  <div class="adm-media-grid">
+    <% items.forEach(function (m) { %>
+    <div class="adm-media-item">
+      <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text %>" loading="lazy">
+      <div class="meta">
+        <b><%= m.file_path %></b>
+        <span><%= m.file_size ? Math.round(m.file_size / 1024) + ' KB' : 'size unknown' %></span>
+      </div>
+      <form class="alt-form" method="post" action="/admin/media/<%= m.id %>/alt">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="text" name="alt_text" value="<%= m.alt_text %>" maxlength="255" placeholder="Alt text">
+        <button type="submit" class="adm-btn-ghost small">Save</button>
+      </form>
+      <div class="row">
+        <span><%= (m.mime_type || '').replace('image/', '') %></span>
+        <form class="adm-inline-form" method="post" action="/admin/media/<%= m.id %>/delete" data-confirm="Delete this file? This cannot be undone.">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button type="submit" class="adm-btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+</section>
+<%- include('../partials/bottom') %>

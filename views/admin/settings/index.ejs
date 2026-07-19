@@ -1,0 +1,31 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Settings</h1>
+</header>
+
+<form class="adm-form" method="post" action="/admin/settings">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <section class="adm-panel">
+    <h2>Display settings</h2>
+    <div class="adm-grid3">
+      <label>Carousel product count
+        <small>How many recent products the homepage carousel shows</small>
+        <input type="number" name="carousel_product_count" min="1" max="24" step="1" required value="<%= values.carousel_product_count %>">
+      </label>
+      <label>Testimonials count
+        <small>How many recent testimonials the homepage shows</small>
+        <input type="number" name="testimonials_count" min="1" max="30" step="1" required value="<%= values.testimonials_count %>">
+      </label>
+      <label>Hero picks count
+        <small>Products per vehicle in the hero Popular now strip</small>
+        <input type="number" name="hero_picks_count" min="1" max="6" step="1" required value="<%= values.hero_picks_count %>">
+      </label>
+    </div>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save settings</button>
+  </div>
+</form>
+<%- include('../partials/bottom') %>

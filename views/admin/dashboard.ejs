@@ -1,0 +1,29 @@
+<%- include('partials/top') %>
+<header class="adm-head">
+  <h1>Dashboard</h1>
+</header>
+
+<div class="adm-cards">
+  <a class="adm-card" href="/admin/products"><b><%= counts.products %></b><span>Products</span></a>
+  <a class="adm-card" href="/admin/testimonials"><b><%= counts.testimonials %></b><span>Testimonials</span></a>
+  <a class="adm-card" href="/admin/faqs"><b><%= counts.faqs %></b><span>FAQs</span></a>
+  <a class="adm-card" href="/admin/media"><b><%= counts.media %></b><span>Media files</span></a>
+  <div class="adm-card"><b><%= counts.clicks %></b><span>Product clicks</span></div>
+</div>
+
+<section class="adm-panel">
+  <h2>Most clicked products</h2>
+  <table class="adm-table">
+    <thead><tr><th>Product</th><th class="num">Clicks</th></tr></thead>
+    <tbody>
+      <% topProducts.forEach(function (p) { %>
+      <tr>
+        <td><a href="/products/<%= p.slug %>" target="_blank" rel="noopener"><%= p.name %></a></td>
+        <td class="num"><%= p.click_count %></td>
+      </tr>
+      <% }); %>
+      <% if (!topProducts.length) { %><tr><td colspan="2">No products yet</td></tr><% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('partials/bottom') %>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Sign in | Car Spa LK Admin</title>
+<link rel="stylesheet" href="/assets/admin/admin.css">
+</head>
+<body class="adm adm-login-body">
+<form class="adm-login" method="post" action="/admin/login">
+  <h1>CARSPA<span>.LK</span></h1>
+  <p class="adm-login-sub">Store admin</p>
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <label>Username
+    <input type="text" name="username" autocomplete="username" required autofocus>
+  </label>
+  <label>Password
+    <input type="password" name="password" autocomplete="current-password" required>
+  </label>
+  <button type="submit">Sign in</button>
+</form>
+</body>
+</html>

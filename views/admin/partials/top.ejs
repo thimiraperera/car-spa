@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title><%= pageTitle %> | Car Spa LK Admin</title>
+<link rel="stylesheet" href="/assets/admin/admin.css">
+</head>
+<body class="adm">
+<aside class="adm-side">
+  <a class="adm-brand" href="/admin">CARSPA<span>.LK</span><small>admin</small></a>
+  <nav class="adm-nav">
+    <a href="/admin" class="<%= active === 'dashboard' ? 'on' : '' %>">Dashboard</a>
+    <span class="adm-nav-group">Catalog</span>
+    <a href="/admin/products" class="<%= active === 'products' ? 'on' : '' %>">Products</a>
+    <a href="/admin/media" class="<%= active === 'media' ? 'on' : '' %>">Media</a>
+    <span class="adm-nav-group">Content</span>
+    <a href="/admin/testimonials" class="<%= active === 'testimonials' ? 'on' : '' %>">Testimonials</a>
+    <a href="/admin/faqs" class="<%= active === 'faqs' ? 'on' : '' %>">FAQs</a>
+    <a href="/admin/legal" class="<%= active === 'legal' ? 'on' : '' %>">Legal pages</a>
+    <span class="adm-nav-group">Site</span>
+    <a href="/admin/site-info" class="<%= active === 'site-info' ? 'on' : '' %>">Site info</a>
+    <a href="/admin/hours" class="<%= active === 'hours' ? 'on' : '' %>">Opening hours</a>
+    <a href="/admin/page-seo" class="<%= active === 'page-seo' ? 'on' : '' %>">Page SEO</a>
+    <a href="/admin/settings" class="<%= active === 'settings' ? 'on' : '' %>">Settings</a>
+  </nav>
+  <form class="adm-logout" method="post" action="/admin/logout">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <button type="submit">Sign out<small><%= adminName %></small></button>
+  </form>
+</aside>
+<main class="adm-main">
+<% if (typeof saved !== 'undefined' && saved) { %>
+  <div class="adm-toast" id="adm-toast">Saved</div>
+<% } %>

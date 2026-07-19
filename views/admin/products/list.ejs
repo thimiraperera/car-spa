@@ -1,0 +1,56 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Products</h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn" href="/admin/products/new">Add product</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Vehicle</th>
+        <th>Category</th>
+        <th class="num">Price</th>
+        <th>Size</th>
+        <th>Status</th>
+        <th class="num">Clicks</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(function (p) { %>
+      <tr>
+        <td>
+          <% if (p.featured_image) { %>
+          <img class="thumb" src="/media/<%= p.featured_image %>" alt="">
+          <% } else { %>
+          <span class="thumb"></span>
+          <% } %>
+        </td>
+        <td><a href="/admin/products/<%= p.id %>/edit"><%= p.name %></a></td>
+        <td class="muted"><%= p.vehicle.charAt(0).toUpperCase() + p.vehicle.slice(1) %></td>
+        <td class="muted"><%= p.category || '' %></td>
+        <td class="num">Rs <%= Number(p.price_lkr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+        <td class="muted"><%= p.size || '' %></td>
+        <td><span class="adm-pill <%= p.is_active ? 'on' : 'off' %>"><%= p.is_active ? 'Active' : 'Hidden' %></span></td>
+        <td class="num"><%= p.click_count %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/products/<%= p.id %>/edit">Edit</a>
+          <form class="adm-inline-form" method="post" action="/admin/products/<%= p.id %>/delete" data-confirm="Delete <%= p.name %>? Its images and SEO settings go with it.">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit" class="adm-btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!products.length) { %>
+      <tr><td colspan="9" class="muted">No products yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>

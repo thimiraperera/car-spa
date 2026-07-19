@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head><%- include('partials/head') %></head><body>
+<% var BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; %>
+<% var waPhone = site.phones.find(function (p) { return p.type === 'whatsapp'; }) || site.phones[0] || {}; %>
+<% var waNumber = String(waPhone.number || '').replace(/[^0-9]/g, ''); %>
+<% if (waNumber.indexOf('0') === 0) waNumber = '94' + waNumber.slice(1); %>
+<% if (!waNumber) waNumber = '94742388588'; %>
+<% var specLabels = (product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs)) ? Object.keys(product.specs) : []; %>
+<% var howTo = Array.isArray(product.how_to_use) ? product.how_to_use.filter(Boolean).join(' ') : String(product.how_to_use || '').trim(); %>
+
+<%- include('partials/header') %>
+
+<div class="container">
+  <p class="breadcrumb"><a href="/">Home</a> / <a href="/products">Products</a> / <b style="color:var(--ink)"><%= product.name %></b></p>
+  <div class="pd-wrap">
+    <div class="pd-media-col">
+      <div class="pd-media"><img id="pd-main-img" src="<%= featured ? '/media/' + featured.file_path : BLANK_IMG %>" alt="<%= (featured && featured.alt_text) || product.name %>"></div>
+      <% if (images.length > 1) { %>
+      <div class="pd-thumbs">
+        <% images.forEach(function (img, i) { %>
+          <button class="pd-thumb<%= i === 0 ? ' active' : '' %>" data-src="/media/<%= img.file_path %>" aria-label="View image <%= i + 1 %>">
+            <img src="/media/<%= img.file_path %>" alt="<%= img.alt_text || (product.name + ' photo ' + (i + 1)) %>" loading="lazy" decoding="async">
+          </button>
+        <% }); %>
+      </div>
+      <% } %>
+    </div>
+    <div class="pd-info">
+      <% if (product.category) { %><span class="badge-cat"><%= product.category %></span><% } %>
+      <h1><%= product.name %></h1>
+      <div class="stars">★★★★★ <small style="color:var(--ink-soft); letter-spacing:0;">Genuine Arkos Vetek product</small></div>
+      <p class="pd-price">Rs. <%= Number(product.price_lkr).toLocaleString('en-US') %><% if (product.size) { %> <small>/ <%= product.size %></small><% } %></p>
+      <% if (product.short_description) { %>
+      <p class="pd-desc"><%= product.short_description %></p>
+      <% } %>
+      <% if (product.description_html) { %>
+      <div class="pd-desc"><%- product.description_html %></div>
+      <% } %>
+      <% if (product.features && product.features.length) { %>
+      <ul class="pd-features">
+        <% product.features.forEach(function (feature) { %>
+        <li><%= feature %></li>
+        <% }); %>
+      </ul>
+      <% } %>
+      <div class="pd-actions">
+        <button class="btn btn-dark add-to-cart" type="button"
+          data-slug="<%= product.slug %>" data-name="<%= product.name %>" data-price="<%= Math.round(Number(product.price_lkr)) %>"
+          data-size="<%= product.size || '' %>" data-img="<%= featured ? '/media/' + featured.file_path : '' %>">
+          <span class="atc-label">Add to cart</span> <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <a class="btn btn-accent" href="https://wa.me/<%= waNumber %>?text=<%= encodeURIComponent('Hi Car Spa LK! I\'d like to order: ' + product.name) %>">Order now <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+      </div>
+      <% if (product.size || specLabels.length) { %>
+      <div class="pd-meta">
+        <% if (product.size) { %><span>Size: <b><%= product.size %></b></span><% } %>
+        <% specLabels.forEach(function (label) { %>
+        <span><%= label %>: <b><%= product.specs[label] %></b></span>
+        <% }); %>
+      </div>
+      <% } %>
+      <% if (howTo) { %>
+      <div class="pd-meta" style="border-top:none; padding-top:0;">
+        <p><b style="color:var(--ink)">How to use:</b> <%= howTo %></p>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<% if (related && related.length) { %>
+<section class="section-cream related">
+  <div class="container">
+    <div class="prod-head">
+      <h2 class="section-title">You might <strong class="hl">also like</strong></h2>
+      <a class="btn btn-dark" href="/products">All products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="prod-grid three">
+      <% related.forEach(function (p, i) { %>
+      <a class="prod-card reveal" href="<%= p.url %>" style="--rd:<%= (i * 0.08).toFixed(2) %>s">
+        <div class="prod-media">
+          <% if (p.category) { %><span class="badge-cat"><%= p.category %></span><% } %>
+          <img src="<%= p.image || BLANK_IMG %>" alt="<%= p.name %>" loading="lazy" decoding="async" onerror="this.remove()">
+        </div>
+        <div class="prod-body">
+          <h4><%= p.name %></h4>
+          <div class="prod-rating" aria-hidden="true">★★★★★</div>
+          <span class="prod-size"><%= p.size %></span>
+          <div class="prod-foot">
+            <span class="prod-price">Rs. <%= Number(p.price_lkr).toLocaleString('en-US') %></span>
+            <span class="prod-view" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
+          </div>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>
+</body>
+</html>

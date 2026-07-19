@@ -1,0 +1,34 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1><%= item && item.id ? 'Edit FAQ' : 'Add FAQ' %></h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn-ghost" href="/admin/faqs">Back to list</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+  <form class="adm-form" method="post" action="<%= item && item.id ? '/admin/faqs/' + item.id : '/admin/faqs' %>">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label>Question
+      <input type="text" name="question" required maxlength="255" value="<%= item ? item.question : '' %>">
+    </label>
+    <label>Answer <small>Plain text, shown in the accordion and in the FAQ structured data</small>
+      <textarea name="answer" required><%= item ? item.answer : '' %></textarea>
+    </label>
+    <div class="adm-grid2">
+      <label>Sort order
+        <input type="number" name="sort_order" step="1" value="<%= item ? item.sort_order : 0 %>">
+      </label>
+      <label class="check">
+        <input type="checkbox" name="is_active" value="1" <%= !item || item.is_active ? 'checked' : '' %>>
+        Show on the site
+      </label>
+    </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save FAQ</button>
+      <a class="adm-btn-ghost" href="/admin/faqs">Cancel</a>
+    </div>
+  </form>
+</section>
+<%- include('../partials/bottom') %>
