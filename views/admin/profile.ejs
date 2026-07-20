@@ -5,11 +5,11 @@
 </header>
 
 <style>
-  .adm-imgpick .pick.none-pick { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-  .adm-imgpick .pick.none-pick .none-ph { font-size: 11px; color: var(--ink-soft); }
+  .adm-upload-row .avatar-prev { border-radius: 50%; object-fit: cover; padding: 0; }
+  .adm-upload-row .adm-avatar-fallback { width: 64px; height: 64px; font-size: 24px; }
 </style>
 
-<form class="adm-form" method="post" action="/admin/profile">
+<form class="adm-form" method="post" action="/admin/profile" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
 
@@ -19,8 +19,8 @@
       <label>Username <small>cannot be changed here</small>
         <input type="text" value="<%= me.username || '' %>" disabled>
       </label>
-      <label>Email
-        <input type="email" name="email" maxlength="190" value="<%= me.email || '' %>">
+      <label>Nickname <small>shown around the admin instead of your username</small>
+        <input type="text" name="nickname" maxlength="60" value="<%= me.nickname || '' %>">
       </label>
       <label>First name
         <input type="text" name="first_name" maxlength="60" value="<%= me.first_name || '' %>">
@@ -28,33 +28,31 @@
       <label>Last name
         <input type="text" name="last_name" maxlength="60" value="<%= me.last_name || '' %>">
       </label>
+      <label class="adm-span2">Email
+        <input type="email" name="email" maxlength="190" value="<%= me.email || '' %>">
+      </label>
+    </div>
+
+    <div class="adm-field">Avatar
+      <div class="adm-upload-row">
+        <% if (me.avatar_file_path) { %>
+        <img class="avatar-prev" src="/media/<%= me.avatar_file_path %>" alt="Current avatar">
+        <% } else { %>
+        <span class="adm-avatar-fallback"><%= String(me.nickname || me.first_name || me.username || '?').charAt(0).toUpperCase() %></span>
+        <% } %>
+        <label>Upload a photo <input type="file" name="avatar_file" accept="image/*"></label>
+        <% if (me.avatar_file_path) { %>
+        <label class="check">
+          <input type="checkbox" name="avatar_clear" value="1"> Remove current photo
+        </label>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save profile</button>
     </div>
   </section>
-
-  <section class="adm-panel">
-    <h2>Avatar</h2>
-    <% if (media.length) { %>
-    <div class="adm-imgpick" id="imgpick">
-      <div class="pick none-pick<%= !me.avatar_media_id ? ' sel' : '' %>">
-        <span class="none-ph">None</span>
-        <span class="tag"><input type="radio" name="avatar_media" value="" <%= !me.avatar_media_id ? 'checked' : '' %>></span>
-      </div>
-      <% media.forEach(function (m) { %>
-      <% const isSel = me.avatar_media_id === m.id; %>
-      <div class="pick<%= isSel ? ' sel' : '' %>">
-        <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
-        <span class="tag"><input type="radio" name="avatar_media" value="<%= m.id %>" <%= isSel ? 'checked' : '' %>></span>
-      </div>
-      <% }); %>
-    </div>
-    <% } else { %>
-    <p class="adm-panel-note">The media library is empty. Upload a photo in <a href="/admin/media">Media</a>.</p>
-    <% } %>
-  </section>
-
-  <div class="adm-form-actions">
-    <button type="submit" class="adm-btn">Save profile</button>
-  </div>
 </form>
 
 <section class="adm-panel">
@@ -78,19 +76,4 @@
     </div>
   </form>
 </section>
-
-<script>
-(function () {
-  var grid = document.getElementById('imgpick');
-  if (grid) {
-    var refresh = function () {
-      grid.querySelectorAll('.pick').forEach(function (pick) {
-        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
-      });
-    };
-    grid.addEventListener('change', refresh);
-    refresh();
-  }
-})();
-</script>
 <%- include('partials/bottom') %>

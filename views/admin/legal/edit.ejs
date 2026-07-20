@@ -16,6 +16,10 @@
     </label>
     <div class="adm-field">Content
       <div class="adm-editor">
+        <div class="adm-editor-tabs">
+          <button type="button" class="adm-editor-tab active" data-editor-tab="visual">Visual</button>
+          <button type="button" class="adm-editor-tab" data-editor-tab="html">HTML</button>
+        </div>
         <div class="adm-editor-bar">
           <button type="button" class="wide" data-cmd="formatBlock" data-value="H2">H2</button>
           <button type="button" class="wide" data-cmd="formatBlock" data-value="H3">H3</button>
@@ -26,8 +30,6 @@
           <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
           <button type="button" class="wide" data-cmd="createLink" title="Insert link">Link</button>
           <button type="button" class="wide" data-cmd="removeFormat" title="Clear formatting">Clear</button>
-          <span class="sep"></span>
-          <button type="button" class="wide" data-src-toggle title="Edit HTML source">HTML</button>
         </div>
         <div class="adm-editor-area" contenteditable="true"></div>
         <textarea class="adm-editor-src" name="content_html"><%= page.content_html %></textarea>

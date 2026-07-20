@@ -18,13 +18,6 @@
       <label>Focus keyphrase
         <input type="text" name="focus_keyphrase" maxlength="120" value="<%= row.focus_keyphrase || '' %>">
       </label>
-      <label>Meta description <small id="meta-desc-count"></small>
-        <textarea name="meta_description" id="meta-desc" maxlength="200"><%= row.meta_description || '' %></textarea>
-      </label>
-      <label class="check">
-        <input type="checkbox" name="cornerstone" value="1" <%= row.cornerstone ? 'checked' : '' %>>
-        Cornerstone content
-      </label>
       <label>Breadcrumbs title
         <input type="text" name="breadcrumbs_title" maxlength="120" value="<%= row.breadcrumbs_title || '' %>">
       </label>
@@ -45,19 +38,26 @@
           <% }); %>
         </select>
       </label>
-      <label>Social title
+      <label class="check">
+        <input type="checkbox" name="cornerstone" value="1" <%= row.cornerstone ? 'checked' : '' %>>
+        Cornerstone content
+      </label>
+      <label class="adm-span2">Meta description <small id="meta-desc-count"></small>
+        <textarea name="meta_description" id="meta-desc" maxlength="200"><%= row.meta_description || '' %></textarea>
+      </label>
+      <label class="adm-span2">Social title
         <input type="text" name="social_title" maxlength="120" value="<%= row.social_title || '' %>">
       </label>
-      <label>Social description
+      <label class="adm-span2">Social description
         <textarea name="social_description" maxlength="300"><%= row.social_description || '' %></textarea>
       </label>
-      <label>X title
+      <label class="adm-span2">X title
         <input type="text" name="x_title" maxlength="120" value="<%= row.x_title || '' %>">
       </label>
-      <label>X description
+      <label class="adm-span2">X description
         <textarea name="x_description" maxlength="300"><%= row.x_description || '' %></textarea>
       </label>
-      <label>Excerpt
+      <label class="adm-span2">Excerpt
         <textarea name="excerpt"><%= row.excerpt || '' %></textarea>
       </label>
     </div>

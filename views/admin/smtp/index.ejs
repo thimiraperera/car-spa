@@ -14,13 +14,23 @@
   <section class="adm-panel">
     <h2>Mail server</h2>
     <div class="adm-grid2">
-      <label>SMTP host
+      <label class="adm-span2">SMTP host
         <input type="text" name="host" maxlength="190" value="<%= settings.host || '' %>">
       </label>
       <label>Port
         <input type="number" name="port" min="1" max="65535" step="1" value="<%= settings.port != null ? settings.port : '' %>">
       </label>
+      <label>Encryption
+        <select name="encryption">
+          <% encryptions.forEach(function (enc) { %>
+          <option value="<%= enc %>" <%= (settings.encryption || 'tls') === enc ? 'selected' : '' %>>
+            <%= enc === 'none' ? 'None' : enc.toUpperCase() %>
+          </option>
+          <% }); %>
+        </select>
+      </label>
     </div>
+    <p class="adm-panel-note">Port usually follows the encryption method: TLS 587, SSL 465, none 25. Change it only if your mail host says otherwise.</p>
     <div class="adm-grid2">
       <label>Username
         <input type="text" name="username" maxlength="190" value="<%= settings.username || '' %>">
@@ -29,15 +39,6 @@
         <input type="password" name="password" autocomplete="new-password" placeholder="Leave blank to keep the current password">
       </label>
     </div>
-    <label>Encryption
-      <select name="encryption">
-        <% encryptions.forEach(function (enc) { %>
-        <option value="<%= enc %>" <%= (settings.encryption || 'tls') === enc ? 'selected' : '' %>>
-          <%= enc === 'none' ? 'None' : enc.toUpperCase() %>
-        </option>
-        <% }); %>
-      </select>
-    </label>
   </section>
 
   <section class="adm-panel">
@@ -50,12 +51,26 @@
         <input type="text" name="from_name" maxlength="190" value="<%= settings.from_name || '' %>">
       </label>
     </div>
+    <div class="adm-form-actions">
+      <button type="submit" class="adm-btn">Save SMTP settings</button>
+    </div>
   </section>
-
-  <div class="adm-form-actions">
-    <button type="submit" class="adm-btn">Save SMTP settings</button>
-  </div>
 </form>
+
+<script>
+  (function () {
+    var enc = document.querySelector('select[name="encryption"]');
+    var port = document.querySelector('input[name="port"]');
+    if (!enc || !port) return;
+    var std = { none: '25', ssl: '465', tls: '587' };
+    enc.addEventListener('change', function () {
+      var v = String(port.value).trim();
+      if (v === '' || v === '25' || v === '465' || v === '587') {
+        if (std[enc.value]) port.value = std[enc.value];
+      }
+    });
+  })();
+</script>
 
 <section class="adm-panel">
   <h2>Send test email</h2>
