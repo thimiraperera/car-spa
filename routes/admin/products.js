@@ -1,10 +1,12 @@
 const express = require('express');
 const { query, queryOne, pool } = require('../../lib/db');
 const { BASE_URL } = require('../../lib/seo');
+const { imageUpload, csrfOk, saveUploadedMedia, removeUploaded } = require('../../lib/uploads');
 
 const router = express.Router();
 
 const VEHICLES = ['car', 'bike', 'both'];
+const PER_CHOICES = [10, 25, 50, 100];
 
 const PAGE_TYPES = [
   'Default for Pages (Web Page)', 'WebPage', 'Item Page', 'About Page', 'FAQ Page',
@@ -185,13 +187,31 @@ function formLocals(opts) {
 
 router.get('/', async function (req, res, next) {
   try {
+    req.session.adminPerPage = req.session.adminPerPage || {};
+    const asked = parseInt(req.query.per, 10);
+    if (PER_CHOICES.indexOf(asked) !== -1) req.session.adminPerPage.products = asked;
+    const per = PER_CHOICES.indexOf(req.session.adminPerPage.products) !== -1
+      ? req.session.adminPerPage.products
+      : 10;
+
+    let page = parseInt(req.query.page, 10);
+    if (!Number.isFinite(page) || page < 1) page = 1;
+    const totalRow = await queryOne('SELECT COUNT(*) AS n FROM products');
+    const total = totalRow ? totalRow.n : 0;
+    const totalPages = Math.max(1, Math.ceil(total / per));
+    if (page > totalPages) page = totalPages;
+
     const products = await query(
       'SELECT p.id, p.slug, p.name, p.vehicle, p.category, p.price_lkr, p.size, p.is_active, p.click_count, ' +
       '(SELECT m.file_path FROM product_images pi JOIN media m ON m.id = pi.media_id ' +
       ' WHERE pi.product_id = p.id AND pi.role = "featured" ORDER BY pi.sort_order, pi.id LIMIT 1) AS featured_image ' +
-      'FROM products p ORDER BY p.name'
+      'FROM products p ORDER BY p.name LIMIT ? OFFSET ?',
+      [per, (page - 1) * per]
     );
-    res.render('admin/products/list', { pageTitle: 'Products', active: 'products', products });
+    res.render('admin/products/list', {
+      pageTitle: 'Products', active: 'products', products,
+      currentPage: page, totalPages: totalPages, per: per
+    });
   } catch (err) {
     next(err);
   }
@@ -244,25 +264,34 @@ router.get('/:id/edit', async function (req, res, next) {
 
 // ---- Save (create + update share one transaction path) --------------------
 
+function discardUploads(req) {
+  return Promise.all((req.files || []).map(removeUploaded));
+}
+
+async function renderFormError(req, res, id, error) {
+  const body = req.body || {};
+  const data = readProductForm(body);
+  const seo = readSeoForm(body);
+  const picks = readImagePicks(body);
+  const media = await mediaList();
+  res.status(422).render('admin/products/form', formLocals({
+    product: Object.assign({}, data, { id: id }),
+    seo: seo.values,
+    media,
+    featuredId: picks.featuredId,
+    galleryIds: picks.galleryIds,
+    featuresText: String(body.features || ''),
+    specsText: String(body.specs || ''),
+    howToText: String(body.how_to_use || ''),
+    error: error
+  }));
+}
+
 async function saveProduct(req, res, next, id) {
   const data = readProductForm(req.body);
   const seo = readSeoForm(req.body);
   const picks = readImagePicks(req.body);
-
-  async function renderError(error) {
-    const media = await mediaList();
-    res.status(422).render('admin/products/form', formLocals({
-      product: Object.assign({}, data, { id: id }),
-      seo: seo.values,
-      media,
-      featuredId: picks.featuredId,
-      galleryIds: picks.galleryIds,
-      featuresText: String(req.body.features || ''),
-      specsText: String(req.body.specs || ''),
-      howToText: String(req.body.how_to_use || ''),
-      error: error
-    }));
-  }
+  const files = req.files || [];
 
   try {
     let error = validate(data) || seo.error;
@@ -272,7 +301,21 @@ async function saveProduct(req, res, next, id) {
       );
       if (clash) error = 'The slug "' + data.slug + '" is already used by another product';
     }
-    if (error) return await renderError(error);
+    if (error) {
+      await discardUploads(req);
+      return await renderFormError(req, res, id, error);
+    }
+
+    // Uploaded files join the media library first so their ids can be
+    // attached inside the transaction below.
+    const uploadedIds = [];
+    for (let i = 0; i < files.length; i++) {
+      uploadedIds.push(await saveUploadedMedia(files[i], data.name));
+    }
+    let featuredId = picks.featuredId;
+    const extra = uploadedIds.slice();
+    if (featuredId === null && extra.length) featuredId = extra.shift();
+    const galleryIds = picks.galleryIds.concat(extra);
 
     const conn = await pool.getConnection();
     try {
@@ -302,16 +345,16 @@ async function saveProduct(req, res, next, id) {
       }
 
       await conn.query('DELETE FROM product_images WHERE product_id = ?', [productId]);
-      if (picks.featuredId !== null) {
+      if (featuredId !== null) {
         await conn.query(
           'INSERT INTO product_images (product_id, media_id, role, sort_order) VALUES (?, ?, "featured", 0)',
-          [productId, picks.featuredId]
+          [productId, featuredId]
         );
       }
-      for (let i = 0; i < picks.galleryIds.length; i++) {
+      for (let i = 0; i < galleryIds.length; i++) {
         await conn.query(
           'INSERT INTO product_images (product_id, media_id, role, sort_order) VALUES (?, ?, "gallery", ?)',
-          [productId, picks.galleryIds[i], i]
+          [productId, galleryIds[i], i]
         );
       }
 
@@ -346,27 +389,54 @@ async function saveProduct(req, res, next, id) {
   } catch (err) {
     // Duplicate slug race between the pre-check and the write
     if (err && err.code === 'ER_DUP_ENTRY') {
-      return renderError('The slug "' + data.slug + '" is already used by another product').catch(next);
+      return renderFormError(req, res, id, 'The slug "' + data.slug + '" is already used by another product').catch(next);
     }
     next(err);
   }
 }
 
-router.post('/', function (req, res, next) {
-  saveProduct(req, res, next, null);
-});
-
-router.post('/:id', async function (req, res, next) {
+// Multipart, so multer runs first and the CSRF token is checked by hand
+// (the global gate in routes/admin/index.js skips multipart bodies).
+async function handleMultipart(req, res, next, uploadErr, id) {
   try {
-    const id = parseInt(req.params.id, 10);
-    const existing = Number.isFinite(id)
-      ? await queryOne('SELECT id FROM products WHERE id = ?', [id])
-      : null;
-    if (!existing) return res.status(404).send('Product not found');
+    req.body = req.body || {};
+    if (uploadErr) {
+      await discardUploads(req);
+      return await renderFormError(req, res, id,
+        'Image upload failed. Use jpg, png, webp, avif or gif files under 8 MB each, at most 12 at a time.');
+    }
+    if (!csrfOk(req)) {
+      await discardUploads(req);
+      return res.status(403).send('Invalid or missing CSRF token');
+    }
     await saveProduct(req, res, next, id);
   } catch (err) {
     next(err);
   }
+}
+
+router.post('/', function (req, res, next) {
+  imageUpload.array('new_images', 12)(req, res, function (err) {
+    handleMultipart(req, res, next, err, null);
+  });
+});
+
+router.post('/:id', function (req, res, next) {
+  imageUpload.array('new_images', 12)(req, res, async function (err) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const existing = Number.isFinite(id)
+        ? await queryOne('SELECT id FROM products WHERE id = ?', [id])
+        : null;
+      if (!existing) {
+        await discardUploads(req);
+        return res.status(404).send('Product not found');
+      }
+      await handleMultipart(req, res, next, err, id);
+    } catch (e) {
+      next(e);
+    }
+  });
 });
 
 // ---- Delete (FK cascades remove images and SEO) ---------------------------

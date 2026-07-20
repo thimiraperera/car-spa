@@ -2,6 +2,16 @@
 <header class="adm-head">
   <h1>Testimonials</h1>
   <div class="adm-head-actions">
+    <form class="adm-perpage" method="get">
+      <label>Show
+        <select name="per" onchange="this.form.submit()">
+          <% perChoices.forEach(function (n) { %>
+          <option value="<%= n %>" <%= perPage === n ? 'selected' : '' %>><%= n %></option>
+          <% }); %>
+        </select>
+        per page
+      </label>
+    </form>
     <a class="adm-btn" href="/admin/testimonials/new">Add testimonial</a>
   </div>
 </header>
@@ -9,6 +19,15 @@
 <style>
   .adm-thumb-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; display: block; }
   .adm-thumb-ph { width: 36px; height: 36px; border-radius: 50%; background: var(--adm-panel-alt, #eee); }
+  .adm-pager { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+  .adm-pager a, .adm-pager span {
+    display: inline-block; min-width: 34px; text-align: center; padding: 7px 10px;
+    border-radius: 8px; border: 1.5px solid var(--line); font-size: 13px; font-weight: 600;
+    text-decoration: none; color: var(--ink);
+  }
+  .adm-pager a:hover { border-color: var(--ink); }
+  .adm-pager a.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .adm-pager span.disabled { color: var(--ink-soft); opacity: .5; }
 </style>
 
 <section class="adm-panel">
@@ -53,5 +72,24 @@
       <% } %>
     </tbody>
   </table>
+
+  <% if (totalPages > 1) { %>
+  <% var perQs = perPage !== 10 ? '&per=' + perPage : ''; %>
+  <nav class="adm-pager" aria-label="Testimonial pages">
+    <% if (currentPage > 1) { %>
+    <a href="/admin/testimonials?page=<%= currentPage - 1 %><%= perQs %>">Prev</a>
+    <% } else { %>
+    <span class="disabled">Prev</span>
+    <% } %>
+    <% for (var pn = 1; pn <= totalPages; pn++) { %>
+    <a href="/admin/testimonials?page=<%= pn %><%= perQs %>" class="<%= pn === currentPage ? 'on' : '' %>"><%= pn %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+    <a href="/admin/testimonials?page=<%= currentPage + 1 %><%= perQs %>">Next</a>
+    <% } else { %>
+    <span class="disabled">Next</span>
+    <% } %>
+  </nav>
+  <% } %>
 </section>
 <%- include('../partials/bottom') %>

@@ -15,7 +15,7 @@
 
 <section class="adm-panel">
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
-  <form class="adm-form" method="post" action="<%= item && item.id ? '/admin/testimonials/' + item.id : '/admin/testimonials' %>">
+  <form class="adm-form" method="post" enctype="multipart/form-data" action="<%= item && item.id ? '/admin/testimonials/' + item.id : '/admin/testimonials' %>">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <label>Quote
       <textarea name="quote" required><%= item ? item.quote : '' %></textarea>
@@ -45,6 +45,9 @@
       </label>
     </div>
     <div class="adm-field">Photo (optional)
+      <div class="adm-upload-row">
+        <label>Upload a photo <input type="file" name="new_photo" accept="image/*"></label>
+      </div>
       <% var currentImageId = item && item.image_media_id ? Number(item.image_media_id) : null; %>
       <% if (media.length) { %>
       <div class="adm-imgpick" id="imgpick">

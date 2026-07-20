@@ -16,7 +16,7 @@
   .adm-imgpick .pick .tag input { margin: 0; }
 </style>
 
-<form class="adm-form" method="post" action="<%= isNew ? '/admin/products' : '/admin/products/' + p.id %>">
+<form class="adm-form" method="post" action="<%= isNew ? '/admin/products' : '/admin/products/' + p.id %>" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
 
@@ -69,6 +69,10 @@
     </label>
     <div class="adm-field">Description
       <div class="adm-editor">
+        <div class="adm-editor-tabs">
+          <button type="button" class="adm-editor-tab active" data-editor-tab="visual">Visual</button>
+          <button type="button" class="adm-editor-tab" data-editor-tab="html">HTML</button>
+        </div>
         <div class="adm-editor-bar">
           <button type="button" class="wide" data-cmd="formatBlock" data-value="H2">H2</button>
           <button type="button" class="wide" data-cmd="formatBlock" data-value="H3">H3</button>
@@ -79,8 +83,6 @@
           <button type="button" data-cmd="insertOrderedList" title="Numbered list">1.</button>
           <button type="button" class="wide" data-cmd="createLink" title="Insert link">Link</button>
           <button type="button" class="wide" data-cmd="removeFormat" title="Clear formatting">Clear</button>
-          <span class="sep"></span>
-          <button type="button" class="wide" data-src-toggle title="Edit HTML source">HTML</button>
         </div>
         <div class="adm-editor-area" contenteditable="true"></div>
         <textarea class="adm-editor-src" name="description_html"><%= p.description_html || '' %></textarea>
@@ -99,7 +101,13 @@
 
   <section class="adm-panel">
     <h2>Images</h2>
-    <p class="adm-panel-note">Pick one featured image and any number of gallery images. Upload new files in <a href="/admin/media">Media</a>.</p>
+    <div class="adm-upload-row">
+      <label>Upload new images
+        <input type="file" name="new_images" accept="image/*" multiple>
+      </label>
+    </div>
+    <p class="adm-panel-note">Uploaded files land in the media library automatically and attach to this product when you save. The first upload becomes the featured image if none is picked below.</p>
+    <p class="adm-panel-note">Pick one featured image and any number of gallery images from the library.</p>
     <% if (media.length) { %>
     <div class="adm-imgpick" id="imgpick">
       <% media.forEach(function (m) { %>
@@ -127,7 +135,7 @@
       <label>Focus keyphrase
         <input type="text" name="focus_keyphrase" maxlength="120" value="<%= s.focus_keyphrase || '' %>">
       </label>
-      <label>Meta description <small id="meta-desc-count"></small>
+      <label class="adm-span2">Meta description <small id="meta-desc-count"></small>
         <textarea name="meta_description" id="meta-desc" maxlength="200"><%= s.meta_description || '' %></textarea>
       </label>
       <label class="check">
@@ -154,19 +162,19 @@
           <% }); %>
         </select>
       </label>
-      <label>Social title
+      <label class="adm-span2">Social title
         <input type="text" name="social_title" maxlength="120" value="<%= s.social_title || '' %>">
       </label>
-      <label>Social description
+      <label class="adm-span2">Social description
         <textarea name="social_description" maxlength="300"><%= s.social_description || '' %></textarea>
       </label>
-      <label>X title
+      <label class="adm-span2">X title
         <input type="text" name="x_title" maxlength="120" value="<%= s.x_title || '' %>">
       </label>
-      <label>X description
+      <label class="adm-span2">X description
         <textarea name="x_description" maxlength="300"><%= s.x_description || '' %></textarea>
       </label>
-      <label>Excerpt
+      <label class="adm-span2">Excerpt
         <textarea name="excerpt"><%= s.excerpt || '' %></textarea>
       </label>
     </div>
