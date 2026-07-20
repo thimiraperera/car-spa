@@ -11,31 +11,55 @@
 --   mysql -u root carspa < schema.sql
 
 -- ---------------------------------------------------------------------------
--- Admin
--- ---------------------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS admin_users (
-  id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
-  username      VARCHAR(50)      NOT NULL,
-  password_hash VARCHAR(255)     NOT NULL,
-  created_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_admin_users_username (username)
-) ENGINE=InnoDB;
-
--- ---------------------------------------------------------------------------
 -- Media library
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS media (
-  id         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-  file_path  VARCHAR(255)  NOT NULL COMMENT 'relative to the media folder, e.g. products/chain-lube-featured.webp',
-  alt_text   VARCHAR(255)  NOT NULL DEFAULT '',
-  mime_type  VARCHAR(100)  NULL,
-  file_size  INT UNSIGNED  NULL,
-  created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  file_path   VARCHAR(255)  NOT NULL COMMENT 'relative to the media folder, e.g. products/chain-lube-featured.webp',
+  title       VARCHAR(190)  NULL,
+  alt_text    VARCHAR(255)  NOT NULL DEFAULT '',
+  description TEXT          NULL,
+  caption     VARCHAR(255)  NULL,
+  mime_type   VARCHAR(100)  NULL,
+  file_size   INT UNSIGNED  NULL,
+  created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_media_file_path (file_path)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------------
+-- Admin
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id                   INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  username             VARCHAR(50)      NOT NULL,
+  first_name           VARCHAR(60)      NULL,
+  last_name            VARCHAR(60)      NULL,
+  email                VARCHAR(190)     NULL,
+  avatar_media_id      INT UNSIGNED     NULL,
+  password_hash        VARCHAR(255)     NOT NULL,
+  reset_token_hash     VARCHAR(128)     NULL,
+  reset_token_expires  DATETIME         NULL,
+  created_at           TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_admin_users_username (username),
+  UNIQUE KEY uq_admin_users_email (email),
+  CONSTRAINT fk_admin_users_media FOREIGN KEY (avatar_media_id) REFERENCES media (id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS smtp_settings (
+  id         INT UNSIGNED NOT NULL,
+  host       VARCHAR(190) NULL,
+  port       SMALLINT UNSIGNED NULL,
+  username   VARCHAR(190) NULL,
+  password   VARCHAR(255) NULL,
+  encryption ENUM('none','ssl','tls') NOT NULL DEFAULT 'tls',
+  from_email VARCHAR(190) NULL,
+  from_name  VARCHAR(190) NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------------
@@ -84,16 +108,18 @@ CREATE TABLE IF NOT EXISTS product_images (
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS testimonials (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  quote         TEXT         NOT NULL,
-  customer_name VARCHAR(100) NOT NULL,
-  detail        VARCHAR(150) NULL COMMENT 'short context line shown under the name, e.g. 2 weeks ago',
-  rating        TINYINT      NOT NULL DEFAULT 5,
-  is_active     TINYINT(1)   NOT NULL DEFAULT 1,
-  sort_order    INT          NOT NULL DEFAULT 0,
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  quote           TEXT         NOT NULL,
+  customer_name   VARCHAR(100) NOT NULL,
+  image_media_id  INT UNSIGNED NULL,
+  detail          VARCHAR(150) NULL COMMENT 'short context line shown under the name, e.g. 2 weeks ago',
+  rating          TINYINT      NOT NULL DEFAULT 5,
+  is_active       TINYINT(1)   NOT NULL DEFAULT 1,
+  sort_order      INT          NOT NULL DEFAULT 0,
+  created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  KEY idx_testimonials_active (is_active, created_at)
+  KEY idx_testimonials_active (is_active, created_at),
+  CONSTRAINT fk_testimonials_media FOREIGN KEY (image_media_id) REFERENCES media (id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS faqs (
