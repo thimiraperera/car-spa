@@ -36,7 +36,9 @@ router.get('/', async function (req, res, next) {
       query(CARD_SELECT + 'ORDER BY p.created_at DESC, p.id DESC LIMIT ?', [carouselCount]),
       query(CARD_SELECT + 'AND p.vehicle IN ("car", "both") ORDER BY p.click_count DESC, p.created_at DESC LIMIT ?', [picksCount]),
       query(CARD_SELECT + 'AND p.vehicle IN ("bike", "both") ORDER BY p.click_count DESC, p.created_at DESC LIMIT ?', [picksCount]),
-      query('SELECT * FROM testimonials WHERE is_active = 1 ORDER BY created_at DESC, id DESC LIMIT ?', [testimonialCount]),
+      query('SELECT t.*, m.file_path AS image_file_path FROM testimonials t ' +
+        'LEFT JOIN media m ON m.id = t.image_media_id ' +
+        'WHERE t.is_active = 1 ORDER BY t.created_at DESC, t.id DESC LIMIT ?', [testimonialCount]),
       query('SELECT * FROM faqs WHERE is_active = 1 ORDER BY sort_order, id')
     ]);
 
@@ -62,15 +64,45 @@ router.get('/', async function (req, res, next) {
 
 // ---- Products listing (most clicked first) --------------------------------
 
+const CATEGORY_KEYS = ['engine', 'exterior', 'interior', 'brake', 'chain'];
+
+// Maps a raw product category string to the filter pill it belongs under.
+function catKey(category) {
+  const c = String(category || '').toLowerCase();
+  if (c.indexOf('engine') !== -1) return 'engine';
+  if (c.indexOf('exterior') !== -1 || c.indexOf('shine') !== -1) return 'exterior';
+  if (c.indexOf('brake') !== -1 || c.indexOf('underbody') !== -1) return 'brake';
+  if (c.indexOf('chain') !== -1 || c.indexOf('bike') !== -1) return 'chain';
+  if (c.indexOf('interior') !== -1 || /\bac\b/.test(c)) return 'interior';
+  return '';
+}
+
 router.get('/products', async function (req, res, next) {
   try {
-    const products = await query(CARD_SELECT + 'ORDER BY p.click_count DESC, p.created_at DESC, p.id DESC');
+    const site = res.locals.site;
+    const perPage = siteSettings.intSetting(site.settings, 'products_per_page', 12);
+
+    const currentCat = CATEGORY_KEYS.indexOf(req.query.cat) !== -1 ? req.query.cat : 'all';
+    let page = parseInt(req.query.page, 10);
+    if (!Number.isFinite(page) || page < 1) page = 1;
+
+    const rows = await query(CARD_SELECT + 'ORDER BY p.click_count DESC, p.created_at DESC, p.id DESC');
+    const all = cardify(rows).map(function (p) {
+      return Object.assign(p, { cat_key: catKey(p.category) });
+    });
+    const filtered = currentCat === 'all' ? all : all.filter(function (p) { return p.cat_key === currentCat; });
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+    if (page > totalPages) page = totalPages;
+
+    const products = filtered.slice((page - 1) * perPage, page * perPage);
+
     const meta = await pageMeta('products', {
       title: 'Shop Car and Bike Care Products | Car Spa LK',
       description: '',
       path: '/products'
     });
-    res.render('products', { meta, products: cardify(products), jsonld: [] });
+    res.render('products', { meta, products, currentPage: page, totalPages, currentCat, jsonld: [] });
   } catch (err) {
     next(err);
   }

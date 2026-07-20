@@ -116,7 +116,7 @@ strong.hl, .hl { color: var(--accent); }
   position: absolute; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; color: #fff;
 }
-.logo-mark svg { height: 46px; width: auto; transition: height .3s ease; }
+.logo-mark svg, .logo-mark-img { height: 46px; width: auto; transition: height .3s ease; display: block; }
 
 .nav-right { display: flex; align-items: center; gap: 18px; }
 .nav-right .icon-link { color: #fff; opacity: .9; display: inline-flex; transition: opacity .2s ease, transform .3s ease; }
@@ -1252,3 +1252,19 @@ body.so-open, body.mc-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .search-overlay, .mini-cart { transition-delay: 0s !important; }
 }
+
+/* ============================================================
+   Products listing pagination (views/products.ejs)
+   ============================================================ */
+.pg-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 48px 0 10px; }
+.pg-btn, .pg-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; padding: 0 18px;
+  border: 2px solid var(--ink); border-radius: 999px;
+  font-weight: 700; font-size: 14px; color: var(--ink);
+  transition: all .2s;
+}
+.pg-num { padding: 0; }
+.pg-btn:hover, .pg-num:hover { background: var(--ink); color: #fff; }
+.pg-num.active { background: var(--ink); color: #fff; cursor: default; }
+.pg-btn.disabled { opacity: .35; border-color: var(--ink-soft); color: var(--ink-soft); pointer-events: none; }
