@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/bash /home/compcfcd/carspa/deploy.sh
+    - /bin/bash /home/compopkz/repositories/carspa/deploy.sh
