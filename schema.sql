@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
   username             VARCHAR(50)      NOT NULL,
   first_name           VARCHAR(60)      NULL,
   last_name            VARCHAR(60)      NULL,
+  nickname             VARCHAR(60)      NULL,
   email                VARCHAR(190)     NULL,
   avatar_media_id      INT UNSIGNED     NULL,
   password_hash        VARCHAR(255)     NOT NULL,
