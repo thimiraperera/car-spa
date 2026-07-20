@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { query, queryOne } = require('../../lib/db');
+const siteSettings = require('../../lib/settings');
 
 const router = express.Router();
 
@@ -40,11 +41,26 @@ const upload = multer({
 
 router.get('/', async function (req, res, next) {
   try {
-    const items = await query('SELECT * FROM media ORDER BY created_at DESC, id DESC');
+    const perPage = siteSettings.intSetting(res.locals.site.settings, 'media_per_page', 24);
+    let page = parseInt(req.query.page, 10);
+    if (!Number.isFinite(page) || page < 1) page = 1;
+
+    const totalRow = await queryOne('SELECT COUNT(*) AS n FROM media');
+    const total = totalRow ? totalRow.n : 0;
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    if (page > totalPages) page = totalPages;
+    const offset = (page - 1) * perPage;
+
+    const items = await query(
+      'SELECT * FROM media ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?',
+      [perPage, offset]
+    );
     res.render('admin/media/index', {
       pageTitle: 'Media',
       active: 'media',
       items: items,
+      currentPage: page,
+      totalPages: totalPages,
       err: req.query.err || null
     });
   } catch (err) {
@@ -79,12 +95,18 @@ router.post('/', function (req, res, next) {
   });
 });
 
-router.post('/:id/alt', async function (req, res, next) {
+router.post('/:id', async function (req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     if (!Number.isFinite(id)) return res.redirect('/admin/media');
+    const title = String(req.body.title || '').trim().slice(0, 190);
     const altText = String(req.body.alt_text || '').trim().slice(0, 255);
-    await query('UPDATE media SET alt_text = ? WHERE id = ?', [altText, id]);
+    const description = String(req.body.description || '').trim();
+    const caption = String(req.body.caption || '').trim().slice(0, 255);
+    await query(
+      'UPDATE media SET title = ?, alt_text = ?, description = ?, caption = ? WHERE id = ?',
+      [title || null, altText, description || null, caption || null, id]
+    );
     res.redirect('/admin/media?saved=1');
   } catch (err) {
     next(err);

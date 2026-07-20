@@ -1,12 +1,57 @@
 <%- include('../partials/top') %>
 <style>
   .adm-form input[type="file"] { display: block; width: 100%; margin-top: 5px; font: inherit; font-weight: 400; }
-  .adm-media-item .alt-form { display: flex; gap: 4px; padding: 0 6px 6px; }
-  .adm-media-item .alt-form input {
-    flex: 1; min-width: 0; font: inherit; font-size: 11.5px; padding: 4px 7px;
-    border: 1px solid var(--line); border-radius: 6px; color: var(--ink);
+
+  /* ---- Grid tiles as buttons ---- */
+  .media-tile {
+    display: block; width: 100%; margin: 0; padding: 0; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
   }
-  .adm-media-item .alt-form input:focus { outline: none; border-color: var(--ink); }
+  .media-tile:hover .meta b { color: var(--accent-dark); }
+  .media-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- Detail overlay ---- */
+  .adm-media-overlay {
+    display: none; position: fixed; inset: 0; z-index: 60;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .adm-media-overlay.open { display: flex; }
+  .adm-media-backdrop { position: absolute; inset: 0; background: rgba(28, 31, 35, .55); }
+  .adm-media-panel {
+    position: relative; background: var(--white); border-radius: 16px;
+    width: min(600px, 100%); max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .35); padding: 26px 28px;
+  }
+  .adm-media-close {
+    position: absolute; top: 14px; right: 14px; width: 32px; height: 32px;
+    border-radius: 50%; border: 0; background: var(--cream); color: var(--ink);
+    font-size: 18px; line-height: 1; cursor: pointer;
+  }
+  .adm-media-close:hover { background: var(--line); }
+  .adm-media-panel-img {
+    width: 100%; max-height: 240px; border-radius: 10px; background: var(--cream);
+    display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 16px;
+  }
+  .adm-media-panel-img img { max-width: 100%; max-height: 240px; object-fit: contain; display: block; }
+  .adm-media-readonly { margin-bottom: 18px; }
+  .adm-media-readonly div {
+    display: flex; justify-content: space-between; gap: 14px; padding: 6px 0;
+    border-bottom: 1px solid var(--line); font-size: 12.5px;
+  }
+  .adm-media-readonly .k { color: var(--ink-soft); font-weight: 600; flex-shrink: 0; }
+  .adm-media-readonly .v { word-break: break-all; text-align: right; }
+  #mediaDeleteForm { margin-top: 4px; }
+
+  /* ---- Pagination ---- */
+  .adm-media-pager { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+  .adm-media-pager a, .adm-media-pager span {
+    display: inline-block; min-width: 34px; text-align: center; padding: 7px 10px;
+    border-radius: 8px; border: 1.5px solid var(--line); font-size: 13px; font-weight: 600;
+    text-decoration: none; color: var(--ink);
+  }
+  .adm-media-pager a:hover { border-color: var(--ink); }
+  .adm-media-pager a.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .adm-media-pager span.disabled { color: var(--ink-soft); opacity: .5; }
 </style>
 <header class="adm-head">
   <h1>Media</h1>
@@ -43,27 +88,132 @@
   <% } else { %>
   <div class="adm-media-grid">
     <% items.forEach(function (m) { %>
-    <div class="adm-media-item">
+    <button type="button" class="adm-media-item media-tile"
+      data-id="<%= m.id %>"
+      data-file-path="<%= m.file_path %>"
+      data-title="<%= m.title || '' %>"
+      data-alt-text="<%= m.alt_text || '' %>"
+      data-description="<%= m.description || '' %>"
+      data-caption="<%= m.caption || '' %>"
+      data-file-size="<%= m.file_size || '' %>"
+      data-created-at="<%= m.created_at || '' %>">
       <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text %>" loading="lazy">
       <div class="meta">
-        <b><%= m.file_path %></b>
+        <b><%= m.title || m.file_path %></b>
         <span><%= m.file_size ? Math.round(m.file_size / 1024) + ' KB' : 'size unknown' %></span>
       </div>
-      <form class="alt-form" method="post" action="/admin/media/<%= m.id %>/alt">
-        <input type="hidden" name="_csrf" value="<%= csrf %>">
-        <input type="text" name="alt_text" value="<%= m.alt_text %>" maxlength="255" placeholder="Alt text">
-        <button type="submit" class="adm-btn-ghost small">Save</button>
-      </form>
       <div class="row">
         <span><%= (m.mime_type || '').replace('image/', '') %></span>
-        <form class="adm-inline-form" method="post" action="/admin/media/<%= m.id %>/delete" data-confirm="Delete this file? This cannot be undone.">
-          <input type="hidden" name="_csrf" value="<%= csrf %>">
-          <button type="submit" class="adm-btn-danger">Delete</button>
-        </form>
       </div>
-    </div>
+    </button>
     <% }); %>
   </div>
+
+  <% if (totalPages > 1) { %>
+  <nav class="adm-media-pager" aria-label="Media pages">
+    <% if (currentPage > 1) { %>
+    <a href="/admin/media?page=<%= currentPage - 1 %>">Prev</a>
+    <% } else { %>
+    <span class="disabled">Prev</span>
+    <% } %>
+    <% for (var pn = 1; pn <= totalPages; pn++) { %>
+    <a href="/admin/media?page=<%= pn %>" class="<%= pn === currentPage ? 'on' : '' %>"><%= pn %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+    <a href="/admin/media?page=<%= currentPage + 1 %>">Next</a>
+    <% } else { %>
+    <span class="disabled">Next</span>
+    <% } %>
+  </nav>
+  <% } %>
   <% } %>
 </section>
+
+<div class="adm-media-overlay" id="mediaOverlay">
+  <div class="adm-media-backdrop" id="mediaBackdrop"></div>
+  <div class="adm-media-panel">
+    <button type="button" class="adm-media-close" id="mediaClose" aria-label="Close">&times;</button>
+    <div class="adm-media-panel-img">
+      <img id="mediaPanelImg" src="" alt="">
+    </div>
+    <div class="adm-media-readonly">
+      <div><span class="k">File path</span><span class="v" id="mediaPanelPath"></span></div>
+      <div><span class="k">Size</span><span class="v" id="mediaPanelSize"></span></div>
+      <div><span class="k">Uploaded</span><span class="v" id="mediaPanelDate"></span></div>
+    </div>
+    <form class="adm-form" method="post" id="mediaMetaForm" action="/admin/media">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Title
+        <input type="text" name="title" id="mediaFieldTitle" maxlength="190">
+      </label>
+      <label>Alt text
+        <input type="text" name="alt_text" id="mediaFieldAlt" maxlength="255">
+      </label>
+      <label>Caption
+        <input type="text" name="caption" id="mediaFieldCaption" maxlength="255">
+      </label>
+      <label>Description
+        <textarea name="description" id="mediaFieldDescription"></textarea>
+      </label>
+      <div class="adm-form-actions">
+        <button type="submit" class="adm-btn">Save</button>
+        <button type="button" class="adm-btn-ghost" id="mediaCancel">Cancel</button>
+      </div>
+    </form>
+    <form method="post" id="mediaDeleteForm" action="/admin/media" data-confirm="Delete this file? This cannot be undone.">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button type="submit" class="adm-btn-danger">Delete file</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  var overlay = document.getElementById('mediaOverlay');
+  var backdrop = document.getElementById('mediaBackdrop');
+  var closeBtn = document.getElementById('mediaClose');
+  var cancelBtn = document.getElementById('mediaCancel');
+  var metaForm = document.getElementById('mediaMetaForm');
+  var deleteForm = document.getElementById('mediaDeleteForm');
+  var img = document.getElementById('mediaPanelImg');
+  var pathEl = document.getElementById('mediaPanelPath');
+  var sizeEl = document.getElementById('mediaPanelSize');
+  var dateEl = document.getElementById('mediaPanelDate');
+  var titleField = document.getElementById('mediaFieldTitle');
+  var altField = document.getElementById('mediaFieldAlt');
+  var captionField = document.getElementById('mediaFieldCaption');
+  var descField = document.getElementById('mediaFieldDescription');
+
+  function openPanel(tile) {
+    var d = tile.dataset;
+    metaForm.action = '/admin/media/' + d.id;
+    deleteForm.action = '/admin/media/' + d.id + '/delete';
+    img.src = '/media/' + d.filePath;
+    img.alt = d.altText || '';
+    pathEl.textContent = d.filePath;
+    sizeEl.textContent = d.fileSize ? Math.round(d.fileSize / 1024) + ' KB' : 'Unknown';
+    dateEl.textContent = d.createdAt || 'Unknown';
+    titleField.value = d.title || '';
+    altField.value = d.altText || '';
+    captionField.value = d.caption || '';
+    descField.value = d.description || '';
+    overlay.classList.add('open');
+  }
+
+  function closePanel() {
+    overlay.classList.remove('open');
+  }
+
+  document.querySelectorAll('.media-tile').forEach(function (tile) {
+    tile.addEventListener('click', function () { openPanel(tile); });
+  });
+
+  backdrop.addEventListener('click', closePanel);
+  closeBtn.addEventListener('click', closePanel);
+  cancelBtn.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closePanel();
+  });
+})();
+</script>
 <%- include('../partials/bottom') %>
