@@ -37,12 +37,14 @@
     });
   });
 
-  /* Rich editor: contenteditable area synced to a hidden textarea, with an
-     HTML source toggle. Markup contract:
-     .adm-editor > .adm-editor-bar (buttons with data-cmd / data-src-toggle)
+  /* Rich editor: contenteditable area synced to a hidden textarea, with
+     Visual / HTML tabs. Markup contract:
+     .adm-editor > .adm-editor-tabs (buttons with data-editor-tab="visual|html")
+                 > .adm-editor-bar (buttons with data-cmd, shown in Visual only)
                  > .adm-editor-area[contenteditable]
                  > textarea.adm-editor-src
-     The textarea carries the form field name and the initial value. */
+     The textarea carries the form field name and the initial value.
+     (A legacy [data-src-toggle] button still works if a view has one.) */
   document.querySelectorAll('.adm-editor').forEach(function (editor) {
     var area = editor.querySelector('.adm-editor-area');
     var src = editor.querySelector('.adm-editor-src');
@@ -70,17 +72,31 @@
       });
     });
 
+    function setMode(html) {
+      if (html) {
+        syncFromArea();
+        editor.classList.add('src-mode');
+      } else {
+        syncFromSrc();
+        editor.classList.remove('src-mode');
+      }
+      editor.querySelectorAll('[data-editor-tab]').forEach(function (tab) {
+        tab.classList.toggle('active', (tab.getAttribute('data-editor-tab') === 'html') === html);
+      });
+    }
+
+    editor.querySelectorAll('[data-editor-tab]').forEach(function (tab) {
+      tab.addEventListener('click', function (e) {
+        e.preventDefault();
+        setMode(tab.getAttribute('data-editor-tab') === 'html');
+      });
+    });
+
     var toggle = editor.querySelector('[data-src-toggle]');
     if (toggle) {
       toggle.addEventListener('click', function (e) {
         e.preventDefault();
-        if (editor.classList.contains('src-mode')) {
-          syncFromSrc();
-          editor.classList.remove('src-mode');
-        } else {
-          syncFromArea();
-          editor.classList.add('src-mode');
-        }
+        setMode(!editor.classList.contains('src-mode'));
       });
     }
 

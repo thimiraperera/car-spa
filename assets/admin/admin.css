@@ -79,10 +79,14 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .adm-logout button svg { flex: none; width: 15px; height: 15px; }
 .adm-logout button:hover { background: var(--ink-2); color: #fff; }
 
-/* ---------- Top bar (main column) ---------- */
+/* ---------- Content column (right of the sidebar) ---------- */
+.adm-content { margin-left: var(--side-w); }
+
+/* ---------- Top bar (full width of the content column) ---------- */
 .adm-topbar {
   display: flex; justify-content: flex-end; align-items: center;
-  padding: 14px 34px; margin: -30px -34px 26px; border-bottom: 1px solid var(--line);
+  padding: 14px 34px; border-bottom: 1px solid var(--line);
+  background: var(--white);
 }
 .adm-topbar-profile { position: relative; }
 .adm-topbar-btn {
@@ -114,7 +118,7 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .adm-topbar-menu button { color: var(--accent-dark); }
 
 /* ---------- Main column ---------- */
-.adm-main { margin-left: var(--side-w); padding: 30px 34px 60px; max-width: 1180px; }
+.adm-main { padding: 30px 34px 60px; max-width: 1180px; }
 .adm-head {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; margin-bottom: 22px; flex-wrap: wrap;
@@ -123,8 +127,10 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .adm-head .adm-head-actions { display: flex; gap: 10px; }
 
 /* ---------- Cards ---------- */
+/* auto-fit (not auto-fill) so the cards stretch to the same width as the
+   panels below instead of leaving a phantom empty column */
 .adm-cards {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px; margin-bottom: 26px;
 }
 .adm-card {
@@ -207,8 +213,24 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .adm-form .check input { width: auto; margin: 0; }
 .adm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
 .adm-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 20px; }
-.adm-form-actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+.adm-span2 { grid-column: 1 / -1; }
+.adm-form-actions { display: flex; gap: 10px; align-items: center; margin: 6px 0 8px; }
 .adm-inline-form { display: inline; }
+
+/* Per-page selector on paginated admin lists */
+.adm-perpage { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+.adm-perpage select {
+  font: inherit; padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 8px;
+  background: var(--white); color: var(--ink);
+}
+
+/* Upload field with a preview of the current image */
+.adm-upload-row { display: flex; align-items: center; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+.adm-upload-row img {
+  width: 64px; height: 64px; object-fit: contain; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--cream); padding: 4px;
+}
+.adm-upload-row input[type="file"] { font-size: 13px; }
 
 /* ---------- Toast, errors ---------- */
 .adm-toast {
@@ -265,8 +287,18 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 .adm-media-item .meta span { color: var(--ink-soft); }
 .adm-media-item .row { display: flex; justify-content: space-between; align-items: center; padding: 0 6px 6px; }
 
-/* ---------- Rich editor (legal pages) ---------- */
+/* ---------- Rich editor (legal pages, product descriptions) ---------- */
 .adm-editor { border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; margin-top: 5px; }
+.adm-editor-tabs {
+  display: flex; gap: 4px; padding: 8px 8px 0;
+  background: var(--cream);
+}
+.adm-editor-tab {
+  border: 0; background: transparent; font: inherit; font-weight: 700; font-size: 13px;
+  color: var(--ink-soft); padding: 8px 16px; border-radius: 9px 9px 0 0; cursor: pointer;
+}
+.adm-editor-tab.active { background: var(--white); color: var(--ink); }
+.adm-editor.src-mode .adm-editor-bar { display: none; }
 .adm-editor-bar {
   display: flex; flex-wrap: wrap; gap: 2px; padding: 6px;
   background: var(--cream); border-bottom: 1.5px solid var(--line);
@@ -312,8 +344,9 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .adm-side { position: static; width: auto; inset: auto; }
-  .adm-main { margin-left: 0; padding: 20px 16px 50px; }
-  .adm-topbar { margin: -20px -16px 20px; padding: 12px 16px; }
+  .adm-content { margin-left: 0; }
+  .adm-main { padding: 20px 16px 50px; }
+  .adm-topbar { padding: 12px 16px; }
   .adm-grid2, .adm-grid3 { grid-template-columns: 1fr; }
   body.adm { font-size: 14px; }
 }

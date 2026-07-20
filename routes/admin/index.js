@@ -79,16 +79,17 @@ router.post('/logout', requireAdmin, verifyCsrf, function (req, res, next) {
 
 router.use(requireAdmin);
 
-// Make csrf + admin name + avatar available to every admin view.
+// Make csrf + admin display name + avatar available to every admin view.
 router.use(async function (req, res, next) {
   try {
     res.locals.csrf = csrfToken(req);
-    res.locals.adminName = req.session.adminName;
     res.locals.saved = req.query.saved === '1';
     const row = await queryOne(
-      'SELECT m.file_path FROM admin_users a LEFT JOIN media m ON m.id = a.avatar_media_id WHERE a.id = ?',
+      'SELECT a.nickname, a.first_name, m.file_path FROM admin_users a ' +
+      'LEFT JOIN media m ON m.id = a.avatar_media_id WHERE a.id = ?',
       [req.session.adminId]
     );
+    res.locals.adminName = (row && (row.nickname || row.first_name)) || req.session.adminName;
     res.locals.adminAvatar = row ? row.file_path : null;
     next();
   } catch (err) {
@@ -97,11 +98,12 @@ router.use(async function (req, res, next) {
 });
 
 // State-changing requests must carry the CSRF token. Multipart uploads are
-// exempt here because multer parses their body inside the media module, which
-// verifies the token itself right after.
+// exempt from this gate because their body is only parsed by multer inside
+// the handling module; every multipart handler MUST call csrfOk() from
+// lib/uploads.js right after multer runs and 403 on mismatch.
 router.use(function (req, res, next) {
   if (req.method === 'GET') return next();
-  if (req.path === '/media' && (req.get('content-type') || '').indexOf('multipart/form-data') === 0) return next();
+  if ((req.get('content-type') || '').indexOf('multipart/form-data') === 0) return next();
   return verifyCsrf(req, res, next);
 });
 
