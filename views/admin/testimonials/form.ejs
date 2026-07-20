@@ -6,6 +6,13 @@
   </div>
 </header>
 
+<style>
+  .adm-imgpick .pick .tag { display: flex; justify-content: center; gap: 10px; padding: 3px 0; }
+  .adm-imgpick .pick .tag label { display: flex; align-items: center; gap: 3px; margin: 0; font-weight: 400; font-size: 10px; cursor: pointer; }
+  .adm-imgpick .pick .tag input { margin: 0; }
+  .adm-imgpick .pick.nophoto { display: flex; align-items: center; justify-content: center; min-height: 80px; font-size: 12px; color: var(--adm-muted, #888); text-align: center; }
+</style>
+
 <section class="adm-panel">
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
   <form class="adm-form" method="post" action="<%= item && item.id ? '/admin/testimonials/' + item.id : '/admin/testimonials' %>">
@@ -37,10 +44,49 @@
         Show on the site
       </label>
     </div>
+    <div class="adm-field">Photo (optional)
+      <% var currentImageId = item && item.image_media_id ? Number(item.image_media_id) : null; %>
+      <% if (media.length) { %>
+      <div class="adm-imgpick" id="imgpick">
+        <div class="pick nophoto<%= currentImageId ? '' : ' sel' %>">
+          <span class="tag">
+            <label title="No photo"><input type="radio" name="image_media" value="" <%= currentImageId ? '' : 'checked' %>> No photo</label>
+          </span>
+        </div>
+        <% media.forEach(function (m) { %>
+        <% var isSel = currentImageId === m.id; %>
+        <div class="pick<%= isSel ? ' sel' : '' %>">
+          <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
+          <span class="tag">
+            <label title="Use this photo"><input type="radio" name="image_media" value="<%= m.id %>" <%= isSel ? 'checked' : '' %>> Use</label>
+          </span>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <p class="adm-panel-note">The media library is empty.</p>
+      <% } %>
+    </div>
+
     <div class="adm-form-actions">
       <button type="submit" class="adm-btn">Save testimonial</button>
       <a class="adm-btn-ghost" href="/admin/testimonials">Cancel</a>
     </div>
   </form>
 </section>
+
+<script>
+(function () {
+  var grid = document.getElementById('imgpick');
+  if (grid) {
+    var refresh = function () {
+      grid.querySelectorAll('.pick').forEach(function (pick) {
+        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
+      });
+    };
+    grid.addEventListener('change', refresh);
+    refresh();
+  }
+})();
+</script>
 <%- include('../partials/bottom') %>

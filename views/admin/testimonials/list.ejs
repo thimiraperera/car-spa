@@ -6,10 +6,16 @@
   </div>
 </header>
 
+<style>
+  .adm-thumb-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; display: block; }
+  .adm-thumb-ph { width: 36px; height: 36px; border-radius: 50%; background: var(--adm-panel-alt, #eee); }
+</style>
+
 <section class="adm-panel">
   <table class="adm-table">
     <thead>
       <tr>
+        <th>Photo</th>
         <th>Quote</th>
         <th>Customer</th>
         <th>Detail</th>
@@ -21,6 +27,13 @@
     <tbody>
       <% testimonials.forEach(function (t) { %>
       <tr>
+        <td>
+          <% if (t.image_file_path) { %>
+          <img class="adm-thumb-sm" src="/media/<%= t.image_file_path %>" alt="<%= t.customer_name %>">
+          <% } else { %>
+          <span class="adm-thumb-ph"></span>
+          <% } %>
+        </td>
         <td><%= t.quote.length > 80 ? t.quote.slice(0, 80) + '...' : t.quote %></td>
         <td><%= t.customer_name %></td>
         <td class="muted"><%= t.detail || '' %></td>
@@ -36,7 +49,7 @@
       </tr>
       <% }); %>
       <% if (!testimonials.length) { %>
-      <tr><td colspan="6" class="muted">No testimonials yet</td></tr>
+      <tr><td colspan="7" class="muted">No testimonials yet</td></tr>
       <% } %>
     </tbody>
   </table>
