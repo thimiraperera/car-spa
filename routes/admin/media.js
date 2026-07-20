@@ -1,47 +1,22 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const { query, queryOne } = require('../../lib/db');
-const siteSettings = require('../../lib/settings');
+const { MEDIA_ROOT } = require('../../lib/uploads');
 
 const router = express.Router();
 
-const MEDIA_ROOT = path.join(__dirname, '..', '..', 'media');
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
-// The extension decides what content type the file is served back with, so it
-// is checked as well; the client-declared mimetype alone cannot be trusted.
-const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif'];
-
-function slugifyBase(name) {
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  return slug || 'file';
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(MEDIA_ROOT, 'uploads', String(new Date().getFullYear()));
-    fs.mkdir(dir, { recursive: true }, function (err) { cb(err, dir); });
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const base = slugifyBase(path.basename(file.originalname, ext));
-    cb(null, base + '-' + Date.now() + ext);
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 8 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, ALLOWED_TYPES.indexOf(file.mimetype) !== -1 && ALLOWED_EXTS.indexOf(ext) !== -1);
-  }
-});
+const PER_CHOICES = [10, 25, 50, 100];
 
 router.get('/', async function (req, res, next) {
   try {
-    const perPage = siteSettings.intSetting(res.locals.site.settings, 'media_per_page', 24);
+    req.session.adminPerPage = req.session.adminPerPage || {};
+    const asked = parseInt(req.query.per, 10);
+    if (PER_CHOICES.indexOf(asked) !== -1) req.session.adminPerPage.media = asked;
+    const perPage = PER_CHOICES.indexOf(req.session.adminPerPage.media) !== -1
+      ? req.session.adminPerPage.media
+      : 25;
+
     let page = parseInt(req.query.page, 10);
     if (!Number.isFinite(page) || page < 1) page = 1;
 
@@ -61,38 +36,12 @@ router.get('/', async function (req, res, next) {
       items: items,
       currentPage: page,
       totalPages: totalPages,
+      per: perPage,
       err: req.query.err || null
     });
   } catch (err) {
     next(err);
   }
-});
-
-// Multipart body, so multer runs first and the CSRF token is checked by hand
-// afterwards. The global CSRF gate in routes/admin/index.js skips this POST.
-router.post('/', function (req, res, next) {
-  upload.single('file')(req, res, async function (err) {
-    try {
-      if (err) return res.redirect('/admin/media?err=upload');
-      const tokenOk = req.session && req.session.csrf &&
-        req.body && req.body._csrf === req.session.csrf;
-      if (!tokenOk) {
-        if (req.file) await fs.promises.unlink(req.file.path).catch(function () {});
-        return res.status(403).send('Invalid or missing CSRF token');
-      }
-      if (!req.file) return res.redirect('/admin/media?err=upload');
-
-      const relPath = path.relative(MEDIA_ROOT, req.file.path).split(path.sep).join('/');
-      const altText = String(req.body.alt_text || '').trim().slice(0, 255);
-      await query(
-        'INSERT INTO media (file_path, alt_text, mime_type, file_size) VALUES (?, ?, ?, ?)',
-        [relPath, altText, req.file.mimetype, req.file.size]
-      );
-      res.redirect('/admin/media?saved=1');
-    } catch (e) {
-      next(e);
-    }
-  });
 });
 
 router.post('/:id', async function (req, res, next) {

@@ -4,12 +4,10 @@
 </header>
 
 <style>
-  .adm-imgpick .pick.none-pick { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-  .adm-imgpick .pick.none-pick .none-ph { font-size: 11px; color: var(--ink-soft); }
-  .adm-branding-grid { display: flex; flex-direction: column; gap: 4px; }
+  .adm-upload-row label { display: inline; margin-bottom: 0; font-weight: 400; font-size: 13px; }
 </style>
 
-<form class="adm-form" method="post" action="/admin/settings">
+<form class="adm-form" method="post" action="/admin/settings" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
 
   <section class="adm-panel">
@@ -31,79 +29,31 @@
   </section>
 
   <section class="adm-panel">
-    <h2>Pagination</h2>
-    <div class="adm-grid2">
-      <label>Products per page
-        <small>How many products are shown per page on the products listing</small>
-        <select name="products_per_page">
-          <% [6, 12, 18, 24, 36, 48].forEach(function (n) { %>
-          <option value="<%= n %>" <%= values.products_per_page === n ? 'selected' : '' %>><%= n %></option>
-          <% }); %>
-        </select>
-      </label>
-      <label>Media library page size
-        <small>How many items are shown per page in the media library</small>
-        <select name="media_per_page">
-          <% [12, 24, 48, 96].forEach(function (n) { %>
-          <option value="<%= n %>" <%= values.media_per_page === n ? 'selected' : '' %>><%= n %></option>
-          <% }); %>
-        </select>
-      </label>
-    </div>
-  </section>
-
-  <section class="adm-panel">
     <h2>Branding</h2>
-    <% if (!media.length) { %>
-    <p class="adm-panel-note">The media library is empty. Upload logos in <a href="/admin/media">Media</a>.</p>
-    <% } %>
-    <% const logoPickers = [
+    <% const logoFields = [
       { key: 'site_logo_media_id', label: 'Site logo', help: '' },
-      { key: 'mail_header_logo_media_id', label: 'Mail template header logo', help: 'Shown at the top of outgoing emails' },
-      { key: 'dark_mode_logo_media_id', label: 'Dark mode logo', help: 'Used on the transparent homepage header over the dark hero image, pick a light or white colored logo' },
-      { key: 'light_mode_logo_media_id', label: 'Light mode logo', help: 'Used on the solid white header on every other page, pick a dark colored logo' }
+      { key: 'mail_header_logo_media_id', label: 'Mail template header logo', help: 'Shown at the top of outgoing emails, PNG recommended for email clients' },
+      { key: 'dark_mode_logo_media_id', label: 'Dark mode logo', help: 'Used on the transparent homepage header over the dark hero image, upload a light or white colored version' },
+      { key: 'light_mode_logo_media_id', label: 'Light mode logo', help: 'Used on the solid white header on every other page, upload a dark colored version' }
     ]; %>
-    <div class="adm-branding-grid">
-      <% logoPickers.forEach(function (lp) { %>
-      <% const selId = values[lp.key]; %>
-      <div class="adm-field">
-        <%= lp.label %><% if (lp.help) { %> <small><%= lp.help %></small><% } %>
-        <% if (media.length) { %>
-        <div class="adm-imgpick">
-          <div class="pick none-pick<%= !selId ? ' sel' : '' %>">
-            <span class="none-ph">None</span>
-            <span class="tag"><input type="radio" name="<%= lp.key %>" value="" <%= !selId ? 'checked' : '' %>></span>
-          </div>
-          <% media.forEach(function (m) { %>
-          <% const isSel = selId === m.id; %>
-          <div class="pick<%= isSel ? ' sel' : '' %>">
-            <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
-            <span class="tag"><input type="radio" name="<%= lp.key %>" value="<%= m.id %>" <%= isSel ? 'checked' : '' %>></span>
-          </div>
-          <% }); %>
-        </div>
+    <% logoFields.forEach(function (lf) { %>
+    <div class="adm-field">
+      <%= lf.label %><% if (lf.help) { %> <small><%= lf.help %></small><% } %>
+      <div class="adm-upload-row">
+        <% if (logos[lf.key]) { %>
+        <img src="/media/<%= logos[lf.key].file_path %>" alt="Current <%= lf.label.toLowerCase() %>">
+        <% } %>
+        <input type="file" name="<%= lf.key %>_file" accept="image/*">
+        <% if (logos[lf.key]) { %>
+        <label><input type="checkbox" name="<%= lf.key %>_clear" value="1"> Remove</label>
         <% } %>
       </div>
-      <% }); %>
     </div>
+    <% }); %>
   </section>
 
   <div class="adm-form-actions">
     <button type="submit" class="adm-btn">Save settings</button>
   </div>
 </form>
-
-<script>
-(function () {
-  document.querySelectorAll('.adm-imgpick').forEach(function (grid) {
-    var refresh = function () {
-      grid.querySelectorAll('.pick').forEach(function (pick) {
-        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
-      });
-    };
-    grid.addEventListener('change', refresh);
-    refresh();
-  });
-})();
-</script>
 <%- include('../partials/bottom') %>

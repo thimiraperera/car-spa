@@ -1,7 +1,6 @@
 <%- include('../partials/top') %>
+<% const pageLink = function (pn) { return '/admin/media?page=' + pn + (per !== 25 ? '&per=' + per : ''); }; %>
 <style>
-  .adm-form input[type="file"] { display: block; width: 100%; margin-top: 5px; font: inherit; font-weight: 400; }
-
   /* ---- Grid tiles as buttons ---- */
   .media-tile {
     display: block; width: 100%; margin: 0; padding: 0; text-align: left;
@@ -55,36 +54,29 @@
 </style>
 <header class="adm-head">
   <h1>Media</h1>
+  <div class="adm-head-actions">
+    <form class="adm-perpage" method="get">
+      <label>Show
+        <select name="per" onchange="this.form.submit()">
+          <% [10, 25, 50, 100].forEach(function (n) { %>
+          <option value="<%= n %>" <%= per === n ? 'selected' : '' %>><%= n %></option>
+          <% }); %>
+        </select>
+        per page
+      </label>
+    </form>
+  </div>
 </header>
 
 <% if (err === 'used') { %>
 <div class="adm-error">That file is attached to a product, detach it first</div>
-<% } else if (err === 'upload') { %>
-<div class="adm-error">Upload failed. Use a jpg, png, webp, avif or gif under 8 MB.</div>
 <% } %>
 
 <section class="adm-panel">
-  <h2>Upload image</h2>
-  <form class="adm-form" method="post" action="/admin/media" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<%= csrf %>">
-    <div class="adm-grid2">
-      <label>File
-        <input type="file" name="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required>
-      </label>
-      <label>Alt text <small>(optional)</small>
-        <input type="text" name="alt_text" maxlength="255" placeholder="Describe the image">
-      </label>
-    </div>
-    <div class="adm-form-actions">
-      <button type="submit" class="adm-btn">Upload</button>
-    </div>
-  </form>
-</section>
-
-<section class="adm-panel">
   <h2>Library</h2>
+  <p class="adm-panel-note">Images are added by uploading them where they are used (products, testimonials, branding, profile) and every upload appears here automatically.</p>
   <% if (!items.length) { %>
-  <p class="adm-panel-note">No media yet. Upload the first image above.</p>
+  <p class="adm-panel-note">No media yet.</p>
   <% } else { %>
   <div class="adm-media-grid">
     <% items.forEach(function (m) { %>
@@ -112,15 +104,15 @@
   <% if (totalPages > 1) { %>
   <nav class="adm-media-pager" aria-label="Media pages">
     <% if (currentPage > 1) { %>
-    <a href="/admin/media?page=<%= currentPage - 1 %>">Prev</a>
+    <a href="<%= pageLink(currentPage - 1) %>">Prev</a>
     <% } else { %>
     <span class="disabled">Prev</span>
     <% } %>
     <% for (var pn = 1; pn <= totalPages; pn++) { %>
-    <a href="/admin/media?page=<%= pn %>" class="<%= pn === currentPage ? 'on' : '' %>"><%= pn %></a>
+    <a href="<%= pageLink(pn) %>" class="<%= pn === currentPage ? 'on' : '' %>"><%= pn %></a>
     <% } %>
     <% if (currentPage < totalPages) { %>
-    <a href="/admin/media?page=<%= currentPage + 1 %>">Next</a>
+    <a href="<%= pageLink(currentPage + 1) %>">Next</a>
     <% } else { %>
     <span class="disabled">Next</span>
     <% } %>
