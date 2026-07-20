@@ -1,9 +1,14 @@
 -- Car Spa LK database schema (structure only, no data).
 -- Import order: run this file first, then the content seed.
 -- MySQL 8 / MariaDB 10.5+
-
-CREATE DATABASE IF NOT EXISTS carspa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE carspa;
+--
+-- This file does not create or select a database: on shared hosting (cPanel
+-- etc) the database already exists with a fixed name your DB user can't
+-- change. Point the client at it yourself, e.g.
+--   mysql -u dbuser -p dbname < schema.sql
+-- Locally, create the database first: mysql -u root -e "CREATE DATABASE
+-- carspa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" then
+--   mysql -u root carspa < schema.sql
 
 -- ---------------------------------------------------------------------------
 -- Admin
