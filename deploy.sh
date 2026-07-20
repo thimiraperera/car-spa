@@ -1,13 +1,21 @@
 #!/bin/bash
-# Installs dependencies and restarts Passenger after a git pull. The git
-# repository path and the live Node app root are the same directory in
-# this setup, so there is nothing to sync, just reinstall and reload.
+# Pulls the latest backend branch, installs dependencies and restarts
+# Passenger. Fully self-contained: run it by hand, from cron, or via
+# cPanel's Git "Deploy" button (.cpanel.yml calls this same script).
 set -e
 
 APP_PATH="/home/compopkz/repositories/carspa"
 NODEVENV="/home/compopkz/nodevenv/repositories/carspa/24/bin/activate"
+BRANCH="backend"
 
 cd "$APP_PATH"
+
+# reset --hard only touches tracked files, so .env, node_modules and
+# media/uploads (all untracked) are never affected by this.
+git fetch origin "$BRANCH"
+git checkout "$BRANCH"
+git reset --hard "origin/$BRANCH"
+
 source "$NODEVENV"
 npm ci --omit=dev
 deactivate
