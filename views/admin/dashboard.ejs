@@ -1,6 +1,85 @@
 <%- include('partials/top') %>
+<%
+  var topClicks = 0;
+  (topProducts || []).forEach(function (p) {
+    if (p.click_count > topClicks) topClicks = p.click_count;
+  });
+%>
+<style>
+  /* ---- Header flourish ---- */
+  .adm-head { position: relative; overflow: visible; }
+  .adm-head-flourish {
+    position: absolute; top: -14px; right: -6px; width: 220px; height: 64px;
+    pointer-events: none; z-index: 0;
+  }
+  .adm-head h1, .adm-head .adm-head-actions { position: relative; z-index: 1; }
+
+  /* ---- Stat card entrance ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    .adm-cards .adm-card {
+      opacity: 0; animation: adm-card-in .5s ease forwards;
+    }
+    .adm-cards .adm-card:nth-child(1) { animation-delay: .02s; }
+    .adm-cards .adm-card:nth-child(2) { animation-delay: .09s; }
+    .adm-cards .adm-card:nth-child(3) { animation-delay: .16s; }
+    .adm-cards .adm-card:nth-child(4) { animation-delay: .23s; }
+    .adm-cards .adm-card:nth-child(5) { animation-delay: .30s; }
+    @keyframes adm-card-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adm-cards .adm-card { animation: none; opacity: 1; }
+  }
+
+  /* ---- Stat card hover flair (adds to the base lift already in admin.css) ---- */
+  .adm-cards .adm-card {
+    position: relative; overflow: hidden;
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .adm-cards .adm-card::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: var(--accent); transform: scaleX(0); transform-origin: left;
+    transition: transform .25s ease;
+  }
+  .adm-cards .adm-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 10px 26px rgba(224, 51, 43, .16);
+  }
+  .adm-cards .adm-card:hover::before { transform: scaleX(1); }
+  .adm-cards .adm-card b { transition: color .2s ease; }
+  .adm-cards .adm-card:hover b { color: var(--accent); }
+
+  /* ---- Click bars in the most-clicked table ---- */
+  .adm-clickbar-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .adm-clickbar-track {
+    height: 4px; border-radius: 4px; background: var(--cream); overflow: hidden;
+    width: 100%; max-width: 220px;
+  }
+  .adm-clickbar-fill {
+    height: 100%; border-radius: 4px; background: var(--accent);
+    width: 0%; transform-origin: left;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .adm-clickbar-fill {
+      animation: adm-clickbar-in .6s ease forwards; animation-delay: .15s;
+      transform: scaleX(0);
+    }
+    @keyframes adm-clickbar-in { to { transform: scaleX(1); } }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adm-clickbar-fill { transform: none; }
+  }
+</style>
+
 <header class="adm-head">
   <h1>Dashboard</h1>
+  <svg class="adm-head-flourish" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M4 46C40 10 70 58 108 30S176 4 216 22" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" opacity=".16"/>
+    <path d="M20 58C54 30 82 62 116 38S182 14 214 40" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" opacity=".1"/>
+    <circle cx="216" cy="22" r="3.5" fill="var(--accent)" opacity=".18"/>
+  </svg>
 </header>
 
 <div class="adm-cards">
@@ -16,9 +95,18 @@
   <table class="adm-table">
     <thead><tr><th>Product</th><th class="num">Clicks</th></tr></thead>
     <tbody>
-      <% topProducts.forEach(function (p) { %>
+      <% topProducts.forEach(function (p) {
+        var pct = topClicks > 0 ? Math.round((p.click_count / topClicks) * 100) : 0;
+      %>
       <tr>
-        <td><a href="/products/<%= p.slug %>" target="_blank" rel="noopener"><%= p.name %></a></td>
+        <td>
+          <div class="adm-clickbar-wrap">
+            <a href="/products/<%= p.slug %>" target="_blank" rel="noopener"><%= p.name %></a>
+            <div class="adm-clickbar-track">
+              <div class="adm-clickbar-fill" style="width: <%= pct %>%"></div>
+            </div>
+          </div>
+        </td>
         <td class="num"><%= p.click_count %></td>
       </tr>
       <% }); %>
