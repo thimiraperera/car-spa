@@ -178,6 +178,14 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES ('carousel_product
 INSERT INTO site_settings (setting_key, setting_value) VALUES ('testimonials_count', '10');
 INSERT INTO site_settings (setting_key, setting_value) VALUES ('hero_picks_count', '3');
 
+-- Brand logos
+INSERT INTO media (file_path, title, alt_text, mime_type, file_size) VALUES ('site/logo-dark.webp', 'Car Spa LK logo, light on dark', 'Car Spa LK', 'image/webp', 28516);
+INSERT INTO site_settings (setting_key, setting_value) VALUES ('dark_mode_logo_media_id', (SELECT id FROM media WHERE file_path = 'site/logo-dark.webp'));
+INSERT INTO media (file_path, title, alt_text, mime_type, file_size) VALUES ('site/logo-light.webp', 'Car Spa LK logo, dark on light', 'Car Spa LK', 'image/webp', 26280);
+INSERT INTO site_settings (setting_key, setting_value) VALUES ('light_mode_logo_media_id', (SELECT id FROM media WHERE file_path = 'site/logo-light.webp'));
+INSERT INTO media (file_path, title, alt_text, mime_type, file_size) VALUES ('site/logo-email.png', 'Car Spa LK logo, email header', 'Car Spa LK', 'image/png', 62571);
+INSERT INTO site_settings (setting_key, setting_value) VALUES ('mail_header_logo_media_id', (SELECT id FROM media WHERE file_path = 'site/logo-email.png'));
+
 -- Phone numbers
 INSERT INTO phone_numbers (number, label, type, is_active, sort_order) VALUES ('074 2 388 588', 'Hotline', 'hotline', 1, 0);
 INSERT INTO phone_numbers (number, label, type, is_active, sort_order) VALUES ('011 42 42 400', 'Landline', 'landline', 1, 1);

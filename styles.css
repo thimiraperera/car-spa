@@ -1268,3 +1268,104 @@ body.so-open, body.mc-open { overflow: hidden; }
 .pg-btn:hover, .pg-num:hover { background: var(--ink); color: #fff; }
 .pg-num.active { background: var(--ink); color: #fff; cursor: default; }
 .pg-btn.disabled { opacity: .35; border-color: var(--ink-soft); color: var(--ink-soft); pointer-events: none; }
+
+/* ============================================================
+   Mobile size and spacing pass: tighter buttons, paddings and
+   type below 760px, tighter still below 480px
+   ============================================================ */
+
+/* Home appears in the burger menu only; on desktop the logo covers it */
+.nav-home { display: none; }
+
+@media (max-width: 760px) {
+  .nav-home { display: block; }
+
+  .logo-mark svg, .logo-mark-img { height: 36px; }
+
+  .btn { font-size: 14.5px; padding: 12px 16px 12px 20px; gap: 10px; }
+  .btn .arrow { width: 34px; height: 34px; }
+  .btn .arrow svg { width: 15px; height: 15px; }
+  .btn-outline { padding: 10px 18px; }
+
+  section { padding: 52px 0; }
+  .section-title { margin-bottom: 12px; }
+  .section-lead { font-size: 15px; }
+  .curve-top::before { height: 48px; }
+  .cat-grid { gap: 12px; margin-top: 28px; }
+  .cat-card { padding: 20px 14px 16px; }
+  .benefits-grid { gap: 26px 18px; margin-top: 36px; }
+
+  .hero-wordmark { font-size: clamp(42px, 15vw, 190px); }
+  .hero-sub { font-size: 10.5px; letter-spacing: .24em; margin-top: 12px; }
+  .hero-bottom { padding: 16px; gap: 14px; }
+
+  .prod-body { padding: 12px 14px 14px; }
+  .prod-body h4 { font-size: 15px; }
+  .prod-price { font-size: 15.5px; }
+  .prod-view { width: 32px; height: 32px; }
+  .prod-foot { padding-top: 10px; }
+  .badge-cat { font-size: 10px; padding: 4px 10px; }
+
+  .page-hero-panel { padding: 54px 22px 44px; }
+  .filter-row { margin: 26px 0 6px; gap: 8px; }
+  .filter-pill { padding: 8px 16px; font-size: 13px; border-width: 1.5px; }
+  .pg-nav { margin: 32px 0 6px; gap: 8px; }
+  .pg-btn, .pg-num { min-width: 38px; height: 38px; padding: 0 14px; font-size: 13px; border-width: 1.5px; }
+  .pg-num { padding: 0; }
+
+  .faq-wrap { margin-top: 28px; gap: 10px; }
+  .faq-item summary { padding: 15px 18px; font-size: 15px; gap: 12px; }
+  .faq-item summary::after { font-size: 22px; }
+  .faq-item .faq-body { padding: 0 18px 16px; font-size: 14px; }
+
+  .cta-band { padding: 48px 22px; }
+  .cta-band h2 { margin-bottom: 20px; }
+
+  footer { margin-top: 56px; padding: 50px 0 26px; font-size: 14px; }
+  .footer-grid { gap: 30px; margin-bottom: 34px; }
+  .footer-grid h5 { margin-bottom: 12px; }
+  .footer-logo { font-size: 22px; margin-bottom: 10px; }
+  .footer-social a { width: 38px; height: 38px; }
+  .footer-bottom { padding-top: 20px; }
+
+  .breadcrumb { margin: 18px 0 6px; }
+  .pd-wrap { gap: 28px; padding: 24px 0 10px; }
+  .pd-price { font-size: 22px; margin: 12px 0 2px; }
+  .pd-features { margin: 16px 0; gap: 8px; }
+  .pd-actions { gap: 10px; margin-top: 20px; }
+  .pd-meta { margin-top: 18px; padding-top: 16px; }
+
+  .page-shell { padding: 36px 0 46px; }
+  .cart-items { margin-top: 24px; }
+  .cart-summary { margin-top: 22px; gap: 22px; }
+  .cart-total b { font-size: 25px; }
+  .cart-empty, .co-empty, .co-done { padding: 46px 0 20px; }
+  .co-grid, .contact-grid { gap: 24px; margin-top: 24px; }
+  .co-panel { padding: 20px 18px; }
+  .co-panel h3 { margin-bottom: 14px; font-size: 18px; }
+  .contact-card { padding: 16px 16px; gap: 14px; }
+  .contact-card .cc-icon { width: 40px; height: 40px; }
+  .legal-body { margin-top: 24px; }
+  .legal-body h2 { font-size: 19px; margin: 26px 0 10px; }
+  .nf-wrap { padding: 50px 0 36px; }
+
+  .to-top { width: 44px; height: 44px; right: 16px; bottom: 16px; }
+  .to-top svg { width: 17px; height: 17px; }
+  .search-panel { margin-top: 56px; }
+  .search-box { border-radius: 14px; padding: 6px 8px 6px 14px; }
+  .search-input { font-size: 16px; padding: 10px 0; }
+  .search-close, .mini-cart-close { width: 36px; height: 36px; }
+  .mini-cart-panel { border-radius: 14px 0 0 14px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding-left: 16px; padding-right: 16px; }
+  section { padding: 44px 0; }
+  .btn { font-size: 14px; padding: 11px 14px 11px 18px; }
+  .hero-bottom { padding: 14px; gap: 12px; }
+  .page-hero { padding: 10px; }
+  .page-hero-panel { padding: 44px 18px 36px; }
+  .cta-band { padding: 40px 18px; }
+  .footer-bottom { font-size: 12px; }
+  .prod-carousel .prod-card { min-width: 78vw; }
+}
