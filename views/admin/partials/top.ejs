@@ -8,23 +8,72 @@
 <link rel="stylesheet" href="/assets/admin/admin.css">
 </head>
 <body class="adm">
+<style>
+  .adm-nav a { display: flex; align-items: center; gap: 10px; }
+  .adm-nav a svg { flex: none; width: 17px; height: 17px; opacity: .75; }
+  .adm-nav a.on svg { opacity: 1; }
+  .adm-profile-link {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px 2px;
+    color: #cfd2d6; text-decoration: none; font-weight: 600; font-size: 13px;
+  }
+  .adm-profile-link:hover { color: #fff; }
+  .adm-profile-link img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex: none; }
+  .adm-profile-link .adm-avatar-fallback {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none;
+  }
+</style>
 <aside class="adm-side">
   <a class="adm-brand" href="/admin">CARSPA<span>.LK</span><small>admin</small></a>
   <nav class="adm-nav">
-    <a href="/admin" class="<%= active === 'dashboard' ? 'on' : '' %>">Dashboard</a>
+    <a href="/admin" class="<%= active === 'dashboard' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.2"/><rect x="13" y="3.5" width="7.5" height="4.5" rx="1.2"/><rect x="13" y="10.5" width="7.5" height="10" rx="1.2"/><rect x="3.5" y="13.5" width="7.5" height="7" rx="1.2"/></svg>
+      Dashboard</a>
     <span class="adm-nav-group">Catalog</span>
-    <a href="/admin/products" class="<%= active === 'products' ? 'on' : '' %>">Products</a>
-    <a href="/admin/media" class="<%= active === 'media' ? 'on' : '' %>">Media</a>
+    <a href="/admin/products" class="<%= active === 'products' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8 12 3.5 20.5 8 12 12.5z"/><path d="M3.5 8v9L12 21.5 20.5 17V8"/><path d="M12 12.5v9"/></svg>
+      Products</a>
+    <a href="/admin/media" class="<%= active === 'media' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m4.5 17 5-5 3 3 4-5 5.5 6.5"/></svg>
+      Media</a>
     <span class="adm-nav-group">Content</span>
-    <a href="/admin/testimonials" class="<%= active === 'testimonials' ? 'on' : '' %>">Testimonials</a>
-    <a href="/admin/faqs" class="<%= active === 'faqs' ? 'on' : '' %>">FAQs</a>
-    <a href="/admin/legal" class="<%= active === 'legal' ? 'on' : '' %>">Legal pages</a>
+    <a href="/admin/testimonials" class="<%= active === 'testimonials' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H12l-4 3.5v-3.5H4z"/><path d="M8 10h8M8 13h5"/></svg>
+      Testimonials</a>
+    <a href="/admin/faqs" class="<%= active === 'faqs' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.3 9.5a2.7 2.7 0 0 1 5.2 1c0 1.8-2.5 1.6-2.5 3.6"/><circle cx="12" cy="17" r=".3" fill="currentColor"/></svg>
+      FAQs</a>
+    <a href="/admin/legal" class="<%= active === 'legal' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h8l4 4v13h-12z"/><path d="M14.5 3.5v4h4"/><path d="M9 12.5h6M9 15.5h6M9 9.5h2.5"/></svg>
+      Legal pages</a>
     <span class="adm-nav-group">Site</span>
-    <a href="/admin/site-info" class="<%= active === 'site-info' ? 'on' : '' %>">Site info</a>
-    <a href="/admin/hours" class="<%= active === 'hours' ? 'on' : '' %>">Opening hours</a>
-    <a href="/admin/page-seo" class="<%= active === 'page-seo' ? 'on' : '' %>">Page SEO</a>
-    <a href="/admin/settings" class="<%= active === 'settings' ? 'on' : '' %>">Settings</a>
+    <a href="/admin/site-info" class="<%= active === 'site-info' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+      Site info</a>
+    <a href="/admin/hours" class="<%= active === 'hours' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+      Opening hours</a>
+    <a href="/admin/page-seo" class="<%= active === 'page-seo' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m19.5 19.5-4.3-4.3"/></svg>
+      Page SEO</a>
+    <a href="/admin/smtp" class="<%= active === 'smtp' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="1.8"/><path d="m4 6.5 8 6.5 8-6.5"/></svg>
+      SMTP</a>
+    <a href="/admin/team" class="<%= active === 'team' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="8.5" r="2.2"/><path d="M15.8 14.2c2.3.4 3.7 2.1 3.7 4.8"/></svg>
+      Team</a>
+    <a href="/admin/settings" class="<%= active === 'settings' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.8"/><path d="M12 3.5v2.3M12 18.2v2.3M20.5 12h-2.3M5.8 12H3.5M17.7 6.3l-1.6 1.6M7.9 16.1l-1.6 1.6M17.7 17.7l-1.6-1.6M7.9 7.9 6.3 6.3"/></svg>
+      Settings</a>
   </nav>
+  <a class="adm-profile-link" href="/admin/profile">
+    <% if (typeof adminAvatar !== 'undefined' && adminAvatar) { %>
+    <img src="/media/<%= adminAvatar %>" alt="">
+    <% } else { %>
+    <span class="adm-avatar-fallback"><%= String(adminName || '?').charAt(0).toUpperCase() %></span>
+    <% } %>
+    My profile
+  </a>
   <form class="adm-logout" method="post" action="/admin/logout">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <button type="submit">Sign out<small><%= adminName %></small></button>
