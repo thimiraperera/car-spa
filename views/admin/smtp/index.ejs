@@ -1,0 +1,77 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>SMTP settings</h1>
+</header>
+
+<style>
+  .smtp-note { background: #e3f4ea; color: #1d8a4a; }
+</style>
+
+<form class="adm-form" method="post" action="/admin/smtp">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+
+  <section class="adm-panel">
+    <h2>Mail server</h2>
+    <div class="adm-grid2">
+      <label>SMTP host
+        <input type="text" name="host" maxlength="190" value="<%= settings.host || '' %>">
+      </label>
+      <label>Port
+        <input type="number" name="port" min="1" max="65535" step="1" value="<%= settings.port != null ? settings.port : '' %>">
+      </label>
+    </div>
+    <div class="adm-grid2">
+      <label>Username
+        <input type="text" name="username" maxlength="190" value="<%= settings.username || '' %>">
+      </label>
+      <label>Password
+        <input type="password" name="password" autocomplete="new-password" placeholder="Leave blank to keep the current password">
+      </label>
+    </div>
+    <label>Encryption
+      <select name="encryption">
+        <% encryptions.forEach(function (enc) { %>
+        <option value="<%= enc %>" <%= (settings.encryption || 'tls') === enc ? 'selected' : '' %>>
+          <%= enc === 'none' ? 'None' : enc.toUpperCase() %>
+        </option>
+        <% }); %>
+      </select>
+    </label>
+  </section>
+
+  <section class="adm-panel">
+    <h2>From address</h2>
+    <div class="adm-grid2">
+      <label>From email
+        <input type="email" name="from_email" maxlength="190" value="<%= settings.from_email || '' %>">
+      </label>
+      <label>From name
+        <input type="text" name="from_name" maxlength="190" value="<%= settings.from_name || '' %>">
+      </label>
+    </div>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save SMTP settings</button>
+  </div>
+</form>
+
+<section class="adm-panel">
+  <h2>Send test email</h2>
+  <p class="adm-panel-note">Sends a short plain test message using the settings saved above.</p>
+  <% if (sent) { %>
+  <div class="adm-error smtp-note">Test email sent.</div>
+  <% } %>
+  <form class="adm-form" method="post" action="/admin/smtp/test">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="adm-form-actions">
+      <label style="flex: 1; min-width: 220px; margin-bottom: 0;">Send to
+        <input type="email" name="to" required placeholder="you@example.com">
+      </label>
+      <button type="submit" class="adm-btn-ghost">Send test email</button>
+    </div>
+  </form>
+</section>
+
+<%- include('../partials/bottom') %>
