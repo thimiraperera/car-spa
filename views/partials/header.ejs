@@ -1,5 +1,9 @@
 <!-- ===== Header ===== -->
-<header class="site-header<%= currentPath === '/' ? '' : ' solid' %>">
+<%
+  var headerSolid = currentPath !== '/';
+  var headerLogo = (headerSolid ? site.logos.lightModeLogo : site.logos.darkModeLogo) || site.logos.siteLogo;
+%>
+<header class="site-header<%= headerSolid ? ' solid' : '' %>">
   <div class="container">
     <nav class="nav-left">
       <a href="/products">Products</a>
@@ -7,10 +11,14 @@
       <a href="/contact">Contact</a>
     </nav>
     <a class="logo-mark" href="/" aria-label="Car Spa LK home">
+      <% if (headerLogo) { %>
+      <img class="logo-mark-img" src="/media/<%= headerLogo.file_path %>" alt="<%= headerLogo.alt_text || 'Car Spa LK' %>">
+      <% } else { %>
       <svg viewBox="0 0 64 46" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 30 Q10 20 18 18 L24 10 Q26 7 30 7 h8 Q42 7 44 10 L50 18 Q58 20 60 30 v6 q0 3-3 3 h-3 a6 6 0 0 1-12 0 h-18 a6 6 0 0 1-12 0 h-1 q-3 0-3-3 z M20 18 h26 l-5-7 q-1-2-3-2 h-10 q-2 0-3 2 z"/>
         <path d="M14 2 q4 4 0 8 M22 0 q4 4 0 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       </svg>
+      <% } %>
     </a>
     <div class="nav-right">
       <button class="icon-link search-open" type="button" aria-label="Search" aria-haspopup="dialog" aria-controls="search-overlay">
