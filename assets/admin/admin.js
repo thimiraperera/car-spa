@@ -9,6 +9,27 @@
     setTimeout(function () { toast.remove(); }, 2400);
   }
 
+  /* Top bar profile dropdown */
+  var profileToggle = document.getElementById('adm-profile-toggle');
+  var profileMenu = document.getElementById('adm-profile-menu');
+  if (profileToggle && profileMenu) {
+    var closeMenu = function () {
+      profileMenu.classList.remove('open');
+      profileToggle.setAttribute('aria-expanded', 'false');
+    };
+    profileToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = profileMenu.classList.toggle('open');
+      profileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!profileMenu.contains(e.target) && e.target !== profileToggle) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
+
   /* Any form or button with data-confirm asks first */
   document.querySelectorAll('form[data-confirm]').forEach(function (form) {
     form.addEventListener('submit', function (e) {

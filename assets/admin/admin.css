@@ -56,13 +56,62 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 }
 .adm-nav a:hover { background: var(--ink-2); color: #fff; }
 .adm-nav a.on { background: var(--accent); color: #fff; }
-.adm-logout { padding: 12px 12px 0; border-top: 1px solid var(--ink-2); }
-.adm-logout button {
-  width: 100%; text-align: left; background: none; border: 0; color: #cfd2d6;
-  font: inherit; font-weight: 600; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+.adm-side-foot { padding: 10px 12px 0; border-top: 1px solid var(--ink-2); margin-top: 8px; }
+.adm-profile-link {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px;
+  color: #cfd2d6; text-decoration: none; font-weight: 600; font-size: 13.5px; margin-bottom: 2px;
 }
+.adm-profile-link:hover { background: var(--ink-2); color: #fff; }
+.adm-profile-link img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex: none; }
+.adm-avatar-fallback {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 12.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none;
+}
+.adm-profile-link .who { min-width: 0; }
+.adm-profile-link .who b { display: block; font-size: 13.5px; line-height: 1.2; }
+.adm-profile-link .who span { display: block; font-size: 11px; font-weight: 400; color: #9aa0a6; }
+.adm-logout { padding: 0; }
+.adm-logout button {
+  width: 100%; display: flex; align-items: center; gap: 8px; text-align: left;
+  background: none; border: 0; color: #9aa0a6; font: inherit; font-weight: 600;
+  font-size: 13px; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+}
+.adm-logout button svg { flex: none; width: 15px; height: 15px; }
 .adm-logout button:hover { background: var(--ink-2); color: #fff; }
-.adm-logout small { display: block; font-weight: 400; font-size: 12px; color: #8b9096; }
+
+/* ---------- Top bar (main column) ---------- */
+.adm-topbar {
+  display: flex; justify-content: flex-end; align-items: center;
+  padding: 14px 34px; margin: -30px -34px 26px; border-bottom: 1px solid var(--line);
+}
+.adm-topbar-profile { position: relative; }
+.adm-topbar-btn {
+  display: flex; align-items: center; gap: 8px; background: none; border: 0; cursor: pointer;
+  padding: 4px 8px 4px 4px; border-radius: 30px; font: inherit;
+}
+.adm-topbar-btn:hover { background: var(--cream); }
+.adm-topbar-btn img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; display: block; }
+.adm-topbar-btn .adm-avatar-fallback { width: 34px; height: 34px; font-size: 13px; color: #fff; }
+.adm-topbar-btn svg { width: 14px; height: 14px; color: var(--ink-soft); transition: transform .15s ease; }
+.adm-topbar-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.adm-topbar-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; min-width: 190px;
+  background: var(--white); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(28,31,35,.14); padding: 6px; z-index: 40;
+  opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .15s ease, transform .15s ease;
+}
+.adm-topbar-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+.adm-topbar-menu-head { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.adm-topbar-menu-head b { display: block; font-size: 13.5px; }
+.adm-topbar-menu-head span { display: block; font-size: 11.5px; color: var(--ink-soft); }
+.adm-topbar-menu a, .adm-topbar-menu button {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  background: none; border: 0; font: inherit; font-weight: 600; font-size: 13.5px;
+  color: var(--ink); padding: 8px 10px; border-radius: 8px; cursor: pointer; text-decoration: none;
+}
+.adm-topbar-menu a svg, .adm-topbar-menu button svg { flex: none; width: 15px; height: 15px; color: var(--ink-soft); }
+.adm-topbar-menu a:hover, .adm-topbar-menu button:hover { background: var(--cream); }
+.adm-topbar-menu button { color: var(--accent-dark); }
 
 /* ---------- Main column ---------- */
 .adm-main { margin-left: var(--side-w); padding: 30px 34px 60px; max-width: 1180px; }
@@ -264,6 +313,7 @@ h1, h2, h3 { line-height: 1.2; font-weight: 800; }
 @media (max-width: 860px) {
   .adm-side { position: static; width: auto; inset: auto; }
   .adm-main { margin-left: 0; padding: 20px 16px 50px; }
+  .adm-topbar { margin: -20px -16px 20px; padding: 12px 16px; }
   .adm-grid2, .adm-grid3 { grid-template-columns: 1fr; }
   body.adm { font-size: 14px; }
 }
