@@ -1,8 +1,11 @@
 const express = require('express');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const { query, queryOne } = require('../lib/db');
 const siteSettings = require('../lib/settings');
 const { pageMeta, productMeta, BASE_URL } = require('../lib/seo');
 const { productSchema, faqSchema, localBusinessSchema } = require('../lib/jsonld');
+const { sendMail, buildEmailHtml } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -217,6 +220,116 @@ async function render404(req, res) {
 
 router.get('/404', function (req, res, next) {
   render404(req, res).catch(next);
+});
+
+// ---- Forgot / reset password (public) --------------------------------------
+
+async function sendResetEmail(admin) {
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  await query(
+    'UPDATE admin_users SET reset_token_hash = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?',
+    [tokenHash, admin.id]
+  );
+  const resetUrl = BASE_URL + '/reset-password/' + token;
+  const bodyHtml =
+    '<p>Hi ' + (admin.first_name || admin.username) + ',</p>' +
+    '<p>Click below to set a new password for your Car Spa LK admin account. This link expires in 1 hour.</p>' +
+    '<p><a href="' + resetUrl + '" style="display:inline-block;background:#e0332b;color:#fff;padding:10px 20px;' +
+    'border-radius:8px;text-decoration:none;font-weight:700;">Reset password</a></p>' +
+    '<p>If you did not request this, you can ignore this email.</p>';
+  const html = await buildEmailHtml({ title: 'Reset your password', bodyHtml });
+  await sendMail({
+    to: admin.email,
+    subject: 'Reset your Car Spa LK admin password',
+    html,
+    text: 'Reset your password: ' + resetUrl
+  });
+}
+
+router.get('/forgot-password', async function (req, res, next) {
+  try {
+    const meta = await pageMeta('forgot-password', {
+      title: 'Forgot Password | Car Spa LK', description: '', path: '/forgot-password', robots: 'noindex'
+    });
+    res.render('forgot-password', { meta, sent: false, jsonld: [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/forgot-password', async function (req, res, next) {
+  try {
+    const email = String((req.body && req.body.email) || '').trim();
+    if (email) {
+      const admin = await queryOne('SELECT * FROM admin_users WHERE email = ?', [email]);
+      // Whether or not an account was found, the response below is identical,
+      // so this endpoint cannot be used to discover which emails have admin
+      // accounts. A failed send (bad SMTP config etc) never surfaces either.
+      if (admin) {
+        try {
+          await sendResetEmail(admin);
+        } catch (mailErr) {
+          console.error('forgot-password: could not send reset email:', mailErr.message);
+        }
+      }
+    }
+    const meta = await pageMeta('forgot-password', {
+      title: 'Forgot Password | Car Spa LK', description: '', path: '/forgot-password', robots: 'noindex'
+    });
+    res.render('forgot-password', { meta, sent: true, jsonld: [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/reset-password/:token', async function (req, res, next) {
+  try {
+    const tokenHash = crypto.createHash('sha256').update(String(req.params.token || '')).digest('hex');
+    const admin = await queryOne(
+      'SELECT id FROM admin_users WHERE reset_token_hash = ? AND reset_token_expires > NOW()', [tokenHash]
+    );
+    const meta = await pageMeta('reset-password', {
+      title: 'Reset Password | Car Spa LK', description: '', path: '/reset-password', robots: 'noindex'
+    });
+    res.render('reset-password', { meta, token: req.params.token, valid: !!admin, error: null, jsonld: [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/reset-password/:token', async function (req, res, next) {
+  try {
+    const tokenHash = crypto.createHash('sha256').update(String(req.params.token || '')).digest('hex');
+    const admin = await queryOne(
+      'SELECT id FROM admin_users WHERE reset_token_hash = ? AND reset_token_expires > NOW()', [tokenHash]
+    );
+    const meta = await pageMeta('reset-password', {
+      title: 'Reset Password | Car Spa LK', description: '', path: '/reset-password', robots: 'noindex'
+    });
+    if (!admin) {
+      return res.status(400).render('reset-password', { meta, token: req.params.token, valid: false, error: null, jsonld: [] });
+    }
+
+    const password = String((req.body && req.body.password) || '');
+    const confirm = String((req.body && req.body.confirm_password) || '');
+    let error = null;
+    if (password.length < 8) error = 'New password must be at least 8 characters';
+    else if (password !== confirm) error = 'Passwords do not match';
+    if (error) {
+      return res.status(422).render('reset-password', { meta, token: req.params.token, valid: true, error, jsonld: [] });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    // Single use: cleared immediately so the same link cannot be replayed.
+    await query(
+      'UPDATE admin_users SET password_hash = ?, reset_token_hash = NULL, reset_token_expires = NULL WHERE id = ?',
+      [hash, admin.id]
+    );
+    res.redirect('/admin/login?reset=1');
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

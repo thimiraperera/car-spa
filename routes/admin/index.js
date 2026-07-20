@@ -79,12 +79,21 @@ router.post('/logout', requireAdmin, verifyCsrf, function (req, res, next) {
 
 router.use(requireAdmin);
 
-// Make csrf + admin name available to every admin view.
-router.use(function (req, res, next) {
-  res.locals.csrf = csrfToken(req);
-  res.locals.adminName = req.session.adminName;
-  res.locals.saved = req.query.saved === '1';
-  next();
+// Make csrf + admin name + avatar available to every admin view.
+router.use(async function (req, res, next) {
+  try {
+    res.locals.csrf = csrfToken(req);
+    res.locals.adminName = req.session.adminName;
+    res.locals.saved = req.query.saved === '1';
+    const row = await queryOne(
+      'SELECT m.file_path FROM admin_users a LEFT JOIN media m ON m.id = a.avatar_media_id WHERE a.id = ?',
+      [req.session.adminId]
+    );
+    res.locals.adminAvatar = row ? row.file_path : null;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // State-changing requests must carry the CSRF token. Multipart uploads are
@@ -124,5 +133,8 @@ router.use('/hours', require('./hours'));
 router.use('/legal', require('./legal'));
 router.use('/page-seo', require('./page-seo'));
 router.use('/settings', require('./settings'));
+router.use('/smtp', require('./smtp'));
+router.use('/team', require('./team'));
+router.use('/profile', require('./profile'));
 
 module.exports = router;

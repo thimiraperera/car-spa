@@ -11,6 +11,7 @@
 <form class="adm-login" method="post" action="/admin/login">
   <h1>CARSPA<span>.LK</span></h1>
   <p class="adm-login-sub">Store admin</p>
+  <div class="adm-error" id="reset-note" style="background:#e3f4ea;color:#1d8a4a;display:none;">Password reset. Sign in with your new password.</div>
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <label>Username
@@ -20,6 +21,15 @@
     <input type="password" name="password" autocomplete="current-password" required>
   </label>
   <button type="submit">Sign in</button>
+  <p class="adm-login-sub"><a href="/forgot-password">Forgot your password?</a></p>
 </form>
+<script>
+  // The login GET route is a shared file this module does not touch, so the
+  // reset=1 success flag is read client-side from the query string instead.
+  if (/[?&]reset=1(&|$)/.test(window.location.search)) {
+    var note = document.getElementById('reset-note');
+    if (note) note.style.display = 'block';
+  }
+</script>
 </body>
 </html>

@@ -1,0 +1,60 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Team</h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn" href="/admin/team/new">Add admin</a>
+  </div>
+</header>
+
+<section class="adm-panel">
+  <% if (typeof error !== 'undefined' && error) { %><div class="adm-error"><%= error %></div><% } %>
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Joined</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% admins.forEach(function (a) { %>
+      <tr>
+        <td>
+          <% if (a.avatar_file_path) { %>
+          <img class="thumb" src="/media/<%= a.avatar_file_path %>" alt="">
+          <% } else { %>
+          <span class="thumb"></span>
+          <% } %>
+        </td>
+        <td>
+          <a href="/admin/team/<%= a.id %>/edit"><%= a.username %></a>
+          <% if (a.id === selfId) { %> <span class="muted">(you)</span><% } %>
+        </td>
+        <td class="muted"><%= [a.first_name, a.last_name].filter(Boolean).join(' ') %></td>
+        <td class="muted"><%= a.email || '' %></td>
+        <td class="muted"><%= String(a.created_at || '').slice(0, 10) %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/team/<%= a.id %>/edit">Edit</a>
+          <% if (a.id !== selfId) { %>
+          <form class="adm-inline-form" method="post" action="/admin/team/<%= a.id %>/send-reset">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit" class="adm-btn-ghost small">Send reset link</button>
+          </form>
+          <form class="adm-inline-form" method="post" action="/admin/team/<%= a.id %>/delete" data-confirm="Delete <%= a.username %>? This cannot be undone.">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button type="submit" class="adm-btn-danger">Delete</button>
+          </form>
+          <% } %>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!admins.length) { %>
+      <tr><td colspan="6" class="muted">No admins yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/bottom') %>
