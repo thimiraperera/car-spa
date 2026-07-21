@@ -177,6 +177,8 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES ('email', 'info@ca
 INSERT INTO site_settings (setting_key, setting_value) VALUES ('carousel_product_count', '10');
 INSERT INTO site_settings (setting_key, setting_value) VALUES ('testimonials_count', '10');
 INSERT INTO site_settings (setting_key, setting_value) VALUES ('hero_picks_count', '3');
+INSERT INTO site_settings (setting_key, setting_value) VALUES ('payment_cod_enabled', '1');
+INSERT INTO site_settings (setting_key, setting_value) VALUES ('payment_bank_enabled', '1');
 
 -- Brand logos
 INSERT INTO media (file_path, title, alt_text, mime_type, file_size) VALUES ('site/logo-dark.webp', 'Car Spa LK logo, light on dark', 'Car Spa LK', 'image/webp', 28516);
