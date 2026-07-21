@@ -95,12 +95,18 @@ function specsToText(value) {
 
 function readProductForm(body) {
   const price = parseFloat(body.price_lkr);
+  let stock = null;
+  if (!body.stock_unlimited) {
+    const qty = parseInt(body.stock_qty, 10);
+    stock = Number.isFinite(qty) && qty >= 0 ? qty : 0;
+  }
   return {
     name: String(body.name || '').trim(),
     slug: String(body.slug || '').trim().toLowerCase(),
     vehicle: VEHICLES.indexOf(body.vehicle) !== -1 ? body.vehicle : 'both',
     category: String(body.category || '').trim() || null,
     price_lkr: Number.isFinite(price) ? price : null,
+    stock_qty: stock,
     size: String(body.size || '').trim() || null,
     sku: String(body.sku || '').trim() || null,
     listing_blurb: String(body.listing_blurb || '').trim() || null,
@@ -202,7 +208,7 @@ router.get('/', async function (req, res, next) {
     if (page > totalPages) page = totalPages;
 
     const products = await query(
-      'SELECT p.id, p.slug, p.name, p.vehicle, p.category, p.price_lkr, p.size, p.is_active, p.click_count, ' +
+      'SELECT p.id, p.slug, p.name, p.vehicle, p.category, p.price_lkr, p.stock_qty, p.size, p.is_active, p.click_count, ' +
       '(SELECT m.file_path FROM product_images pi JOIN media m ON m.id = pi.media_id ' +
       ' WHERE pi.product_id = p.id AND pi.role = "featured" ORDER BY pi.sort_order, pi.id LIMIT 1) AS featured_image ' +
       'FROM products p ORDER BY p.name LIMIT ? OFFSET ?',
@@ -322,23 +328,23 @@ async function saveProduct(req, res, next, id) {
       await conn.beginTransaction();
 
       const cols = [
-        data.slug, data.name, data.vehicle, data.category, data.price_lkr,
+        data.slug, data.name, data.vehicle, data.category, data.price_lkr, data.stock_qty,
         data.size, data.sku, data.listing_blurb, data.short_description,
         data.description_html, data.features, data.specs, data.how_to_use, data.is_active
       ];
       let productId = id;
       if (id) {
         await conn.query(
-          'UPDATE products SET slug = ?, name = ?, vehicle = ?, category = ?, price_lkr = ?, ' +
+          'UPDATE products SET slug = ?, name = ?, vehicle = ?, category = ?, price_lkr = ?, stock_qty = ?, ' +
           'size = ?, sku = ?, listing_blurb = ?, short_description = ?, description_html = ?, ' +
           'features = ?, specs = ?, how_to_use = ?, is_active = ? WHERE id = ?',
           cols.concat(id)
         );
       } else {
         const [result] = await conn.query(
-          'INSERT INTO products (slug, name, vehicle, category, price_lkr, size, sku, ' +
+          'INSERT INTO products (slug, name, vehicle, category, price_lkr, stock_qty, size, sku, ' +
           'listing_blurb, short_description, description_html, features, specs, how_to_use, is_active) ' +
-          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           cols
         );
         productId = result.insertId;

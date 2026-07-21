@@ -36,6 +36,7 @@
         <th>Vehicle</th>
         <th>Category</th>
         <th class="num">Price</th>
+        <th class="num">Stock</th>
         <th>Size</th>
         <th>Status</th>
         <th class="num">Clicks</th>
@@ -56,6 +57,9 @@
         <td class="muted"><%= p.vehicle.charAt(0).toUpperCase() + p.vehicle.slice(1) %></td>
         <td class="muted"><%= p.category || '' %></td>
         <td class="num">Rs <%= Number(p.price_lkr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+        <td class="num">
+          <% if (p.stock_qty === null) { %>&#8734;<% } else if (p.stock_qty === 0) { %><span class="adm-pill off">Out</span><% } else { %><%= p.stock_qty %><% } %>
+        </td>
         <td class="muted"><%= p.size || '' %></td>
         <td><span class="adm-pill <%= p.is_active ? 'on' : 'off' %>"><%= p.is_active ? 'Active' : 'Hidden' %></span></td>
         <td class="num"><%= p.click_count %></td>
@@ -69,7 +73,7 @@
       </tr>
       <% }); %>
       <% if (!products.length) { %>
-      <tr><td colspan="9" class="muted">No products yet</td></tr>
+      <tr><td colspan="10" class="muted">No products yet</td></tr>
       <% } %>
     </tbody>
   </table>
