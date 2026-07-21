@@ -39,6 +39,7 @@
       <a class="prod-card reveal" data-cat="<%= p.cat_key %>" href="<%= p.url %>" style="--rd:<%= ((i % 4) * 0.07).toFixed(2) %>s">
         <div class="prod-media">
           <% if (p.category) { %><span class="badge-cat"><%= p.category %></span><% } %>
+          <% if (p.stock_qty !== null && p.stock_qty !== undefined && Number(p.stock_qty) === 0) { %><span class="badge-cat" style="left:auto; right:14px; background:rgba(28,31,35,.88); color:#fff;">Out of stock</span><% } %>
           <img src="<%= p.image || BLANK_IMG %>" alt="<%= p.name %>"<% if (i === 0) { %> fetchpriority="high"<% } else if (i >= 3) { %> loading="lazy"<% } %> decoding="async" onerror="this.remove()">
         </div>
         <div class="prod-body">

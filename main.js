@@ -135,6 +135,13 @@
     navBackdrop.addEventListener('click', closeMenu);
     navLeft.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeMenu); });
     window.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+    /* Tap or click anywhere outside the open drawer closes it. The burger
+       is excluded so its own click keeps toggling instead of fighting this. */
+    document.addEventListener('click', function (e) {
+      if (!navLeft.classList.contains('open')) return;
+      if (navLeft.contains(e.target) || burger.contains(e.target)) return;
+      closeMenu();
+    });
   }
 
   /* Reveal-on-scroll for cards, benefits, FAQ items.
@@ -326,7 +333,10 @@
     });
   }
 
-  /* Featured products carousel: arrow buttons page through the strip */
+  /* Featured products carousel: arrow buttons page through the strip, and
+     the strip autoplays one step every few seconds. Autoplay pauses while
+     hovered, while a touch is in progress, and while the tab is hidden.
+     Reduced motion disables it entirely. Each carousel owns its timer. */
   document.querySelectorAll('.prod-carousel').forEach(function (car) {
     var viewport = car.querySelector('.prod-carousel-viewport');
     if (!viewport) return;
@@ -335,6 +345,39 @@
     var next = car.querySelector('.carousel-btn.next');
     if (prev) prev.addEventListener('click', function () { viewport.scrollBy({ left: -step(), behavior: 'smooth' }); });
     if (next) next.addEventListener('click', function () { viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
+
+    if (reducedMotionQuery.matches) return;
+    var autoTimer = null;
+    var hovering = false;
+    var touching = false;
+    var autoStep = function () {
+      /* within a few px of the end counts as the end, glide back to start */
+      if (viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 4) {
+        viewport.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        viewport.scrollBy({ left: step(), behavior: 'smooth' });
+      }
+    };
+    var autoStop = function () {
+      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    };
+    var autoStart = function () {
+      if (autoTimer || hovering || touching || document.hidden) return;
+      autoTimer = setInterval(autoStep, 3500);
+    };
+    car.addEventListener('mouseenter', function () { hovering = true; autoStop(); });
+    car.addEventListener('mouseleave', function () { hovering = false; autoStart(); });
+    viewport.addEventListener('touchstart', function () { touching = true; autoStop(); }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (evt) {
+      viewport.addEventListener(evt, function () {
+        touching = false;
+        setTimeout(autoStart, 900); /* let the momentum scroll settle first */
+      }, { passive: true });
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) autoStop(); else autoStart();
+    });
+    autoStart();
   });
 
   /* Hero light rig: a soft light pool sweeps the hero photo following the
@@ -709,22 +752,77 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         var data = new FormData(form);
-        var lines = ['Hi Car Spa LK! I would like to place an order:', ''];
-        cartRead().forEach(function (it) {
-          lines.push('- ' + it.name + ' (' + it.size + ') x ' + it.qty + ' = ' + fmtRs(it.price * it.qty));
+        var submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        var payload = {
+          customer_name: data.get('name'),
+          phone: data.get('phone'),
+          address: data.get('address'),
+          city: data.get('city') || '',
+          notes: data.get('notes') || '',
+          payment: data.get('payment') === 'Bank Transfer' ? 'bank' : 'cod',
+          items: cartRead().map(function (it) { return { slug: it.slug, qty: it.qty }; })
+        };
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (body) {
+            return { status: res.status, body: body };
+          });
+        }).then(function (r) {
+          if (r.status === 409 && r.body && r.body.shortages) {
+            var short = ['Sorry, we do not have enough stock for some items:'];
+            r.body.shortages.forEach(function (s) {
+              short.push('- ' + s.name + ': only ' + s.available + ' available');
+            });
+            short.push('', 'Please adjust the quantities in your cart and try again.');
+            alert(short.join('\n'));
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          if (!r.body || !r.body.ok) {
+            alert('Sorry, we could not place your order right now. Please try again.');
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          var orderNo = r.body.orderNo;
+          var orderNoEl = document.getElementById('order-no');
+          if (orderNoEl) orderNoEl.textContent = orderNo;
+          var bankBox = document.getElementById('bank-details');
+          var bankList = document.getElementById('bank-list');
+          if (r.body.bankAccounts && r.body.bankAccounts.length && bankBox && bankList) {
+            bankList.innerHTML = r.body.bankAccounts.map(function (acc) {
+              return '<li>' +
+                '<b>' + escapeHtml(acc.bank_name) + (acc.branch ? ' - ' + escapeHtml(acc.branch) : '') + '</b><br>' +
+                escapeHtml(acc.account_name) + '<br>' +
+                escapeHtml(acc.account_number) +
+                (acc.note ? '<br><small>' + escapeHtml(acc.note) + '</small>' : '') +
+                '</li>';
+            }).join('');
+            bankBox.hidden = false;
+          }
+          var lines = ['Order ' + orderNo, 'Hi Car Spa LK! I would like to place an order:', ''];
+          cartRead().forEach(function (it) {
+            lines.push('- ' + it.name + ' (' + it.size + ') x ' + it.qty + ' = ' + fmtRs(it.price * it.qty));
+          });
+          lines.push('', 'Total: ' + fmtRs(Number(r.body.total) || total), '');
+          lines.push('Name: ' + data.get('name'));
+          lines.push('Phone: ' + data.get('phone'));
+          lines.push('Address: ' + data.get('address') + (data.get('city') ? ', ' + data.get('city') : ''));
+          lines.push('Payment: ' + data.get('payment'));
+          if (data.get('notes')) lines.push('Notes: ' + data.get('notes'));
+          var waNumber = (form.getAttribute('data-whatsapp') || '').replace(/[^0-9]/g, '') || '94742388588';
+          var url = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(lines.join('\n'));
+          cartClear();
+          checkoutRoot.querySelector('.co-grid').hidden = true;
+          checkoutRoot.querySelector('.co-done').hidden = false;
+          window.open(url, '_blank', 'noopener');
+        }).catch(function () {
+          alert('Sorry, we could not place your order right now. Please try again.');
+          if (submitBtn) submitBtn.disabled = false;
         });
-        lines.push('', 'Total: ' + fmtRs(total), '');
-        lines.push('Name: ' + data.get('name'));
-        lines.push('Phone: ' + data.get('phone'));
-        lines.push('Address: ' + data.get('address') + (data.get('city') ? ', ' + data.get('city') : ''));
-        lines.push('Payment: ' + data.get('payment'));
-        if (data.get('notes')) lines.push('Notes: ' + data.get('notes'));
-        var waNumber = (form.getAttribute('data-whatsapp') || '').replace(/[^0-9]/g, '') || '94742388588';
-        var url = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent(lines.join('\n'));
-        cartClear();
-        checkoutRoot.querySelector('.co-grid').hidden = true;
-        checkoutRoot.querySelector('.co-done').hidden = false;
-        window.open(url, '_blank', 'noopener');
       });
     }
   }

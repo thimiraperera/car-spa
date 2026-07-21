@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Products with their featured image, ready for cards.
 const CARD_SELECT =
-  'SELECT p.id, p.slug, p.name, p.vehicle, p.category, p.price_lkr, p.size, p.listing_blurb, ' +
+  'SELECT p.id, p.slug, p.name, p.vehicle, p.category, p.price_lkr, p.size, p.listing_blurb, p.stock_qty, ' +
   '(SELECT m.file_path FROM product_images pi JOIN media m ON m.id = pi.media_id ' +
   ' WHERE pi.product_id = p.id AND pi.role = "featured" ORDER BY pi.sort_order, pi.id LIMIT 1) AS featured_image ' +
   'FROM products p WHERE p.is_active = 1 ';
@@ -185,8 +185,15 @@ router.get('/cart', async function (req, res, next) {
 
 router.get('/checkout', async function (req, res, next) {
   try {
+    const settings = res.locals.site.settings;
     const meta = await pageMeta('checkout', { title: 'Checkout | Car Spa LK', description: '', path: '/checkout', robots: 'noindex' });
-    res.render('checkout', { meta, jsonld: [] });
+    res.render('checkout', {
+      meta,
+      // Missing keys count as enabled so a fresh database keeps both methods.
+      payCod: siteSettings.get(settings, 'payment_cod_enabled', '1') !== '0',
+      payBank: siteSettings.get(settings, 'payment_bank_enabled', '1') !== '0',
+      jsonld: []
+    });
   } catch (err) {
     next(err);
   }

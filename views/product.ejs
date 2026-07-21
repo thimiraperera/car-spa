@@ -6,6 +6,8 @@
 <% if (!waNumber) waNumber = '94742388588'; %>
 <% var specLabels = (product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs)) ? Object.keys(product.specs) : []; %>
 <% var howTo = Array.isArray(product.how_to_use) ? product.how_to_use.filter(Boolean).join(' ') : String(product.how_to_use || '').trim(); %>
+<% var stockQty = (product.stock_qty === null || product.stock_qty === undefined) ? null : Number(product.stock_qty); %>
+<% var outOfStock = stockQty === 0; %>
 
 <%- include('partials/header') %>
 
@@ -28,7 +30,7 @@
       <% if (product.category) { %><span class="badge-cat"><%= product.category %></span><% } %>
       <h1><%= product.name %></h1>
       <div class="stars">★★★★★ <small style="color:var(--ink-soft); letter-spacing:0;">Genuine Arkos Vetek product</small></div>
-      <p class="pd-price">Rs. <%= Number(product.price_lkr).toLocaleString('en-US') %><% if (product.size) { %> <small>/ <%= product.size %></small><% } %></p>
+      <p class="pd-price">Rs. <%= Number(product.price_lkr).toLocaleString('en-US') %><% if (product.size) { %> <small>/ <%= product.size %></small><% } %><% if (stockQty !== null && stockQty >= 1 && stockQty <= 5) { %> <small style="color:var(--accent); font-weight:800;">Only <%= stockQty %> left</small><% } %></p>
       <% if (product.short_description) { %>
       <p class="pd-desc"><%= product.short_description %></p>
       <% } %>
@@ -43,13 +45,22 @@
       </ul>
       <% } %>
       <div class="pd-actions">
+        <% if (outOfStock) { %>
+        <button class="btn btn-dark" type="button" disabled style="opacity:.55; pointer-events:none;">
+          <span class="atc-label">Out of stock</span>
+        </button>
+        <% } else { %>
         <button class="btn btn-dark add-to-cart" type="button"
           data-slug="<%= product.slug %>" data-name="<%= product.name %>" data-price="<%= Math.round(Number(product.price_lkr)) %>"
           data-size="<%= product.size || '' %>" data-img="<%= featured ? '/media/' + featured.file_path : '' %>">
           <span class="atc-label">Add to cart</span> <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
         </button>
+        <% } %>
         <a class="btn btn-accent" href="https://wa.me/<%= waNumber %>?text=<%= encodeURIComponent('Hi Car Spa LK! I\'d like to order: ' + product.name) %>">Order now <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
       </div>
+      <% if (outOfStock) { %>
+      <p style="margin-top:10px; font-size:14px; color:var(--ink-soft);">This product is out of stock right now. Message us on WhatsApp and we'll let you know when it's back.</p>
+      <% } %>
       <% if (product.size || specLabels.length) { %>
       <div class="pd-meta">
         <% if (product.size) { %><span>Size: <b><%= product.size %></b></span><% } %>
