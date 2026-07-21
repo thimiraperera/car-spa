@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title><%= pageTitle %> | Car Spa LK Admin</title>
-<link rel="stylesheet" href="/assets/admin/admin.css">
+<link rel="stylesheet" href="/assets/admin/admin.css?v=<%= v %>">
 </head>
 <body class="adm">
 <style>
@@ -26,6 +26,13 @@
     <a href="/admin/media" class="<%= active === 'media' ? 'on' : '' %>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m4.5 17 5-5 3 3 4-5 5.5 6.5"/></svg>
       Media</a>
+    <span class="adm-nav-group">Sales</span>
+    <a href="/admin/orders" class="<%= active === 'orders' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6.5h13l-1.5 8h-10z"/><path d="M6 6.5 5.3 4H3.5"/><circle cx="9" cy="18.5" r="1.6"/><circle cx="15.5" cy="18.5" r="1.6"/></svg>
+      Orders</a>
+    <a href="/admin/payments" class="<%= active === 'payments' ? 'on' : '' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6.5" width="17" height="11" rx="1.8"/><path d="M3.5 10h17"/><path d="M7 14.5h4"/></svg>
+      Payments</a>
     <span class="adm-nav-group">Content</span>
     <a href="/admin/testimonials" class="<%= active === 'testimonials' ? 'on' : '' %>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H12l-4 3.5v-3.5H4z"/><path d="M8 10h8M8 13h5"/></svg>

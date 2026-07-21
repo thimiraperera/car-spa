@@ -15,10 +15,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.disable('x-powered-by');
 
-// Cache-busting version for styles.css and main.js, derived from file mtimes
+// Cache-busting version for the styles and scripts, derived from file mtimes
 // so nobody has to bump ?v=N by hand across pages anymore.
 function assetVersion() {
-  const files = ['styles.css', 'main.js'];
+  const files = ['styles.css', 'main.js', 'assets/admin/admin.css', 'assets/admin/admin.js'];
   let latest = 0;
   files.forEach(function (file) {
     try {
