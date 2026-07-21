@@ -1,0 +1,100 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Payments</h1>
+</header>
+
+<style>
+  .pay-rep td { vertical-align: top; }
+  .pay-rep .pay-sort { width: 80px; }
+  .pay-rep .actions { width: 90px; }
+  .pay-methods .check { margin-bottom: 10px; }
+</style>
+
+<form class="adm-form" method="post" action="/admin/payments">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <section class="adm-panel pay-methods">
+    <h2>Payment methods</h2>
+    <label class="check">
+      <input type="checkbox" name="payment_cod_enabled" value="1" <%= codEnabled ? 'checked' : '' %>>
+      Cash on delivery enabled
+    </label>
+    <label class="check">
+      <input type="checkbox" name="payment_bank_enabled" value="1" <%= bankEnabled ? 'checked' : '' %>>
+      Direct bank transfer enabled
+    </label>
+    <p class="adm-panel-note">Disabled methods disappear from the checkout immediately.</p>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Bank accounts for direct transfer</h2>
+    <p class="adm-panel-note">Rows with an empty bank or account number are dropped on save.</p>
+    <table class="adm-table pay-rep">
+      <thead><tr><th>Bank</th><th>Branch</th><th>Account name</th><th>Account number</th><th>Note</th><th class="pay-sort">Sort</th><th></th></tr></thead>
+      <tbody id="accounts-rows">
+        <% accounts.forEach(function (a, i) { %>
+        <tr>
+          <td><input type="text" name="accounts[<%= i %>][bank_name]" maxlength="120" value="<%= a.bank_name %>"></td>
+          <td><input type="text" name="accounts[<%= i %>][branch]" maxlength="120" value="<%= a.branch || '' %>"></td>
+          <td><input type="text" name="accounts[<%= i %>][account_name]" maxlength="150" value="<%= a.account_name %>"></td>
+          <td><input type="text" name="accounts[<%= i %>][account_number]" maxlength="60" value="<%= a.account_number %>"></td>
+          <td><input type="text" name="accounts[<%= i %>][note]" maxlength="255" value="<%= a.note || '' %>" placeholder="e.g. send the slip on WhatsApp"></td>
+          <td class="pay-sort"><input type="number" name="accounts[<%= i %>][sort_order]" step="1" value="<%= a.sort_order %>"></td>
+          <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div class="adm-form-actions">
+      <button type="button" class="adm-btn-ghost small" data-add-row="accounts">Add account</button>
+    </div>
+  </section>
+
+  <section class="adm-panel">
+    <h2>Where customers see this</h2>
+    <p class="adm-panel-note">These accounts are shown to customers who choose direct bank transfer at checkout, so they know where to deposit the payment. Use the note field for instructions such as where to send the slip.</p>
+  </section>
+
+  <div class="adm-form-actions">
+    <button type="submit" class="adm-btn">Save payments</button>
+  </div>
+</form>
+
+<template id="accounts-row-template">
+  <tr>
+    <td><input type="text" name="accounts[__IDX__][bank_name]" maxlength="120" value=""></td>
+    <td><input type="text" name="accounts[__IDX__][branch]" maxlength="120" value=""></td>
+    <td><input type="text" name="accounts[__IDX__][account_name]" maxlength="150" value=""></td>
+    <td><input type="text" name="accounts[__IDX__][account_number]" maxlength="60" value=""></td>
+    <td><input type="text" name="accounts[__IDX__][note]" maxlength="255" value="" placeholder="e.g. send the slip on WhatsApp"></td>
+    <td class="pay-sort"><input type="number" name="accounts[__IDX__][sort_order]" step="1" value="0"></td>
+    <td class="actions"><button type="button" class="adm-btn-danger" data-remove-row>Remove</button></td>
+  </tr>
+</template>
+
+<script>
+(function () {
+  'use strict';
+  /* Indexes keep counting past the server-rendered rows so names never collide */
+  var next = { accounts: <%= accounts.length %> };
+
+  document.querySelectorAll('[data-add-row]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.getAttribute('data-add-row');
+      var tpl = document.getElementById(kind + '-row-template');
+      var row = tpl.content.firstElementChild.cloneNode(true);
+      row.querySelectorAll('[name]').forEach(function (el) {
+        el.setAttribute('name', el.getAttribute('name').replace('__IDX__', next[kind]));
+      });
+      next[kind] += 1;
+      document.getElementById(kind + '-rows').appendChild(row);
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove-row]');
+    if (btn) btn.closest('tr').remove();
+  });
+})();
+</script>
+<%- include('../partials/bottom') %>

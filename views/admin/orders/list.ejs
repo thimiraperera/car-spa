@@ -1,0 +1,118 @@
+<%- include('../partials/top') %>
+<%
+  var money = function (n) {
+    return 'Rs ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  var pillClass = function (s) {
+    if (s === 'paid' || s === 'completed') return 'on';
+    if (s === 'cancelled') return 'off';
+    return '';
+  };
+  var listLink = function (pn, st) {
+    var parts = ['page=' + pn];
+    if (perPage !== 10) parts.push('per=' + perPage);
+    if (st) parts.push('status=' + st);
+    return '/admin/orders?' + parts.join('&');
+  };
+  var pageLink = function (pn) { return listLink(pn, status); };
+%>
+<style>
+  .ord-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .ord-filters a {
+    display: inline-block; padding: 6px 14px; border-radius: 20px;
+    border: 1.5px solid var(--line); font-size: 13px; font-weight: 600;
+    text-decoration: none; color: var(--ink);
+  }
+  .ord-filters a:hover { border-color: var(--ink); }
+  .ord-filters a.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .adm-pager { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+  .adm-pager a, .adm-pager span {
+    display: inline-block; min-width: 34px; text-align: center; padding: 7px 10px;
+    border-radius: 8px; border: 1.5px solid var(--line); font-size: 13px; font-weight: 600;
+    text-decoration: none; color: var(--ink);
+  }
+  .adm-pager a:hover { border-color: var(--ink); }
+  .adm-pager a.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .adm-pager span.disabled { color: var(--ink-soft); opacity: .5; }
+</style>
+<header class="adm-head">
+  <h1>Orders</h1>
+  <div class="adm-head-actions">
+    <form class="adm-perpage" method="get">
+      <% if (status) { %>
+      <input type="hidden" name="status" value="<%= status %>">
+      <% } %>
+      <label>Show
+        <select name="per" onchange="this.form.submit()">
+          <% perChoices.forEach(function (n) { %>
+          <option value="<%= n %>" <%= perPage === n ? 'selected' : '' %>><%= n %></option>
+          <% }); %>
+        </select>
+      per page</label>
+    </form>
+  </div>
+</header>
+
+<nav class="ord-filters" aria-label="Filter by status">
+  <a href="<%= listLink(1, '') %>" class="<%= status === '' ? 'on' : '' %>">All</a>
+  <% statuses.forEach(function (s) { %>
+  <a href="<%= listLink(1, s) %>" class="<%= status === s ? 'on' : '' %>"><%= statusLabels[s] %></a>
+  <% }); %>
+</nav>
+
+<section class="adm-panel">
+  <table class="adm-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th class="num">Items</th>
+        <th class="num">Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th class="actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function (o) { %>
+      <tr>
+        <td><a href="/admin/orders/<%= o.id %>"><b>CS-<%= 1000 + o.id %></b></a></td>
+        <td><%= o.customer_name %></td>
+        <td class="muted"><%= o.phone %></td>
+        <td class="num"><%= Number(o.items_qty) %></td>
+        <td class="num"><%= money(o.total_lkr) %></td>
+        <td class="muted"><%= paymentLabels[o.payment_method] || o.payment_method %></td>
+        <td><span class="adm-pill <%= pillClass(o.status) %>"><%= statusLabels[o.status] || o.status %></span></td>
+        <td class="muted"><%= String(o.created_at).slice(0, 10) %></td>
+        <td class="actions">
+          <a class="adm-btn-ghost small" href="/admin/orders/<%= o.id %>">View</a>
+        </td>
+      </tr>
+      <% }); %>
+      <% if (!orders.length) { %>
+      <tr><td colspan="9" class="muted">No orders yet. They appear here when customers check out.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <% if (totalPages > 1) { %>
+  <nav class="adm-pager" aria-label="Order pages">
+    <% if (currentPage > 1) { %>
+    <a href="<%= pageLink(currentPage - 1) %>">Prev</a>
+    <% } else { %>
+    <span class="disabled">Prev</span>
+    <% } %>
+    <% for (var pn = 1; pn <= totalPages; pn++) { %>
+    <a href="<%= pageLink(pn) %>" class="<%= pn === currentPage ? 'on' : '' %>"><%= pn %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+    <a href="<%= pageLink(currentPage + 1) %>">Next</a>
+    <% } else { %>
+    <span class="disabled">Next</span>
+    <% } %>
+  </nav>
+  <% } %>
+</section>
+<%- include('../partials/bottom') %>

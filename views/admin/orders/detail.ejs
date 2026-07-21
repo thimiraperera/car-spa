@@ -1,0 +1,127 @@
+<%- include('../partials/top') %>
+<%
+  var orderNo = 'CS-' + (1000 + order.id);
+  var money = function (n) {
+    return 'Rs ' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  var pillClass = function (s) {
+    if (s === 'paid' || s === 'completed') return 'on';
+    if (s === 'cancelled') return 'off';
+    return '';
+  };
+  var stamp = function (t) { return String(t).slice(0, 16); };
+%>
+<style>
+  .ord-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0 22px; align-items: start; }
+  @media (max-width: 900px) { .ord-grid { grid-template-columns: 1fr; } }
+  .ord-kv { display: grid; grid-template-columns: 120px 1fr; gap: 7px 14px; font-size: 14px; }
+  .ord-kv dt { color: var(--ink-soft); font-weight: 600; }
+  .ord-kv dd { margin: 0; overflow-wrap: anywhere; }
+  .ord-total td { font-weight: 800; border-top: 2px solid var(--line); }
+</style>
+<header class="adm-head">
+  <h1>Order <%= orderNo %> <span class="adm-pill <%= pillClass(order.status) %>"><%= statusLabels[order.status] || order.status %></span></h1>
+  <div class="adm-head-actions">
+    <a class="adm-btn-ghost" href="/admin/orders">Back to orders</a>
+    <form class="adm-inline-form" method="post" action="/admin/orders/<%= order.id %>/delete" data-confirm="Delete order <%= orderNo %>? Its items go with it.">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button type="submit" class="adm-btn-danger">Delete order</button>
+    </form>
+  </div>
+</header>
+
+<div class="ord-grid">
+  <div>
+    <section class="adm-panel">
+      <h2>Customer</h2>
+      <dl class="ord-kv">
+        <dt>Name</dt>
+        <dd><%= order.customer_name %></dd>
+        <dt>Phone</dt>
+        <dd><a href="tel:<%= String(order.phone).replace(/[^+0-9]/g, '') %>"><%= order.phone %></a></dd>
+        <dt>Address</dt>
+        <dd><%= order.address %></dd>
+        <dt>City</dt>
+        <dd><%= order.city || '' %></dd>
+        <dt>Notes</dt>
+        <dd><%= order.notes || '' %></dd>
+      </dl>
+    </section>
+
+    <section class="adm-panel">
+      <h2>Items</h2>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th class="num">Qty</th>
+            <th class="num">Unit price</th>
+            <th class="num">Line total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(function (it) { %>
+          <tr>
+            <td>
+              <% if (it.product_id) { %>
+              <a href="/admin/products/<%= it.product_id %>/edit"><%= it.name %></a>
+              <% } else { %>
+              <%= it.name %>
+              <% } %>
+            </td>
+            <td class="muted"><%= it.size || '' %></td>
+            <td class="num"><%= it.qty %></td>
+            <td class="num"><%= money(it.price_lkr) %></td>
+            <td class="num"><%= money(it.line_lkr) %></td>
+          </tr>
+          <% }); %>
+          <% if (!items.length) { %>
+          <tr><td colspan="5" class="muted">This order has no items.</td></tr>
+          <% } %>
+          <tr class="ord-total">
+            <td colspan="4" class="num">Grand total</td>
+            <td class="num"><%= money(order.total_lkr) %></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div>
+    <section class="adm-panel">
+      <h2>Status</h2>
+      <form class="adm-form" method="post" action="/admin/orders/<%= order.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <label>Order status
+          <select name="status">
+            <% statuses.forEach(function (s) { %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= statusLabels[s] %></option>
+            <% }); %>
+          </select>
+        </label>
+        <% if (order.payment_method === 'bank' && order.status === 'awaiting_payment') { %>
+        <p class="adm-panel-note">Mark as Paid once the transfer arrives.</p>
+        <% } %>
+        <div class="adm-form-actions">
+          <button type="submit" class="adm-btn">Update</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="adm-panel">
+      <h2>Summary</h2>
+      <dl class="ord-kv">
+        <dt>Payment</dt>
+        <dd><%= paymentLabels[order.payment_method] || order.payment_method %></dd>
+        <dt>Total</dt>
+        <dd><b><%= money(order.total_lkr) %></b></dd>
+        <dt>Placed</dt>
+        <dd class="muted"><%= stamp(order.created_at) %></dd>
+        <dt>Updated</dt>
+        <dd class="muted"><%= stamp(order.updated_at) %></dd>
+      </dl>
+    </section>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

@@ -135,6 +135,8 @@ router.use('/hours', require('./hours'));
 router.use('/legal', require('./legal'));
 router.use('/page-seo', require('./page-seo'));
 router.use('/settings', require('./settings'));
+router.use('/orders', require('./orders'));
+router.use('/payments', require('./payments'));
 router.use('/smtp', require('./smtp'));
 router.use('/team', require('./team'));
 router.use('/profile', require('./profile'));
