@@ -1,0 +1,63 @@
+<%- include('../partials/top') %>
+<header class="adm-head">
+  <h1>Backup</h1>
+</header>
+
+<style>
+  .bk-warn { background: #f8e7e6; color: #a4211a; font-weight: 700; font-size: 14px; padding: 12px 14px; border-radius: 10px; margin-bottom: 12px; }
+  .bk-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .bk-size { color: var(--ink-soft); font-size: 13px; font-weight: 600; }
+  .bk-restore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .bk-restore-grid form { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .bk-restore-grid h3 { font-size: 15px; margin-bottom: 10px; }
+  @media (max-width: 860px) { .bk-restore-grid { grid-template-columns: 1fr; } }
+</style>
+
+<% if (error) { %><div class="adm-error"><%= error %></div><% } %>
+
+<section class="adm-panel">
+  <h2>Download backups</h2>
+  <p class="adm-panel-note">Keep a copy somewhere safe before big edits or a server move. The full backup bundles the database dump and the media folder in one zip.</p>
+  <div class="bk-actions">
+    <a class="adm-btn" href="/admin/backup/database">Download database (.sql)</a>
+    <a class="adm-btn-ghost" href="/admin/backup/media">Download media (.zip)</a>
+    <span class="bk-size">Media folder: <%= mediaSize %></span>
+    <a class="adm-btn-ghost" href="/admin/backup/full">Download full backup (.zip)</a>
+  </div>
+</section>
+
+<section class="adm-panel">
+  <h2>Restore</h2>
+  <div class="bk-restore-grid adm-form">
+    <form method="post" action="/admin/backup/database" enctype="multipart/form-data"
+          data-confirm="Restore this database backup? Every current record will be replaced.">
+      <h3>Restore database</h3>
+      <div class="bk-warn">Warning: Replaces ALL current content. Products, orders, settings and every other record will be overwritten by the backup.</div>
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Database backup (.sql)
+        <input type="file" name="database_file" accept=".sql" required>
+      </label>
+      <div class="adm-form-actions">
+        <button type="submit" class="adm-btn">Restore database</button>
+      </div>
+    </form>
+    <form method="post" action="/admin/backup/media" enctype="multipart/form-data">
+      <h3>Restore media</h3>
+      <div class="bk-warn">Extracts into the media folder, existing files with the same names are overwritten.</div>
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Media backup (.zip)
+        <input type="file" name="media_file" accept=".zip" required>
+      </label>
+      <div class="adm-form-actions">
+        <button type="submit" class="adm-btn">Restore media</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="adm-panel">
+  <h2>Large media folders</h2>
+  <p class="adm-panel-note">If your media library has grown into the gigabytes, skip the zip upload here. Extract the media backup zip straight into the media folder with your hosting file manager or FTP instead. The database restore is what rebuilds the records, the files just need to exist at the same paths.</p>
+</section>
+
+<%- include('../partials/bottom') %>
