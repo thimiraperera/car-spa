@@ -1390,3 +1390,13 @@ body.so-open, body.mc-open { overflow: hidden; }
   .footer-bottom { font-size: 12px; }
   .prod-carousel .prod-card { min-width: 78vw; }
 }
+
+/* ---------- Related products row (product page) ---------- */
+/* One row of up to 3 cards; steps down to 2 columns, then a single stack. */
+.related-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 760px) {
+  .related-row { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+@media (max-width: 480px) {
+  .related-row { grid-template-columns: 1fr; }
+}

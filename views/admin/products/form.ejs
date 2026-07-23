@@ -11,9 +11,23 @@
 </header>
 
 <style>
-  .adm-imgpick .pick .tag { display: flex; justify-content: center; gap: 10px; padding: 3px 0; }
-  .adm-imgpick .pick .tag label { display: flex; align-items: center; gap: 3px; margin: 0; font-weight: 400; font-size: 10px; cursor: pointer; }
-  .adm-imgpick .pick .tag input { margin: 0; }
+  .prod-img-tiles { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 4px; }
+  .prod-img-tiles .tile {
+    position: relative; width: 132px; border: 2px solid var(--line); border-radius: 10px;
+    overflow: hidden; background: var(--white);
+  }
+  .prod-img-tiles .tile img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .prod-img-tiles .tile.off img { opacity: .35; }
+  .prod-img-tiles .tile .flag {
+    position: absolute; top: 6px; left: 6px; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: .02em; padding: 2px 8px; border-radius: 999px;
+  }
+  .prod-img-tiles .tile .opts { padding: 6px 8px; display: grid; gap: 4px; }
+  .prod-img-tiles .tile .opts label {
+    display: flex; align-items: center; gap: 5px; margin: 0;
+    font-weight: 400; font-size: 11px; cursor: pointer;
+  }
+  .prod-img-tiles .tile .opts input { width: auto; margin: 0; }
 </style>
 
 <form class="adm-form" method="post" action="<%= isNew ? '/admin/products' : '/admin/products/' + p.id %>" enctype="multipart/form-data">
@@ -111,28 +125,47 @@
 
   <section class="adm-panel">
     <h2>Images</h2>
-    <div class="adm-upload-row">
-      <label>Upload new images
-        <input type="file" name="new_images" accept="image/*" multiple>
-      </label>
-    </div>
-    <p class="adm-panel-note">Uploaded files land in the media library automatically and attach to this product when you save. The first upload becomes the featured image if none is picked below.</p>
-    <p class="adm-panel-note">Pick one featured image and any number of gallery images from the library.</p>
-    <% if (media.length) { %>
-    <div class="adm-imgpick" id="imgpick">
-      <% media.forEach(function (m) { %>
-      <% const isFeat = featuredId === m.id; const isGal = galleryIds.indexOf(m.id) !== -1; %>
-      <div class="pick<%= isFeat || isGal ? ' sel' : '' %>">
-        <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
-        <span class="tag">
-          <label title="Featured image"><input type="radio" name="featured_media" value="<%= m.id %>" <%= isFeat ? 'checked' : '' %>> Feat</label>
-          <label title="In gallery"><input type="checkbox" name="gallery_media[]" value="<%= m.id %>" <%= isGal ? 'checked' : '' %>> Gal</label>
-        </span>
+    <% if (images.length) { %>
+    <div class="prod-img-tiles" id="prod-images">
+      <% images.forEach(function (img) { %>
+      <div class="tile">
+        <img src="/media/<%= img.file_path %>" alt="<%= img.alt_text || img.file_path %>" title="<%= img.file_path %>">
+        <% if (img.role === 'featured') { %><span class="flag">Featured</span><% } %>
+        <div class="opts">
+          <label><input type="radio" name="featured_media" value="<%= img.media_id %>" <%= featuredId === img.media_id ? 'checked' : '' %>> Featured</label>
+          <label><input type="checkbox" name="keep_media[]" value="<%= img.media_id %>" <%= keptIds.indexOf(img.media_id) !== -1 ? 'checked' : '' %>> Keep on product</label>
+        </div>
       </div>
       <% }); %>
     </div>
+    <p class="adm-panel-note">Untick Keep to take an image off this product when you save. The file stays in the media library.</p>
+    <% } %>
+    <div class="adm-upload-row">
+      <label><%= images.length ? 'Upload more images' : 'Upload images' %>
+        <input type="file" name="new_images" accept="image/*" multiple>
+      </label>
+    </div>
+    <% if (images.length) { %>
+    <p class="adm-panel-note">Uploaded images join the gallery automatically, tick the radio to make one featured.</p>
     <% } else { %>
-    <p class="adm-panel-note">The media library is empty.</p>
+    <p class="adm-panel-note">No images yet. Upload some and they attach to this product on save, the first one becomes the featured image.</p>
+    <% } %>
+  </section>
+
+  <section class="adm-panel">
+    <h2>You might also like</h2>
+    <% if (otherProducts.length) { %>
+    <p class="adm-panel-note" id="prod-related-note">Pick up to 3. Leave empty to pick automatically by category.</p>
+    <div class="adm-grid2" id="prod-related">
+      <% otherProducts.forEach(function (op) { %>
+      <label class="check">
+        <input type="checkbox" name="related_ids[]" value="<%= op.id %>" <%= relatedIds.indexOf(op.id) !== -1 ? 'checked' : '' %>>
+        <%= op.name %>
+      </label>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <p class="adm-panel-note">No other active products yet. Once there are, you can hand-pick up to 3 here.</p>
     <% } %>
   </section>
 
@@ -233,15 +266,29 @@
   ta.addEventListener('input', count);
   count();
 
-  var grid = document.getElementById('imgpick');
-  if (grid) {
-    var refresh = function () {
-      grid.querySelectorAll('.pick').forEach(function (pick) {
-        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
+  var tiles = document.getElementById('prod-images');
+  if (tiles) {
+    var refreshTiles = function () {
+      tiles.querySelectorAll('.tile').forEach(function (tile) {
+        var keep = tile.querySelector('input[type="checkbox"]');
+        tile.classList.toggle('off', !keep.checked);
       });
     };
-    grid.addEventListener('change', refresh);
-    refresh();
+    tiles.addEventListener('change', refreshTiles);
+    refreshTiles();
+  }
+
+  var related = document.getElementById('prod-related');
+  if (related) {
+    var relBoxes = related.querySelectorAll('input[type="checkbox"]');
+    var capRelated = function () {
+      var ticked = related.querySelectorAll('input:checked').length;
+      relBoxes.forEach(function (box) {
+        if (!box.checked) box.disabled = ticked >= 3;
+      });
+    };
+    related.addEventListener('change', capRelated);
+    capRelated();
   }
 })();
 </script>

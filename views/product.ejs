@@ -85,7 +85,7 @@
       <h2 class="section-title">You might <strong class="hl">also like</strong></h2>
       <a class="btn btn-dark" href="/products">All products <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span></a>
     </div>
-    <div class="prod-grid three">
+    <div class="related-row">
       <% related.forEach(function (p, i) { %>
       <a class="prod-card reveal" href="<%= p.url %>" style="--rd:<%= (i * 0.08).toFixed(2) %>s">
         <div class="prod-media">

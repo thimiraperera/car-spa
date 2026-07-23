@@ -118,16 +118,61 @@ router.get('/products/:slug', async function (req, res, next) {
     const product = await queryOne('SELECT * FROM products WHERE slug = ? AND is_active = 1', [req.params.slug]);
     if (!product) return render404(req, res);
 
-    const [images, related] = await Promise.all([
-      query(
-        'SELECT m.file_path, m.alt_text, pi.role FROM product_images pi ' +
-        'JOIN media m ON m.id = pi.media_id WHERE pi.product_id = ? ' +
-        'ORDER BY pi.role = "featured" DESC, pi.sort_order, pi.id',
-        [product.id]
-      ),
-      query(CARD_SELECT + 'AND p.id <> ? AND p.vehicle IN (?, "both") ORDER BY p.click_count DESC LIMIT 4',
-        [product.id, product.vehicle === 'both' ? 'car' : product.vehicle])
-    ]);
+    const images = await query(
+      'SELECT m.file_path, m.alt_text, pi.role FROM product_images pi ' +
+      'JOIN media m ON m.id = pi.media_id WHERE pi.product_id = ? ' +
+      'ORDER BY pi.role = "featured" DESC, pi.sort_order, pi.id',
+      [product.id]
+    );
+
+    // "You might also like": hand-picked ids first, topped up with same-category
+    // best sellers, then random actives. Always 3 at most.
+    let picked = [];
+    if (typeof product.related_ids === 'string') {
+      try { picked = JSON.parse(product.related_ids); } catch (err) { picked = []; }
+    } else if (Array.isArray(product.related_ids)) {
+      picked = product.related_ids;
+    }
+    picked = (Array.isArray(picked) ? picked : [])
+      .map(Number)
+      .filter(function (id, i, arr) {
+        return Number.isInteger(id) && id > 0 && id !== product.id && arr.indexOf(id) === i;
+      })
+      .slice(0, 3);
+
+    let related = [];
+    if (picked.length) {
+      const rows = await query(
+        CARD_SELECT + 'AND p.id IN (' + picked.map(function () { return '?'; }).join(', ') + ')',
+        picked
+      );
+      picked.forEach(function (id) {
+        const row = rows.find(function (r) { return r.id === id; });
+        if (row) related.push(row);
+      });
+    }
+
+    if (related.length < 3) {
+      const exclude = [product.id].concat(related.map(function (r) { return r.id; }));
+      const holes = exclude.map(function () { return '?'; }).join(', ');
+      const fill = await query(
+        CARD_SELECT + 'AND p.category = ? AND p.id NOT IN (' + holes + ') ' +
+        'ORDER BY p.click_count DESC LIMIT ?',
+        [product.category].concat(exclude, [3 - related.length])
+      );
+      related = related.concat(fill);
+    }
+
+    if (related.length < 3) {
+      const exclude = [product.id].concat(related.map(function (r) { return r.id; }));
+      const holes = exclude.map(function () { return '?'; }).join(', ');
+      const fill = await query(
+        CARD_SELECT + 'AND p.id NOT IN (' + holes + ') ORDER BY RAND() LIMIT ?',
+        exclude.concat([3 - related.length])
+      );
+      related = related.concat(fill);
+    }
+    related = related.slice(0, 3);
 
     ['features', 'specs', 'how_to_use'].forEach(function (key) {
       if (typeof product[key] === 'string') {

@@ -137,16 +137,35 @@ function readSeoForm(body) {
   return { values: values, error: error };
 }
 
-function readImagePicks(body) {
+function readImageForm(body) {
   const featured = parseInt(body.featured_media, 10);
-  let gallery = body.gallery_media === undefined ? [] : body.gallery_media;
-  if (!Array.isArray(gallery)) gallery = [gallery];
+  let keep = body.keep_media === undefined ? [] : body.keep_media;
+  if (!Array.isArray(keep)) keep = [keep];
   return {
-    featuredId: Number.isFinite(featured) ? featured : null,
-    galleryIds: gallery
+    featuredPick: Number.isFinite(featured) ? featured : null,
+    keepIds: keep
       .map(function (v) { return parseInt(v, 10); })
       .filter(function (n) { return Number.isFinite(n); })
   };
+}
+
+function readRelatedForm(body) {
+  let raw = body.related_ids === undefined ? [] : body.related_ids;
+  if (!Array.isArray(raw)) raw = [raw];
+  const ids = [];
+  raw.forEach(function (v) {
+    const n = parseInt(v, 10);
+    if (Number.isFinite(n) && ids.indexOf(n) === -1) ids.push(n);
+  });
+  return ids;
+}
+
+function relatedFromColumn(value) {
+  const arr = parseJsonColumn(value);
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map(function (v) { return parseInt(v, 10); })
+    .filter(function (n) { return Number.isFinite(n); });
 }
 
 function validate(data) {
@@ -166,8 +185,21 @@ function validate(data) {
 
 // ---- Render helpers -------------------------------------------------------
 
-function mediaList() {
-  return query('SELECT id, file_path, alt_text FROM media ORDER BY created_at DESC, id DESC');
+// Featured first, then gallery in its saved order.
+function productImages(productId) {
+  return query(
+    'SELECT pi.media_id, pi.role, m.file_path, m.alt_text ' +
+    'FROM product_images pi JOIN media m ON m.id = pi.media_id ' +
+    'WHERE pi.product_id = ? ORDER BY pi.role = "gallery", pi.sort_order, pi.id',
+    [productId]
+  );
+}
+
+function otherProductsList(excludeId) {
+  return query(
+    'SELECT id, name FROM products WHERE is_active = 1 AND id <> ? ORDER BY name',
+    [excludeId || 0]
+  );
 }
 
 function formLocals(opts) {
@@ -176,9 +208,11 @@ function formLocals(opts) {
     active: 'products',
     product: opts.product,
     seo: opts.seo,
-    media: opts.media,
+    images: opts.images,
     featuredId: opts.featuredId,
-    galleryIds: opts.galleryIds,
+    keptIds: opts.keptIds,
+    otherProducts: opts.otherProducts,
+    relatedIds: opts.relatedIds,
     featuresText: opts.featuresText,
     specsText: opts.specsText,
     howToText: opts.howToText,
@@ -227,10 +261,11 @@ router.get('/', async function (req, res, next) {
 
 router.get('/new', async function (req, res, next) {
   try {
-    const media = await mediaList();
+    const otherProducts = await otherProductsList(null);
     res.render('admin/products/form', formLocals({
-      product: null, seo: null, media,
-      featuredId: null, galleryIds: [],
+      product: null, seo: null,
+      images: [], featuredId: null, keptIds: [],
+      otherProducts, relatedIds: [],
       featuresText: '', specsText: '', howToText: ''
     }));
   } catch (err) {
@@ -246,19 +281,19 @@ router.get('/:id/edit', async function (req, res, next) {
       : null;
     if (!product) return res.status(404).send('Product not found');
 
-    const [seo, images, media] = await Promise.all([
+    const [seo, images, otherProducts] = await Promise.all([
       queryOne('SELECT * FROM product_seo WHERE product_id = ?', [id]),
-      query('SELECT media_id, role FROM product_images WHERE product_id = ? ORDER BY sort_order, id', [id]),
-      mediaList()
+      productImages(id),
+      otherProductsList(id)
     ]);
     const featuredRow = images.find(function (row) { return row.role === 'featured'; });
 
     res.render('admin/products/form', formLocals({
-      product, seo, media,
+      product, seo, images,
       featuredId: featuredRow ? featuredRow.media_id : null,
-      galleryIds: images
-        .filter(function (row) { return row.role === 'gallery'; })
-        .map(function (row) { return row.media_id; }),
+      keptIds: images.map(function (row) { return row.media_id; }),
+      otherProducts,
+      relatedIds: relatedFromColumn(product.related_ids),
       featuresText: arrayToText(product.features),
       specsText: specsToText(product.specs),
       howToText: arrayToText(product.how_to_use)
@@ -278,14 +313,19 @@ async function renderFormError(req, res, id, error) {
   const body = req.body || {};
   const data = readProductForm(body);
   const seo = readSeoForm(body);
-  const picks = readImagePicks(body);
-  const media = await mediaList();
+  const picks = readImageForm(body);
+  const [images, otherProducts] = await Promise.all([
+    id ? productImages(id) : Promise.resolve([]),
+    otherProductsList(id)
+  ]);
   res.status(422).render('admin/products/form', formLocals({
     product: Object.assign({}, data, { id: id }),
     seo: seo.values,
-    media,
-    featuredId: picks.featuredId,
-    galleryIds: picks.galleryIds,
+    images,
+    featuredId: picks.featuredPick,
+    keptIds: picks.keepIds,
+    otherProducts,
+    relatedIds: readRelatedForm(body),
     featuresText: String(body.features || ''),
     specsText: String(body.specs || ''),
     howToText: String(body.how_to_use || ''),
@@ -296,7 +336,7 @@ async function renderFormError(req, res, id, error) {
 async function saveProduct(req, res, next, id) {
   const data = readProductForm(req.body);
   const seo = readSeoForm(req.body);
-  const picks = readImagePicks(req.body);
+  const picks = readImageForm(req.body);
   const files = req.files || [];
 
   try {
@@ -312,16 +352,52 @@ async function saveProduct(req, res, next, id) {
       return await renderFormError(req, res, id, error);
     }
 
+    // Keep only ticked images that really belong to this product, in their
+    // current display order (featured first, then gallery).
+    const currentRows = id
+      ? await query(
+          'SELECT media_id FROM product_images WHERE product_id = ? ORDER BY role = "gallery", sort_order, id',
+          [id]
+        )
+      : [];
+    const keepSet = {};
+    picks.keepIds.forEach(function (mid) { keepSet[mid] = true; });
+    const seen = {};
+    const keptIds = currentRows
+      .map(function (row) { return row.media_id; })
+      .filter(function (mid) {
+        if (!keepSet[mid] || seen[mid]) return false;
+        seen[mid] = true;
+        return true;
+      });
+
+    // Hand-picked related products: up to 3 ids of real, other, active products.
+    const otherRows = await query(
+      'SELECT id FROM products WHERE is_active = 1 AND id <> ?', [id || 0]
+    );
+    const otherSet = {};
+    otherRows.forEach(function (row) { otherSet[row.id] = true; });
+    const relatedIds = readRelatedForm(req.body)
+      .filter(function (pid) { return otherSet[pid]; })
+      .slice(0, 3);
+    data.related_ids = relatedIds.length ? JSON.stringify(relatedIds) : null;
+
     // Uploaded files join the media library first so their ids can be
     // attached inside the transaction below.
     const uploadedIds = [];
     for (let i = 0; i < files.length; i++) {
       uploadedIds.push(await saveUploadedMedia(files[i], data.name));
     }
-    let featuredId = picks.featuredId;
-    const extra = uploadedIds.slice();
-    if (featuredId === null && extra.length) featuredId = extra.shift();
-    const galleryIds = picks.galleryIds.concat(extra);
+
+    // Featured: the radio pick if it survived, else first kept, else first upload.
+    let featuredId = picks.featuredPick !== null && keptIds.indexOf(picks.featuredPick) !== -1
+      ? picks.featuredPick
+      : null;
+    if (featuredId === null) {
+      featuredId = keptIds.length ? keptIds[0] : (uploadedIds.length ? uploadedIds[0] : null);
+    }
+    const galleryIds = keptIds.concat(uploadedIds)
+      .filter(function (mid) { return mid !== featuredId; });
 
     const conn = await pool.getConnection();
     try {
@@ -330,21 +406,22 @@ async function saveProduct(req, res, next, id) {
       const cols = [
         data.slug, data.name, data.vehicle, data.category, data.price_lkr, data.stock_qty,
         data.size, data.sku, data.listing_blurb, data.short_description,
-        data.description_html, data.features, data.specs, data.how_to_use, data.is_active
+        data.description_html, data.features, data.specs, data.how_to_use,
+        data.related_ids, data.is_active
       ];
       let productId = id;
       if (id) {
         await conn.query(
           'UPDATE products SET slug = ?, name = ?, vehicle = ?, category = ?, price_lkr = ?, stock_qty = ?, ' +
           'size = ?, sku = ?, listing_blurb = ?, short_description = ?, description_html = ?, ' +
-          'features = ?, specs = ?, how_to_use = ?, is_active = ? WHERE id = ?',
+          'features = ?, specs = ?, how_to_use = ?, related_ids = ?, is_active = ? WHERE id = ?',
           cols.concat(id)
         );
       } else {
         const [result] = await conn.query(
           'INSERT INTO products (slug, name, vehicle, category, price_lkr, stock_qty, size, sku, ' +
-          'listing_blurb, short_description, description_html, features, specs, how_to_use, is_active) ' +
-          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'listing_blurb, short_description, description_html, features, specs, how_to_use, related_ids, is_active) ' +
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           cols
         );
         productId = result.insertId;
