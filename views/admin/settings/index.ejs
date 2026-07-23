@@ -29,6 +29,16 @@
   </section>
 
   <section class="adm-panel">
+    <h2>Images</h2>
+    <div class="adm-grid3">
+      <label>Max image dimension
+        <small>Uploads are converted to webp and resized so the longest side stays under this</small>
+        <input type="number" name="image_max_dimension" min="256" max="4096" step="64" required value="<%= values.image_max_dimension %>">
+      </label>
+    </div>
+  </section>
+
+  <section class="adm-panel">
     <h2>Branding</h2>
     <% const logoFields = [
       { key: 'site_logo_media_id', label: 'Site logo', help: '' },

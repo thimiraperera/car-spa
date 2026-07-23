@@ -8,7 +8,8 @@ const router = express.Router();
 const FIELDS = [
   { key: 'carousel_product_count', def: 10, min: 1, max: 24 },
   { key: 'testimonials_count', def: 10, min: 1, max: 30 },
-  { key: 'hero_picks_count', def: 3, min: 1, max: 6 }
+  { key: 'hero_picks_count', def: 3, min: 1, max: 6 },
+  { key: 'image_max_dimension', def: 1024, min: 256, max: 4096 }
 ];
 
 const LOGO_FIELDS = [
