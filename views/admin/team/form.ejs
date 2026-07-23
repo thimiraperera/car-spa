@@ -7,12 +7,7 @@
   </div>
 </header>
 
-<style>
-  .adm-imgpick .pick.none-pick { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-  .adm-imgpick .pick.none-pick .none-ph { font-size: 11px; color: var(--ink-soft); }
-</style>
-
-<form class="adm-form" method="post" action="<%= isNew ? '/admin/team' : '/admin/team/' + a.id %>">
+<form class="adm-form" method="post" enctype="multipart/form-data" action="<%= isNew ? '/admin/team' : '/admin/team/' + a.id %>">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <% if (error) { %><div class="adm-error"><%= error %></div><% } %>
 
@@ -41,23 +36,16 @@
 
   <section class="adm-panel">
     <h2>Avatar</h2>
-    <% if (media.length) { %>
-    <div class="adm-imgpick" id="imgpick">
-      <div class="pick none-pick<%= !a.avatar_media_id ? ' sel' : '' %>">
-        <span class="none-ph">None</span>
-        <span class="tag"><input type="radio" name="avatar_media" value="" <%= !a.avatar_media_id ? 'checked' : '' %>></span>
-      </div>
-      <% media.forEach(function (m) { %>
-      <% const isSel = a.avatar_media_id === m.id; %>
-      <div class="pick<%= isSel ? ' sel' : '' %>">
-        <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
-        <span class="tag"><input type="radio" name="avatar_media" value="<%= m.id %>" <%= isSel ? 'checked' : '' %>></span>
-      </div>
-      <% }); %>
+    <div class="adm-upload-row">
+      <% if (a.avatar_file_path) { %>
+      <img src="/media/<%= a.avatar_file_path %>" alt="" style="border-radius: 50%;">
+      <% } %>
+      <label>Upload a photo <input type="file" name="avatar_file" accept="image/*"></label>
+      <% if (a.avatar_file_path) { %>
+      <label class="check"><input type="checkbox" name="avatar_clear" value="1"> Remove</label>
+      <% } %>
     </div>
-    <% } else { %>
-    <p class="adm-panel-note">The media library is empty. Upload a photo in <a href="/admin/media">Media</a>.</p>
-    <% } %>
+    <p class="adm-panel-note">Replacing or removing the photo also deletes the old file when nothing else uses it.</p>
   </section>
 
   <div class="adm-form-actions">
@@ -86,19 +74,4 @@
   </form>
 </section>
 <% } %>
-
-<script>
-(function () {
-  var grid = document.getElementById('imgpick');
-  if (grid) {
-    var refresh = function () {
-      grid.querySelectorAll('.pick').forEach(function (pick) {
-        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
-      });
-    };
-    grid.addEventListener('change', refresh);
-    refresh();
-  }
-})();
-</script>
 <%- include('../partials/bottom') %>

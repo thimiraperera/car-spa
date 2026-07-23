@@ -9,15 +9,13 @@ const PER_CHOICES = [10, 25, 50, 100];
 function readForm(body) {
   const sort = parseInt(body.sort_order, 10);
   const rating = parseInt(body.rating, 10);
-  const imageMedia = parseInt(body.image_media, 10);
   return {
     quote: String(body.quote || '').trim(),
     customer_name: String(body.customer_name || '').trim(),
     detail: String(body.detail || '').trim(),
     rating: rating >= 1 && rating <= 5 ? rating : 5,
     is_active: body.is_active ? 1 : 0,
-    sort_order: Number.isFinite(sort) ? sort : 0,
-    image_media_id: Number.isFinite(imageMedia) ? imageMedia : null
+    sort_order: Number.isFinite(sort) ? sort : 0
   };
 }
 
@@ -25,10 +23,6 @@ function validate(data) {
   if (!data.quote) return 'Quote is required';
   if (!data.customer_name) return 'Customer name is required';
   return null;
-}
-
-function mediaList() {
-  return query('SELECT id, file_path, alt_text FROM media ORDER BY created_at DESC, id DESC');
 }
 
 // Multer runs before the handler; its errors re-render as a form error.
@@ -74,27 +68,25 @@ router.get('/', async function (req, res, next) {
   }
 });
 
-router.get('/new', async function (req, res, next) {
-  try {
-    const media = await mediaList();
-    res.render('admin/testimonials/form', {
-      pageTitle: 'Add testimonial', active: 'testimonials', item: null, media, error: null
-    });
-  } catch (err) {
-    next(err);
-  }
+router.get('/new', function (req, res) {
+  res.render('admin/testimonials/form', {
+    pageTitle: 'Add testimonial', active: 'testimonials', item: null, error: null
+  });
 });
 
 router.get('/:id/edit', async function (req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     const item = Number.isFinite(id)
-      ? await queryOne('SELECT * FROM testimonials WHERE id = ?', [id])
+      ? await queryOne(
+          'SELECT t.*, m.file_path AS image_file_path FROM testimonials t ' +
+          'LEFT JOIN media m ON m.id = t.image_media_id WHERE t.id = ?',
+          [id]
+        )
       : null;
     if (!item) return res.status(404).send('Testimonial not found');
-    const media = await mediaList();
     res.render('admin/testimonials/form', {
-      pageTitle: 'Edit testimonial', active: 'testimonials', item, media, error: null
+      pageTitle: 'Edit testimonial', active: 'testimonials', item, error: null
     });
   } catch (err) {
     next(err);
@@ -111,13 +103,11 @@ router.post('/', photoUpload, async function (req, res, next) {
     const error = req.uploadError || validate(data);
     if (error) {
       await removeUploaded(req.file);
-      const media = await mediaList();
       return res.status(422).render('admin/testimonials/form', {
-        pageTitle: 'Add testimonial', active: 'testimonials', item: data, media, error
+        pageTitle: 'Add testimonial', active: 'testimonials', item: data, error
       });
     }
-    // A freshly uploaded photo wins over whatever the picker had selected.
-    if (req.file) data.image_media_id = await saveUploadedMedia(req.file, data.customer_name);
+    data.image_media_id = req.file ? await saveUploadedMedia(req.file, data.customer_name) : null;
     await query(
       'INSERT INTO testimonials (quote, customer_name, detail, rating, is_active, sort_order, image_media_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [data.quote, data.customer_name, data.detail || null, data.rating, data.is_active, data.sort_order, data.image_media_id]
@@ -136,7 +126,11 @@ router.post('/:id', photoUpload, async function (req, res, next) {
     }
     const id = parseInt(req.params.id, 10);
     const existing = Number.isFinite(id)
-      ? await queryOne('SELECT id FROM testimonials WHERE id = ?', [id])
+      ? await queryOne(
+          'SELECT t.id, t.image_media_id, m.file_path AS image_file_path FROM testimonials t ' +
+          'LEFT JOIN media m ON m.id = t.image_media_id WHERE t.id = ?',
+          [id]
+        )
       : null;
     if (!existing) {
       await removeUploaded(req.file);
@@ -146,13 +140,19 @@ router.post('/:id', photoUpload, async function (req, res, next) {
     const error = req.uploadError || validate(data);
     if (error) {
       await removeUploaded(req.file);
-      const media = await mediaList();
       return res.status(422).render('admin/testimonials/form', {
         pageTitle: 'Edit testimonial', active: 'testimonials',
-        item: Object.assign({ id: id }, data), media, error
+        item: Object.assign({ id: id, image_file_path: existing.image_file_path }, data), error
       });
     }
-    if (req.file) data.image_media_id = await saveUploadedMedia(req.file, data.customer_name);
+    // Precedence: a new upload wins, then an explicit clear, then keep what was there.
+    if (req.file) {
+      data.image_media_id = await saveUploadedMedia(req.file, data.customer_name);
+    } else if (req.body.photo_clear) {
+      data.image_media_id = null;
+    } else {
+      data.image_media_id = existing.image_media_id;
+    }
     await query(
       'UPDATE testimonials SET quote = ?, customer_name = ?, detail = ?, rating = ?, is_active = ?, sort_order = ?, image_media_id = ? WHERE id = ?',
       [data.quote, data.customer_name, data.detail || null, data.rating, data.is_active, data.sort_order, data.image_media_id, id]

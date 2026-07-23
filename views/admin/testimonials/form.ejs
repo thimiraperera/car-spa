@@ -7,10 +7,7 @@
 </header>
 
 <style>
-  .adm-imgpick .pick .tag { display: flex; justify-content: center; gap: 10px; padding: 3px 0; }
-  .adm-imgpick .pick .tag label { display: flex; align-items: center; gap: 3px; margin: 0; font-weight: 400; font-size: 10px; cursor: pointer; }
-  .adm-imgpick .pick .tag input { margin: 0; }
-  .adm-imgpick .pick.nophoto { display: flex; align-items: center; justify-content: center; min-height: 80px; font-size: 12px; color: var(--adm-muted, #888); text-align: center; }
+  .adm-upload-row .photo-prev { border-radius: 50%; object-fit: cover; padding: 0; }
 </style>
 
 <section class="adm-panel">
@@ -46,29 +43,16 @@
     </div>
     <div class="adm-field">Photo (optional)
       <div class="adm-upload-row">
+        <% if (item && item.image_file_path) { %>
+        <img class="photo-prev" src="/media/<%= item.image_file_path %>" alt="Current photo">
+        <% } %>
         <label>Upload a photo <input type="file" name="new_photo" accept="image/*"></label>
+        <% if (item && item.image_file_path) { %>
+        <label class="check">
+          <input type="checkbox" name="photo_clear" value="1"> Remove current photo
+        </label>
+        <% } %>
       </div>
-      <% var currentImageId = item && item.image_media_id ? Number(item.image_media_id) : null; %>
-      <% if (media.length) { %>
-      <div class="adm-imgpick" id="imgpick">
-        <div class="pick nophoto<%= currentImageId ? '' : ' sel' %>">
-          <span class="tag">
-            <label title="No photo"><input type="radio" name="image_media" value="" <%= currentImageId ? '' : 'checked' %>> No photo</label>
-          </span>
-        </div>
-        <% media.forEach(function (m) { %>
-        <% var isSel = currentImageId === m.id; %>
-        <div class="pick<%= isSel ? ' sel' : '' %>">
-          <img src="/media/<%= m.file_path %>" alt="<%= m.alt_text || m.file_path %>" title="<%= m.file_path %>">
-          <span class="tag">
-            <label title="Use this photo"><input type="radio" name="image_media" value="<%= m.id %>" <%= isSel ? 'checked' : '' %>> Use</label>
-          </span>
-        </div>
-        <% }); %>
-      </div>
-      <% } else { %>
-      <p class="adm-panel-note">The media library is empty.</p>
-      <% } %>
     </div>
 
     <div class="adm-form-actions">
@@ -78,18 +62,4 @@
   </form>
 </section>
 
-<script>
-(function () {
-  var grid = document.getElementById('imgpick');
-  if (grid) {
-    var refresh = function () {
-      grid.querySelectorAll('.pick').forEach(function (pick) {
-        pick.classList.toggle('sel', !!pick.querySelector('input:checked'));
-      });
-    };
-    grid.addEventListener('change', refresh);
-    refresh();
-  }
-})();
-</script>
 <%- include('../partials/bottom') %>

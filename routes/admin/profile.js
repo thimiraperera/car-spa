@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { query, queryOne } = require('../../lib/db');
-const { imageUpload, csrfOk, saveUploadedMedia, removeUploaded } = require('../../lib/uploads');
+const { imageUpload, csrfOk, saveUploadedMedia, removeUploaded, deleteMediaIfUnused } = require('../../lib/uploads');
 
 const router = express.Router();
 
@@ -79,6 +79,11 @@ router.post('/', avatarUpload, async function (req, res, next) {
       'UPDATE admin_users SET first_name = ?, last_name = ?, nickname = ?, email = ?, avatar_media_id = ? WHERE id = ?',
       [first_name || null, last_name || null, nickname || null, email || null, avatar_media_id, id]
     );
+    // A replaced or removed avatar gets cleaned out of the media library when
+    // nothing else references it.
+    if (admin.avatar_media_id && admin.avatar_media_id !== avatar_media_id) {
+      await deleteMediaIfUnused(admin.avatar_media_id);
+    }
     res.redirect('/admin/profile?saved=1');
   } catch (err) {
     if (err && err.code === 'ER_DUP_ENTRY') {
