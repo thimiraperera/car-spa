@@ -10,20 +10,20 @@
   <table class="adm-table">
     <thead>
       <tr>
+        <th></th>
         <th>Question</th>
         <th>Answer</th>
-        <th>Status</th>
-        <th class="num">Sort</th>
         <th class="actions">Actions</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="faq-rows">
       <% faqs.forEach(function (f) { %>
-      <tr>
+      <tr draggable="true" data-id="<%= f.id %>">
+        <td class="adm-drag-handle" title="Drag to reorder">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 3.5h10M2 7h10M2 10.5h10"/></svg>
+        </td>
         <td><%= f.question %></td>
         <td class="muted"><%= f.answer.length > 80 ? f.answer.slice(0, 80) + '...' : f.answer %></td>
-        <td><span class="adm-pill <%= f.is_active ? 'on' : 'off' %>"><%= f.is_active ? 'Active' : 'Hidden' %></span></td>
-        <td class="num"><%= f.sort_order %></td>
         <td class="actions">
           <a class="adm-btn-ghost small" href="/admin/faqs/<%= f.id %>/edit">Edit</a>
           <form class="adm-inline-form" method="post" action="/admin/faqs/<%= f.id %>/delete" data-confirm="Delete this FAQ?">
@@ -34,9 +34,88 @@
       </tr>
       <% }); %>
       <% if (!faqs.length) { %>
-      <tr><td colspan="5" class="muted">No FAQs yet</td></tr>
+      <tr><td colspan="4" class="muted">No FAQs yet</td></tr>
       <% } %>
     </tbody>
   </table>
 </section>
+
+<style>
+  .adm-drag-handle svg { display: block; }
+  #faq-rows tr.adm-row-dragging { opacity: .45; }
+  #faq-rows tr.adm-row-dragging td { background: var(--cream); }
+</style>
+
+<script>
+(function () {
+  'use strict';
+  var tbody = document.getElementById('faq-rows');
+  if (!tbody || !tbody.querySelector('tr[data-id]')) return;
+  var dragged = null;
+  var startOrder = '';
+
+  function rowIds() {
+    return Array.prototype.map.call(tbody.querySelectorAll('tr[data-id]'), function (row) {
+      return parseInt(row.getAttribute('data-id'), 10);
+    });
+  }
+
+  function showToast(text) {
+    var t = document.createElement('div');
+    t.className = 'adm-toast';
+    t.textContent = text;
+    document.body.appendChild(t);
+    setTimeout(function () { t.classList.add('hide'); }, 1800);
+    setTimeout(function () { t.remove(); }, 2400);
+  }
+
+  tbody.addEventListener('dragstart', function (e) {
+    var row = e.target.closest('tr[data-id]');
+    if (!row) return;
+    dragged = row;
+    startOrder = rowIds().join(',');
+    row.classList.add('adm-row-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', row.getAttribute('data-id')); } catch (err) {}
+  });
+
+  // The dragged row is moved live so its translucent ghost marks the drop spot.
+  tbody.addEventListener('dragover', function (e) {
+    if (!dragged) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var row = e.target.closest('tr[data-id]');
+    if (!row || row === dragged) return;
+    var rect = row.getBoundingClientRect();
+    var before = (e.clientY - rect.top) < rect.height / 2;
+    tbody.insertBefore(dragged, before ? row : row.nextSibling);
+  });
+
+  tbody.addEventListener('drop', function (e) {
+    if (dragged) e.preventDefault();
+  });
+
+  tbody.addEventListener('dragend', function () {
+    if (!dragged) return;
+    dragged.classList.remove('adm-row-dragging');
+    dragged = null;
+    var ids = rowIds();
+    if (ids.join(',') === startOrder) return;
+    fetch('/admin/faqs/reorder', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-csrf-token': '<%= csrf %>'
+      },
+      body: JSON.stringify({ ids: ids })
+    }).then(function (res) {
+      if (!res.ok) throw new Error('reorder failed');
+      showToast('Order saved');
+    }).catch(function () {
+      alert('Could not save the new order. The list will reload.');
+      window.location.reload();
+    });
+  });
+})();
+</script>
 <%- include('../partials/bottom') %>

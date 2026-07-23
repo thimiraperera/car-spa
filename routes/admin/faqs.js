@@ -1,15 +1,12 @@
 const express = require('express');
-const { query, queryOne } = require('../../lib/db');
+const { pool, query, queryOne } = require('../../lib/db');
 
 const router = express.Router();
 
 function readForm(body) {
-  const sort = parseInt(body.sort_order, 10);
   return {
     question: String(body.question || '').trim(),
-    answer: String(body.answer || '').trim(),
-    is_active: body.is_active ? 1 : 0,
-    sort_order: Number.isFinite(sort) ? sort : 0
+    answer: String(body.answer || '').trim()
   };
 }
 
@@ -50,6 +47,31 @@ router.get('/:id/edit', async function (req, res, next) {
   }
 });
 
+// Drag-to-reorder on the list posts the row ids in their new order.
+router.post('/reorder', async function (req, res, next) {
+  const raw = req.body && req.body.ids;
+  const ids = Array.isArray(raw)
+    ? raw.map(function (v) { return parseInt(v, 10); })
+    : null;
+  if (!ids || !ids.length || ids.some(function (n) { return !Number.isFinite(n); })) {
+    return res.status(400).json({ ok: false, error: 'ids must be an array of integers' });
+  }
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    for (let i = 0; i < ids.length; i++) {
+      await conn.query('UPDATE faqs SET sort_order = ? WHERE id = ?', [i, ids[i]]);
+    }
+    await conn.commit();
+    res.json({ ok: true });
+  } catch (err) {
+    await conn.rollback().catch(function () {});
+    next(err);
+  } finally {
+    conn.release();
+  }
+});
+
 router.post('/', async function (req, res, next) {
   try {
     const data = readForm(req.body);
@@ -59,9 +81,11 @@ router.post('/', async function (req, res, next) {
         pageTitle: 'Add FAQ', active: 'faqs', item: data, error
       });
     }
+    // New FAQs go live right away and append at the end of the list.
     await query(
-      'INSERT INTO faqs (question, answer, is_active, sort_order) VALUES (?, ?, ?, ?)',
-      [data.question, data.answer, data.is_active, data.sort_order]
+      'INSERT INTO faqs (question, answer, is_active, sort_order) ' +
+      'SELECT ?, ?, 1, COALESCE(MAX(sort_order), -1) + 1 FROM faqs',
+      [data.question, data.answer]
     );
     res.redirect('/admin/faqs?saved=1');
   } catch (err) {
@@ -85,8 +109,8 @@ router.post('/:id', async function (req, res, next) {
       });
     }
     await query(
-      'UPDATE faqs SET question = ?, answer = ?, is_active = ?, sort_order = ? WHERE id = ?',
-      [data.question, data.answer, data.is_active, data.sort_order, id]
+      'UPDATE faqs SET question = ?, answer = ? WHERE id = ?',
+      [data.question, data.answer, id]
     );
     res.redirect('/admin/faqs?saved=1');
   } catch (err) {
